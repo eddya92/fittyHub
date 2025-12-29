@@ -45,6 +45,9 @@ class SettingsService
             $settings->setTimeSlotDuration((int)$data['time_slot_duration']);
         }
 
+        // Check-in tornello: se il checkbox non è presente, il valore è false
+        $settings->setEnableGymCheckIn(isset($data['enable_gym_check_in']) && $data['enable_gym_check_in'] === '1');
+
         $this->settingsRepository->save($settings, true);
     }
 }

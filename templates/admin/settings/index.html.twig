@@ -81,6 +81,65 @@
             </div>
         </div>
 
+        {# Check-in Tornello #}
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-6">Check-in Ingresso Palestra</h3>
+            <p class="text-sm text-gray-600 mb-6">
+                Abilita il sistema di check-in tornello per l'ingresso in palestra.
+                Gli iscritti dovranno timbrare l'ingresso e verranno verificati automaticamente abbonamento e certificato medico.
+            </p>
+
+            <div class="flex items-start">
+                <div class="flex items-center h-5">
+                    <input
+                        id="enable_gym_check_in"
+                        name="enable_gym_check_in"
+                        type="checkbox"
+                        value="1"
+                        {% if settings.isEnableGymCheckIn %}checked{% endif %}
+                        class="w-5 h-5 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                    >
+                </div>
+                <div class="ml-4">
+                    <label for="enable_gym_check_in" class="font-medium text-gray-900">
+                        Abilita Check-in Tornello
+                    </label>
+                    <p class="text-sm text-gray-500 mt-1">
+                        Quando attivo, gli utenti potranno timbrare l'ingresso in palestra tramite tornello fisico o app.
+                        Il sistema verificherà automaticamente:
+                    </p>
+                    <ul class="text-sm text-gray-500 mt-2 ml-4 space-y-1">
+                        <li class="flex items-center">
+                            <svg class="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                            Abbonamento attivo e non scaduto
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                            Certificato medico valido e non scaduto
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            {% if settings.isEnableGymCheckIn %}
+                <div class="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <div class="flex">
+                        <svg class="w-5 h-5 text-green-600 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <div class="text-sm text-green-800">
+                            <p class="font-medium">Check-in tornello attivo</p>
+                            <p class="mt-1">Gli iscritti possono ora timbrare l'ingresso in palestra.</p>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
         {# Actions #}
         <div class="flex gap-4">
             <button

@@ -40,6 +40,9 @@ class GymAttendance
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $notes = null;
 
+    #[ORM\Column(length: 20, options: ['default' => 'gym_entrance'])]
+    private string $type = 'gym_entrance'; // gym_entrance | course
+
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
@@ -140,6 +143,18 @@ class GymAttendance
     public function setNotes(?string $notes): static
     {
         $this->notes = $notes;
+
+        return $this;
+    }
+
+    public function getType(): string
+    {
+        return $this->type;
+    }
+
+    public function setType(string $type): static
+    {
+        $this->type = $type;
 
         return $this;
     }

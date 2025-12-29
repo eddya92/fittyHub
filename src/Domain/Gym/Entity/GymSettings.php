@@ -27,6 +27,9 @@ class GymSettings
     #[ORM\Column(type: 'integer')]
     private int $timeSlotDuration = 60; // minuti
 
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    private bool $enableGymCheckIn = false; // Abilita check-in tornello ingresso
+
     #[ORM\Column(type: 'datetime_immutable')]
     private ?\DateTimeImmutable $createdAt = null;
 
@@ -95,6 +98,17 @@ class GymSettings
     public function setTimeSlotDuration(int $timeSlotDuration): self
     {
         $this->timeSlotDuration = $timeSlotDuration;
+        return $this;
+    }
+
+    public function isEnableGymCheckIn(): bool
+    {
+        return $this->enableGymCheckIn;
+    }
+
+    public function setEnableGymCheckIn(bool $enableGymCheckIn): self
+    {
+        $this->enableGymCheckIn = $enableGymCheckIn;
         return $this;
     }
 

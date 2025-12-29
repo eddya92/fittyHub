@@ -4,14 +4,14 @@ namespace App\Application\Service;
 
 use App\Domain\Gym\Entity\Gym;
 use App\Domain\Gym\Repository\GymRepository;
-use App\Domain\Membership\Repository\MembershipRepository;
+use App\Domain\Membership\Repository\GymMembershipRepository;
 use App\Domain\User\Entity\User;
 
 class GymUserService
 {
     public function __construct(
         private GymRepository $gymRepository,
-        private MembershipRepository $membershipRepository
+        private GymMembershipRepository $membershipRepository
     ) {}
 
     /**
