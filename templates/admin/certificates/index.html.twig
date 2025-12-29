@@ -1,0 +1,194 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block page_title %}Gestione Certificati Medici{% endblock %}
+{% block page_subtitle %}Revisiona e approva i certificati medici degli iscritti{% endblock %}
+
+{% block content %}
+{# Stats Cards #}
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-600 font-medium">In Attesa</p>
+                <p class="text-3xl font-bold text-yellow-600 mt-2">{{ stats.pending }}</p>
+            </div>
+            <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-600 font-medium">Approvati</p>
+                <p class="text-3xl font-bold text-green-600 mt-2">{{ stats.approved }}</p>
+            </div>
+            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-600 font-medium">Rifiutati</p>
+                <p class="text-3xl font-bold text-red-600 mt-2">{{ stats.rejected }}</p>
+            </div>
+            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-600 font-medium">Scaduti</p>
+                <p class="text-3xl font-bold text-orange-600 mt-2">{{ stats.expired }}</p>
+            </div>
+            <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Filters #}
+<div class="bg-white rounded-lg shadow-md p-6 mb-6">
+    <form method="get" action="{{ path('admin_certificates') }}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div>
+            <label for="search" class="block text-sm font-medium text-gray-700 mb-2">Cerca Utente</label>
+            <input
+                type="text"
+                id="search"
+                name="search"
+                value="{{ current_search }}"
+                placeholder="Nome, cognome o email..."
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            >
+        </div>
+
+        <div>
+            <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Stato</label>
+            <select
+                id="status"
+                name="status"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            >
+                <option value="">Tutti</option>
+                <option value="pending_review" {% if current_status == 'pending_review' %}selected{% endif %}>In Attesa</option>
+                <option value="approved" {% if current_status == 'approved' %}selected{% endif %}>Approvati</option>
+                <option value="rejected" {% if current_status == 'rejected' %}selected{% endif %}>Rifiutati</option>
+                <option value="expired" {% if current_status == 'expired' %}selected{% endif %}>Scaduti</option>
+            </select>
+        </div>
+
+        <div class="flex items-end">
+            <button
+                type="submit"
+                class="w-full px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
+            >
+                Filtra
+            </button>
+        </div>
+
+        <div class="flex items-end">
+            <a
+                href="{{ path('admin_certificates') }}"
+                class="w-full px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium text-center"
+            >
+                Reset
+            </a>
+        </div>
+    </form>
+</div>
+
+{# Certificates Grid #}
+{% if certificates|length > 0 %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for certificate in certificates %}
+            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
+                {# Header #}
+                <div class="bg-gray-50 p-4 border-b border-gray-200 flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
+                            <span class="text-primary-600 font-bold">
+                                {{ certificate.user.firstName[0] ~ certificate.user.lastName[0] }}
+                            </span>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-gray-900">
+                                {{ certificate.user.firstName }} {{ certificate.user.lastName }}
+                            </p>
+                            <p class="text-xs text-gray-500">{{ certificate.user.email }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                {# Content #}
+                <div class="p-4">
+                    <div class="space-y-3">
+                        <div>
+                            <p class="text-xs text-gray-600">Tipo</p>
+                            <p class="text-sm font-medium text-gray-900">
+                                {% if certificate.certificateType == 'agonistic' %}Agonistico
+                                {% elseif certificate.certificateType == 'non_agonistic' %}Non Agonistico
+                                {% else %}{{ certificate.certificateType }}{% endif %}
+                            </p>
+                        </div>
+
+                        <div>
+                            <p class="text-xs text-gray-600">Data Scadenza</p>
+                            <p class="text-sm font-medium text-gray-900">{{ certificate.expiryDate|date('d/m/Y') }}</p>
+                        </div>
+
+                        <div>
+                            <p class="text-xs text-gray-600">Caricato</p>
+                            <p class="text-sm font-medium text-gray-900">{{ certificate.uploadedAt|date('d/m/Y H:i') }}</p>
+                        </div>
+
+                        <div>
+                            <p class="text-xs text-gray-600 mb-1">Stato</p>
+                            <span class="px-2 py-1 text-xs font-medium rounded-full
+                                {% if certificate.status == 'approved' %}bg-green-100 text-green-800
+                                {% elseif certificate.status == 'rejected' %}bg-red-100 text-red-800
+                                {% elseif certificate.status == 'expired' %}bg-orange-100 text-orange-800
+                                {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                                {{ certificate.status|upper|replace({'_': ' '}) }}
+                            </span>
+                        </div>
+                    </div>
+
+                    {# Action Buttons #}
+                    <div class="mt-4 pt-4 border-t border-gray-200">
+                        <a
+                            href="{{ path('admin_certificate_show', {'id': certificate.id}) }}"
+                            class="block w-full px-4 py-2 bg-primary-600 text-white text-center rounded-lg hover:bg-primary-700 transition-colors font-medium"
+                        >
+                            Revisiona →
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="bg-white rounded-lg shadow-md p-12 text-center">
+        <svg class="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+        <p class="text-lg font-medium text-gray-900 mb-2">Nessun certificato trovato</p>
+        <p class="text-sm text-gray-600">Prova a modificare i filtri di ricerca</p>
+    </div>
+{% endif %}
+{% endblock %}

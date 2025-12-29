@@ -1,0 +1,217 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block page_title %}Gestione Corsi{% endblock %}
+{% block page_subtitle %}Gestisci i corsi della tua palestra{% endblock %}
+
+{% block content %}
+{# Stats Cards #}
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-600 font-medium">Corsi Totali</p>
+                <p class="text-3xl font-bold text-gray-900 mt-2">{{ stats.total }}</p>
+            </div>
+            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-600 font-medium">Corsi Attivi</p>
+                <p class="text-3xl font-bold text-green-600 mt-2">{{ stats.active }}</p>
+            </div>
+            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-600 font-medium">Sospesi</p>
+                <p class="text-3xl font-bold text-orange-600 mt-2">{{ stats.suspended }}</p>
+            </div>
+            <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Quick Actions #}
+<div class="mb-6 flex gap-4">
+    <a
+        href="{{ path('admin_course_create') }}"
+        class="inline-flex items-center px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium shadow-lg"
+    >
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+        </svg>
+        Crea Nuovo Corso
+    </a>
+
+    <a
+        href="{{ path('admin_courses_calendar') }}"
+        class="inline-flex items-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium shadow-lg"
+    >
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+        </svg>
+        Visualizza Calendario
+    </a>
+</div>
+
+{# Filters #}
+<div class="bg-white rounded-lg shadow-md p-6 mb-6">
+    <form method="get" action="{{ path('admin_courses') }}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div>
+            <label for="search" class="block text-sm font-medium text-gray-700 mb-2">Cerca</label>
+            <input
+                type="text"
+                id="search"
+                name="search"
+                value="{{ current_search }}"
+                placeholder="Nome corso..."
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            >
+        </div>
+
+        <div>
+            <label for="category" class="block text-sm font-medium text-gray-700 mb-2">Categoria</label>
+            <select
+                id="category"
+                name="category"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            >
+                <option value="">Tutte</option>
+                <option value="yoga" {% if current_category == 'yoga' %}selected{% endif %}>Yoga</option>
+                <option value="zumba" {% if current_category == 'zumba' %}selected{% endif %}>Zumba</option>
+                <option value="spinning" {% if current_category == 'spinning' %}selected{% endif %}>Spinning</option>
+                <option value="pilates" {% if current_category == 'pilates' %}selected{% endif %}>Pilates</option>
+                <option value="martial_arts" {% if current_category == 'martial_arts' %}selected{% endif %}>Arti Marziali</option>
+                <option value="crossfit" {% if current_category == 'crossfit' %}selected{% endif %}>CrossFit</option>
+                <option value="aerobics" {% if current_category == 'aerobics' %}selected{% endif %}>Aerobica</option>
+                <option value="other" {% if current_category == 'other' %}selected{% endif %}>Altro</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Stato</label>
+            <select
+                id="status"
+                name="status"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            >
+                <option value="">Tutti</option>
+                <option value="active" {% if current_status == 'active' %}selected{% endif %}>Attivo</option>
+                <option value="suspended" {% if current_status == 'suspended' %}selected{% endif %}>Sospeso</option>
+                <option value="cancelled" {% if current_status == 'cancelled' %}selected{% endif %}>Cancellato</option>
+            </select>
+        </div>
+
+        <div class="flex items-end gap-2">
+            <button
+                type="submit"
+                class="flex-1 px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
+            >
+                Filtra
+            </button>
+            <a
+                href="{{ path('admin_courses') }}"
+                class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+            >
+                Reset
+            </a>
+        </div>
+    </form>
+</div>
+
+{# Courses Grid #}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% if courses|length > 0 %}
+        {% for course in courses %}
+            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                <div class="p-6">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900">{{ course.name }}</h3>
+                            {% if course.category %}
+                                <p class="text-sm text-gray-600 mt-1">{{ course.category.name }}</p>
+                            {% else %}
+                                <p class="text-sm text-gray-400 mt-1">Nessuna categoria</p>
+                            {% endif %}
+                        </div>
+                        <span class="px-3 py-1 text-xs font-medium rounded-full
+                            {% if course.status == 'active' %}bg-green-100 text-green-800
+                            {% elseif course.status == 'suspended' %}bg-orange-100 text-orange-800
+                            {% else %}bg-red-100 text-red-800{% endif %}">
+                            {{ course.status|upper }}
+                        </span>
+                    </div>
+
+                    {% if course.description %}
+                        <p class="text-sm text-gray-600 mb-4 line-clamp-2">{{ course.description }}</p>
+                    {% endif %}
+
+                    <div class="space-y-2 mb-4">
+                        <div class="flex items-center text-sm text-gray-600">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            </svg>
+                            Max {{ course.maxParticipants }} partecipanti per orario
+                        </div>
+
+                        {% if course.instructor %}
+                            <div class="flex items-center text-sm text-gray-600">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                </svg>
+                                {{ course.instructor.user.firstName }} {{ course.instructor.user.lastName }}
+                            </div>
+                        {% endif %}
+
+                        <div class="flex items-center text-sm text-gray-600">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            {{ course.schedules|length }} orari settimanali
+                        </div>
+                    </div>
+
+                    <a
+                        href="{{ path('admin_course_show', {'id': course.id}) }}"
+                        class="block w-full text-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
+                    >
+                        Dettagli
+                    </a>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="col-span-full bg-white rounded-lg shadow-md p-12 text-center">
+            <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+            </svg>
+            <p class="text-lg font-medium text-gray-500">Nessun corso trovato</p>
+            <p class="text-sm text-gray-400 mt-1">Inizia creando il tuo primo corso!</p>
+            <a
+                href="{{ path('admin_course_create') }}"
+                class="inline-block mt-4 px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
+            >
+                Crea Corso
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

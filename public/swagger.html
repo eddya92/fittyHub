@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>FittyHub API - Documentazione</title>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css" />
+    <style>
+        body { margin: 0; padding: 0; }
+        .topbar { display: none; }
+    </style>
+</head>
+<body>
+    <div id="swagger-ui"></div>
+    <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-standalone-preset.js"></script>
+    <script>
+        // Carica documentazione automatica da API Platform
+        // Quando aggiungi nuove entity con #[ApiResource], si aggiorneranno automaticamente qui
+        fetch('/index.php/api/docs')
+            .then(response => response.json())
+            .then(hydraDoc => {
+                // Converti Hydra in OpenAPI 3.0
+                const openApiSpec = convertHydraToOpenAPI(hydraDoc);
+
+                window.ui = SwaggerUIBundle({
+                    spec: openApiSpec,
+                    dom_id: '#swagger-ui',
+                    deepLinking: true,
+                    presets: [
+                        SwaggerUIBundle.presets.apis,
+                        SwaggerUIStandalonePreset
+                    ],
+                    plugins: [
+                        SwaggerUIBundle.plugins.DownloadUrl
+                    ],
+                    layout: "StandaloneLayout"
+                });
+            });
+
+        function convertHydraToOpenAPI(hydra) {
+            const spec = {
+                openapi: '3.0.0',
+                info: {
+                    title: hydra.title || 'FittyHub API',
+                    description: hydra.description || 'API automatica',
+                    version: '1.0.0'
+                },
+                servers: [{
+                    url: window.location.origin + '/index.php',
+                    description: 'Server di sviluppo'
+                }],
+                components: {
+                    securitySchemes: {
+                        bearerAuth: {
+                            type: 'http',
+                            scheme: 'bearer',
+                            bearerFormat: 'JWT'
+                        }
+                    },
+                    schemas: {}
+                },
+                paths: {},
+                security: []
+            };
+
+            // Converti le classi Hydra in schemas e paths OpenAPI
+            if (hydra.supportedClass) {
+                hydra.supportedClass.forEach(cls => {
+                    if (cls['@id'].startsWith('#')) {
+                        const className = cls['@id'].substring(1);
+
+                        // Crea schema
+                        const schema = {
+                            type: 'object',
+                            properties: {}
+                        };
+
+                        if (cls.supportedProperty) {
+                            cls.supportedProperty.forEach(prop => {
+                                const propName = prop.property.label || prop.title;
+                                const propRange = prop.property.range;
+
+                                schema.properties[propName] = {
+                                    type: mapHydraTypeToOpenAPI(propRange),
+                                    description: prop.description || ''
+                                };
+
+                                if (prop.property.format) {
+                                    schema.properties[propName].format = prop.property.format;
+                                }
+                            });
+                        }
+
+                        spec.components.schemas[className] = schema;
+                    }
+                });
+            }
+
+            // Aggiungi endpoints comuni (dedotti da convenzioni API Platform)
+            const resources = ['users', 'gyms', 'workout_plans', 'gym_memberships'];
+
+            resources.forEach(resource => {
+                const singularName = resource.replace(/_/g, ' ').replace(/s$/, '');
+                const capitalName = singularName.charAt(0).toUpperCase() + singularName.slice(1);
+
+                // GET collection
+                spec.paths[`/api/${resource}`] = {
+                    get: {
+                        tags: [capitalName],
+                        summary: `Lista ${singularName}`,
+                        security: resource !== 'gyms' ? [{ bearerAuth: [] }] : [],
+                        responses: {
+                            200: { description: `Lista ${singularName}` }
+                        }
+                    },
+                    post: {
+                        tags: [capitalName],
+                        summary: `Crea ${singularName}`,
+                        security: [{ bearerAuth: [] }],
+                        requestBody: {
+                            required: true,
+                            content: {
+                                'application/ld+json': {
+                                    schema: { type: 'object' }
+                                }
+                            }
+                        },
+                        responses: {
+                            201: { description: `${capitalName} creato` }
+                        }
+                    }
+                };
+
+                // GET/PATCH/DELETE item
+                spec.paths[`/api/${resource}/{id}`] = {
+                    get: {
+                        tags: [capitalName],
+                        summary: `Dettagli ${singularName}`,
+                        security: [{ bearerAuth: [] }],
+                        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }],
+                        responses: {
+                            200: { description: `Dettagli ${singularName}` }
+                        }
+                    },
+                    patch: {
+                        tags: [capitalName],
+                        summary: `Aggiorna ${singularName}`,
+                        security: [{ bearerAuth: [] }],
+                        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }],
+                        requestBody: {
+                            content: {
+                                'application/merge-patch+json': {
+                                    schema: { type: 'object' }
+                                }
+                            }
+                        },
+                        responses: {
+                            200: { description: `${capitalName} aggiornato` }
+                        }
+                    },
+                    delete: {
+                        tags: [capitalName],
+                        summary: `Elimina ${singularName}`,
+                        security: [{ bearerAuth: [] }],
+                        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }],
+                        responses: {
+                            204: { description: `${capitalName} eliminato` }
+                        }
+                    }
+                };
+            });
+
+            // Endpoint login
+            spec.paths['/api/login'] = {
+                post: {
+                    tags: ['Authentication'],
+                    summary: 'Login utente',
+                    requestBody: {
+                        required: true,
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    type: 'object',
+                                    properties: {
+                                        email: { type: 'string', example: 'mario.rossi@example.com' },
+                                        password: { type: 'string', example: 'Password123!' }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    responses: {
+                        200: {
+                            description: 'Login successful',
+                            content: {
+                                'application/json': {
+                                    schema: {
+                                        type: 'object',
+                                        properties: {
+                                            token: { type: 'string' }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+            return spec;
+        }
+
+        function mapHydraTypeToOpenAPI(hydraType) {
+            if (!hydraType) return 'string';
+            if (typeof hydraType === 'string') {
+                if (hydraType.includes('integer')) return 'integer';
+                if (hydraType.includes('boolean')) return 'boolean';
+                if (hydraType.includes('date')) return 'string';
+            }
+            return 'string';
+        }
+    </script>
+</body>
+</html>

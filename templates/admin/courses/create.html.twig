@@ -1,0 +1,143 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block page_title %}Crea Nuovo Corso{% endblock %}
+{% block page_subtitle %}Aggiungi un nuovo corso alla palestra{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <a href="{{ path('admin_courses') }}" class="inline-flex items-center text-primary-600 hover:text-primary-700 font-medium">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+        Torna ai corsi
+    </a>
+</div>
+
+<form method="post" class="space-y-6">
+    {# Dati Base #}
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-6">Informazioni Corso</h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="md:col-span-2">
+                <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Nome Corso *</label>
+                <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    required
+                    placeholder="es. Yoga Avanzato, Zumba Fitness..."
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                >
+            </div>
+
+            <div>
+                <label for="category_id" class="block text-sm font-medium text-gray-700 mb-2">Categoria *</label>
+                <select
+                    id="category_id"
+                    name="category_id"
+                    required
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                >
+                    <option value="">Seleziona categoria...</option>
+                    {% for category in categories %}
+                        <option value="{{ category.id }}">{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+                {% if categories|length == 0 %}
+                    <p class="text-xs text-red-600 mt-1">
+                        Nessuna categoria disponibile. <a href="{{ path('admin_course_category_create') }}" class="underline">Crea una categoria</a> prima di creare un corso.
+                    </p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="max_participants" class="block text-sm font-medium text-gray-700 mb-2">Max Partecipanti *</label>
+                <input
+                    type="number"
+                    id="max_participants"
+                    name="max_participants"
+                    required
+                    min="1"
+                    max="100"
+                    value="20"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                >
+            </div>
+
+            <div>
+                <label for="instructor_id" class="block text-sm font-medium text-gray-700 mb-2">Istruttore (opzionale)</label>
+                <select
+                    id="instructor_id"
+                    name="instructor_id"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                >
+                    <option value="">Nessuno</option>
+                    {% for trainer in trainers %}
+                        <option value="{{ trainer.id }}">
+                            {{ trainer.user.firstName }} {{ trainer.user.lastName }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Stato *</label>
+                <select
+                    id="status"
+                    name="status"
+                    required
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                >
+                    <option value="active" selected>Attivo</option>
+                    <option value="suspended">Sospeso</option>
+                </select>
+            </div>
+
+            <div class="md:col-span-2">
+                <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Descrizione</label>
+                <textarea
+                    id="description"
+                    name="description"
+                    rows="4"
+                    placeholder="Descrivi il corso, obiettivi, livello richiesto..."
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                ></textarea>
+            </div>
+        </div>
+    </div>
+
+    {# Info Box #}
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div class="flex">
+            <svg class="w-5 h-5 text-blue-600 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <div class="text-sm text-blue-800">
+                <p class="font-medium mb-1">Nota</p>
+                <p>Dopo la creazione potrai aggiungere gli orari settimanali e iscrivere i partecipanti.</p>
+            </div>
+        </div>
+    </div>
+
+    {# Actions #}
+    <div class="flex gap-4">
+        <button
+            type="submit"
+            class="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
+        >
+            <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            Crea Corso
+        </button>
+
+        <a
+            href="{{ path('admin_courses') }}"
+            class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+        >
+            Annulla
+        </a>
+    </div>
+</form>
+{% endblock %}

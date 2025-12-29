@@ -1,0 +1,181 @@
+{% extends 'pt/base.html.twig' %}
+
+{% block page_title %}{{ relation.client.firstName }} {{ relation.client.lastName }}{% endblock %}
+{% block page_subtitle %}Dettagli cliente e gestione allenamenti{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <a href="{{ path('pt_clients') }}" class="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+        Torna ai clienti
+    </a>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    {# Main Content #}
+    <div class="lg:col-span-2 space-y-6">
+        {# Client Profile Card #}
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="bg-gradient-to-r from-blue-600 to-blue-700 p-8 text-white">
+                <div class="flex items-center">
+                    <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center">
+                        <span class="text-white font-bold text-3xl">
+                            {{ relation.client.firstName|slice(0, 1) ~ relation.client.lastName|slice(0, 1) }}
+                        </span>
+                    </div>
+                    <div class="ml-6">
+                        <h2 class="text-2xl font-bold">
+                            {{ relation.client.firstName }} {{ relation.client.lastName }}
+                        </h2>
+                        <p class="text-white/80 mt-1">Il tuo cliente</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-6">
+                {# Contact Info #}
+                <div class="grid grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <p class="text-sm text-gray-600 mb-1">Email</p>
+                        <a href="mailto:{{ relation.client.email }}" class="text-base font-medium text-blue-600 hover:text-blue-700">
+                            {{ relation.client.email }}
+                        </a>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600 mb-1">Telefono</p>
+                        <p class="text-base font-medium text-gray-900">
+                            {{ relation.client.phoneNumber ?? 'N/D' }}
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600 mb-1">Data di Nascita</p>
+                        <p class="text-base font-medium text-gray-900">
+                            {{ relation.client.dateOfBirth ? relation.client.dateOfBirth|date('d/m/Y') : 'N/D' }}
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600 mb-1">Genere</p>
+                        <p class="text-base font-medium text-gray-900">
+                            {% if relation.client.gender == 'male' %}Maschio
+                            {% elseif relation.client.gender == 'female' %}Femmina
+                            {% else %}Altro{% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Relation Info Card #}
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Informazioni Relazione PT-Cliente</h3>
+
+            <div class="grid grid-cols-2 gap-6">
+                <div>
+                    <p class="text-sm text-gray-600 mb-1">Data Inizio</p>
+                    <p class="text-base font-medium text-gray-900">{{ relation.startDate|date('d/m/Y') }}</p>
+                </div>
+                {% if relation.endDate %}
+                    <div>
+                        <p class="text-sm text-gray-600 mb-1">Data Fine</p>
+                        <p class="text-base font-medium text-gray-900">{{ relation.endDate|date('d/m/Y') }}</p>
+                    </div>
+                {% endif %}
+                <div>
+                    <p class="text-sm text-gray-600 mb-1">Stato</p>
+                    <span class="px-3 py-1 text-sm font-medium rounded-full
+                        {% if relation.status == 'active' %}bg-green-100 text-green-800
+                        {% elseif relation.status == 'completed' %}bg-gray-100 text-gray-800
+                        {% else %}bg-red-100 text-red-800{% endif %}">
+                        {{ relation.status|upper }}
+                    </span>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600 mb-1">Creata il</p>
+                    <p class="text-base font-medium text-gray-900">{{ relation.createdAt|date('d/m/Y H:i') }}</p>
+                </div>
+            </div>
+
+            {% if relation.notes %}
+                <div class="mt-6 pt-6 border-t border-gray-200">
+                    <p class="text-sm text-gray-600 mb-2">Note</p>
+                    <p class="text-base text-gray-900 bg-gray-50 p-4 rounded-lg">{{ relation.notes }}</p>
+                </div>
+            {% endif %}
+        </div>
+
+        {# Workout Plans Section - TODO #}
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">Piani di Allenamento</h3>
+                <a href="{{ path('pt_workouts_create') }}?client={{ relation.client.id }}" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm">
+                    + Nuovo Piano
+                </a>
+            </div>
+
+            <div class="text-center py-8 text-gray-500">
+                <svg class="mx-auto h-12 w-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                </svg>
+                <p>Nessun piano di allenamento creato per questo cliente</p>
+            </div>
+        </div>
+    </div>
+
+    {# Sidebar #}
+    <div class="lg:col-span-1 space-y-6">
+        {# Quick Actions #}
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Azioni Rapide</h3>
+
+            <div class="space-y-3">
+                <a
+                    href="mailto:{{ relation.client.email }}"
+                    class="block w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-center"
+                >
+                    <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                    Invia Email
+                </a>
+
+                {% if relation.client.phoneNumber %}
+                    <a
+                        href="tel:{{ relation.client.phoneNumber }}"
+                        class="block w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-center"
+                    >
+                        <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                        </svg>
+                        Chiama
+                    </a>
+                {% endif %}
+
+                <a
+                    href="{{ path('pt_workouts_create') }}?client={{ relation.client.id }}"
+                    class="block w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium text-center"
+                >
+                    <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Crea Piano Allenamento
+                </a>
+            </div>
+        </div>
+
+        {# Info Card #}
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div class="flex">
+                <svg class="w-5 h-5 text-blue-600 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <div class="text-sm text-blue-800">
+                    <p class="font-medium mb-1">Nota</p>
+                    <p>Questo cliente è stato assegnato a te dalla palestra. Crea piani di allenamento personalizzati per aiutarlo a raggiungere i suoi obiettivi.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

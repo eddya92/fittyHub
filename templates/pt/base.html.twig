@@ -1,0 +1,92 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<div class="min-h-screen flex">
+    {# Sidebar #}
+    <aside class="w-64 bg-gradient-to-b from-blue-900 to-blue-800 text-white">
+        <div class="p-6">
+            <h1 class="text-2xl font-bold flex items-center">
+                <span class="text-3xl mr-2">💪</span>
+                FITTY HUB
+            </h1>
+            <p class="text-blue-200 text-sm mt-1">Personal Trainer Dashboard</p>
+        </div>
+
+        <nav class="mt-6">
+            <a href="{{ path('pt_dashboard') }}" class="flex items-center px-6 py-3 text-blue-100 hover:bg-blue-700 hover:text-white transition-colors {% if app.request.get('_route') starts with 'pt_dashboard' %}bg-blue-700 text-white{% endif %}">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                </svg>
+                Dashboard
+            </a>
+
+            <a href="{{ path('pt_clients') }}" class="flex items-center px-6 py-3 text-blue-100 hover:bg-blue-700 hover:text-white transition-colors {% if app.request.get('_route') starts with 'pt_clients' %}bg-blue-700 text-white{% endif %}">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+                I Miei Clienti
+            </a>
+
+            <a href="{{ path('pt_workouts') }}" class="flex items-center px-6 py-3 text-blue-100 hover:bg-blue-700 hover:text-white transition-colors {% if app.request.get('_route') starts with 'pt_workouts' %}bg-blue-700 text-white{% endif %}">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                </svg>
+                Piani Allenamento
+            </a>
+
+            <a href="{{ path('pt_invitations') }}" class="flex items-center px-6 py-3 text-blue-100 hover:bg-blue-700 hover:text-white transition-colors {% if app.request.get('_route') starts with 'pt_invitations' %}bg-blue-700 text-white{% endif %}">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                </svg>
+                Inviti Clienti
+            </a>
+        </nav>
+
+        <div class="absolute bottom-0 w-64 p-6 border-t border-blue-700">
+            <div class="flex items-center">
+                <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
+                    <span class="text-white font-bold">{{ app.user ? app.user.firstName|slice(0, 1) ~ app.user.lastName|slice(0, 1) : 'PT' }}</span>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium">{{ app.user ? app.user.firstName ~ ' ' ~ app.user.lastName : 'Personal Trainer' }}</p>
+                    <p class="text-xs text-blue-200">Personal Trainer</p>
+                </div>
+            </div>
+            <a href="{{ path('app_logout') }}" class="mt-4 block text-center px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm transition-colors">
+                Logout
+            </a>
+        </div>
+    </aside>
+
+    {# Main Content #}
+    <main class="flex-1">
+        {# Header #}
+        <header class="bg-white shadow-sm">
+            <div class="px-8 py-6">
+                <h2 class="text-2xl font-bold text-gray-900">
+                    {% block page_title %}Dashboard{% endblock %}
+                </h2>
+                <p class="text-gray-600 mt-1">
+                    {% block page_subtitle %}Panoramica generale{% endblock %}
+                </p>
+            </div>
+        </header>
+
+        {# Flash Messages #}
+        <div class="px-8 py-4">
+            {% for label, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="mb-4 p-4 rounded-lg {% if label == 'success' %}bg-green-50 text-green-800{% elseif label == 'error' %}bg-red-50 text-red-800{% else %}bg-blue-50 text-blue-800{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endfor %}
+        </div>
+
+        {# Page Content #}
+        <div class="px-8 py-6">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+</div>
+{% endblock %}

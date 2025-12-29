@@ -1,0 +1,185 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block page_title %}Modifica Iscrizione #{{ membership.id }}{% endblock %}
+{% block page_subtitle %}Aggiorna i dati dell'utente e dell'iscrizione{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <a href="{{ path('admin_membership_show', {'id': membership.id}) }}" class="inline-flex items-center text-primary-600 hover:text-primary-700 font-medium">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+        Torna al dettaglio
+    </a>
+</div>
+
+<form method="post" class="space-y-6">
+    {# Dati Utente #}
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-6">Dati Personali</h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label for="first_name" class="block text-sm font-medium text-gray-700 mb-2">Nome *</label>
+                <input
+                    type="text"
+                    id="first_name"
+                    name="first_name"
+                    value="{{ membership.user.firstName }}"
+                    required
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                >
+            </div>
+
+            <div>
+                <label for="last_name" class="block text-sm font-medium text-gray-700 mb-2">Cognome *</label>
+                <input
+                    type="text"
+                    id="last_name"
+                    name="last_name"
+                    value="{{ membership.user.lastName }}"
+                    required
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                >
+            </div>
+
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value="{{ membership.user.email }}"
+                    required
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                >
+            </div>
+
+            <div>
+                <label for="phone_number" class="block text-sm font-medium text-gray-700 mb-2">Telefono</label>
+                <input
+                    type="tel"
+                    id="phone_number"
+                    name="phone_number"
+                    value="{{ membership.user.phoneNumber }}"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                >
+            </div>
+
+            <div>
+                <label for="date_of_birth" class="block text-sm font-medium text-gray-700 mb-2">Data di Nascita</label>
+                <input
+                    type="date"
+                    id="date_of_birth"
+                    name="date_of_birth"
+                    value="{{ membership.user.dateOfBirth ? membership.user.dateOfBirth|date('Y-m-d') : '' }}"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                >
+            </div>
+
+            <div>
+                <label for="gender" class="block text-sm font-medium text-gray-700 mb-2">Genere</label>
+                <select
+                    id="gender"
+                    name="gender"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                >
+                    <option value="">Seleziona...</option>
+                    <option value="male" {% if membership.user.gender == 'male' %}selected{% endif %}>Maschio</option>
+                    <option value="female" {% if membership.user.gender == 'female' %}selected{% endif %}>Femmina</option>
+                    <option value="other" {% if membership.user.gender == 'other' %}selected{% endif %}>Altro</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    {# Dati Iscrizione #}
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-6">Dati Iscrizione</h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label for="start_date" class="block text-sm font-medium text-gray-700 mb-2">Data Inizio *</label>
+                <input
+                    type="date"
+                    id="start_date"
+                    name="start_date"
+                    value="{{ membership.startDate|date('Y-m-d') }}"
+                    required
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                >
+            </div>
+
+            <div>
+                <label for="end_date" class="block text-sm font-medium text-gray-700 mb-2">Data Fine *</label>
+                <input
+                    type="date"
+                    id="end_date"
+                    name="end_date"
+                    value="{{ membership.endDate|date('Y-m-d') }}"
+                    required
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                >
+            </div>
+
+            <div>
+                <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Stato *</label>
+                <select
+                    id="status"
+                    name="status"
+                    required
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                >
+                    <option value="active" {% if membership.status == 'active' %}selected{% endif %}>Attivo</option>
+                    <option value="expired" {% if membership.status == 'expired' %}selected{% endif %}>Scaduto</option>
+                    <option value="cancelled" {% if membership.status == 'cancelled' %}selected{% endif %}>Cancellato</option>
+                </select>
+            </div>
+
+            <div class="md:col-span-2">
+                <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Note</label>
+                <textarea
+                    id="notes"
+                    name="notes"
+                    rows="4"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                >{{ membership.notes }}</textarea>
+            </div>
+        </div>
+    </div>
+
+    {# Info Palestra (solo visualizzazione) #}
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+        <div class="flex">
+            <svg class="w-5 h-5 text-blue-600 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <div class="text-sm text-blue-800">
+                <p class="font-medium mb-1">Palestra</p>
+                <p><strong>{{ membership.gym.name }}</strong> - {{ membership.gym.city }}</p>
+                <p class="text-xs mt-2 text-blue-600">La palestra non può essere modificata. Per cambiare palestra, crea una nuova iscrizione.</p>
+            </div>
+        </div>
+    </div>
+
+    {# Azioni #}
+    <div class="flex gap-4">
+        <button
+            type="submit"
+            class="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
+        >
+            <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            Salva Modifiche
+        </button>
+
+        <a
+            href="{{ path('admin_membership_show', {'id': membership.id}) }}"
+            class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+        >
+            Annulla
+        </a>
+    </div>
+</form>
+{% endblock %}

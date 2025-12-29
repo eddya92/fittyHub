@@ -1,0 +1,27 @@
+api_platform:
+    title: FittyHub API
+    description: 'API per la gestione di palestre, personal trainer e piani di allenamento'
+    version: 1.0.0
+
+    # Abilita Swagger UI
+    swagger:
+        versions: [3]
+        api_keys:
+            JWT:
+                name: Authorization
+                type: header
+
+    # Abilita interfaccia grafica
+    enable_swagger_ui: true
+    enable_re_doc: true
+
+    defaults:
+        stateless: true
+        cache_headers:
+            vary: ['Content-Type', 'Authorization', 'Origin']
+
+    # Formati supportati
+    formats:
+        jsonld: ['application/ld+json']
+        json: ['application/json']
+        html: ['text/html']

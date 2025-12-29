@@ -1,0 +1,164 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block page_title %}Invia Nuovo Invito{% endblock %}
+{% block page_subtitle %}Invita un nuovo personal trainer a collaborare con una palestra{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <a href="{{ path('admin_invitations') }}" class="inline-flex items-center text-primary-600 hover:text-primary-700 font-medium">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+        Torna alla lista
+    </a>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    {# Form #}
+    <div class="lg:col-span-2">
+        <div class="bg-white rounded-lg shadow-md p-8">
+            <form method="post" action="{{ path('admin_invitation_create') }}">
+                <div class="space-y-6">
+                    {# Email Field #}
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                            Email Personal Trainer *
+                        </label>
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            required
+                            placeholder="trainer@example.com"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                        >
+                        <p class="mt-1 text-sm text-gray-500">
+                            L'email a cui verrà inviato l'invito
+                        </p>
+                    </div>
+
+                    {# Gym Selection #}
+                    <div>
+                        <label for="gym_id" class="block text-sm font-medium text-gray-700 mb-2">
+                            Palestra *
+                        </label>
+                        <select
+                            id="gym_id"
+                            name="gym_id"
+                            required
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                        >
+                            <option value="">Seleziona una palestra...</option>
+                            {% for gym in gyms %}
+                                <option value="{{ gym.id }}">{{ gym.name }} - {{ gym.city }}</option>
+                            {% endfor %}
+                        </select>
+                        <p class="mt-1 text-sm text-gray-500">
+                            La palestra per cui il PT verrà invitato a lavorare
+                        </p>
+                    </div>
+
+                    {# Message Field #}
+                    <div>
+                        <label for="message" class="block text-sm font-medium text-gray-700 mb-2">
+                            Messaggio Personalizzato
+                        </label>
+                        <textarea
+                            id="message"
+                            name="message"
+                            rows="5"
+                            placeholder="Scrivi un messaggio di benvenuto personalizzato..."
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                        ></textarea>
+                        <p class="mt-1 text-sm text-gray-500">
+                            Messaggio opzionale che verrà incluso nell'email di invito
+                        </p>
+                    </div>
+
+                    {# Submit Buttons #}
+                    <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+                        <a
+                            href="{{ path('admin_invitations') }}"
+                            class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                        >
+                            Annulla
+                        </a>
+                        <button
+                            type="submit"
+                            class="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium shadow-lg"
+                        >
+                            <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                            </svg>
+                            Invia Invito
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {# Sidebar - Info #}
+    <div class="lg:col-span-1">
+        <div class="bg-gradient-to-br from-primary-600 to-primary-700 rounded-lg shadow-md p-6 text-white mb-6">
+            <h3 class="text-lg font-semibold mb-4">Come funziona?</h3>
+
+            <div class="space-y-4 text-sm">
+                <div class="flex items-start">
+                    <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mr-3">
+                        <span class="font-bold">1</span>
+                    </div>
+                    <p>Inserisci l'email del personal trainer che vuoi invitare</p>
+                </div>
+
+                <div class="flex items-start">
+                    <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mr-3">
+                        <span class="font-bold">2</span>
+                    </div>
+                    <p>Seleziona la palestra per cui lavorerà</p>
+                </div>
+
+                <div class="flex items-start">
+                    <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mr-3">
+                        <span class="font-bold">3</span>
+                    </div>
+                    <p>Aggiungi un messaggio personalizzato (opzionale)</p>
+                </div>
+
+                <div class="flex items-start">
+                    <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mr-3">
+                        <span class="font-bold">4</span>
+                    </div>
+                    <p>Il PT riceverà un'email con un link per accettare l'invito</p>
+                </div>
+            </div>
+        </div>
+
+        {# Info Card #}
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div class="flex">
+                <svg class="w-5 h-5 text-blue-600 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <div class="text-sm text-blue-800">
+                    <p class="font-medium mb-1">Nota Importante</p>
+                    <p>L'invito scadrà automaticamente dopo 7 giorni. Potrai reinviarlo in qualsiasi momento dalla lista inviti.</p>
+                </div>
+            </div>
+        </div>
+
+        {# Warning Card #}
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mt-4">
+            <div class="flex">
+                <svg class="w-5 h-5 text-yellow-600 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+                <div class="text-sm text-yellow-800">
+                    <p class="font-medium mb-1">Attenzione</p>
+                    <p>Non puoi inviare più inviti simultanei alla stessa email. Attendi che l'invito precedente venga accettato, rifiutato o scada.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

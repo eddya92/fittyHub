@@ -1,0 +1,190 @@
+{% extends 'pt/base.html.twig' %}
+
+{% block page_title %}Dashboard Personal Trainer{% endblock %}
+{% block page_subtitle %}Benvenuto {{ trainer.user.firstName }}, gestisci i tuoi clienti e piani di allenamento{% endblock %}
+
+{% block content %}
+{# Stats Cards #}
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    {# Total Clients #}
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-600 font-medium">Clienti Totali</p>
+                <p class="text-3xl font-bold text-gray-900 mt-2">{{ stats.total_clients }}</p>
+            </div>
+            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+            </div>
+        </div>
+        <div class="mt-4">
+            <a href="{{ path('pt_clients') }}" class="text-sm text-blue-600 hover:text-blue-700 font-medium">
+                Vedi tutti →
+            </a>
+        </div>
+    </div>
+
+    {# Active Clients #}
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-600 font-medium">Clienti Attivi</p>
+                <p class="text-3xl font-bold text-green-600 mt-2">{{ stats.active_clients }}</p>
+            </div>
+            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+        </div>
+        <div class="mt-4">
+            <p class="text-sm text-gray-500">In allenamento attivo</p>
+        </div>
+    </div>
+
+    {# Workout Plans #}
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-600 font-medium">Piani Creati</p>
+                <p class="text-3xl font-bold text-purple-600 mt-2">{{ stats.total_workout_plans }}</p>
+            </div>
+            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                </svg>
+            </div>
+        </div>
+        <div class="mt-4">
+            <a href="{{ path('pt_workouts') }}" class="text-sm text-purple-600 hover:text-purple-700 font-medium">
+                Gestisci →
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    {# Active Clients List #}
+    <div class="bg-white rounded-lg shadow-md">
+        <div class="p-6 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-900">Clienti Attivi Recenti</h3>
+        </div>
+        <div class="p-6">
+            {% if active_clients|length > 0 %}
+                <div class="space-y-4">
+                    {% for relation in active_clients %}
+                        <div class="flex items-center justify-between pb-4 border-b border-gray-100 last:border-0 last:pb-0">
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <span class="text-blue-600 font-bold">
+                                        {{ relation.client.firstName|slice(0, 1) ~ relation.client.lastName|slice(0, 1) }}
+                                    </span>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-900">
+                                        {{ relation.client.firstName }} {{ relation.client.lastName }}
+                                    </p>
+                                    <p class="text-xs text-gray-500">
+                                        Dal {{ relation.startDate|date('d/m/Y') }}
+                                    </p>
+                                </div>
+                            </div>
+                            <a href="{{ path('pt_client_show', {'id': relation.id}) }}" class="text-sm text-blue-600 hover:text-blue-700 font-medium">
+                                Dettagli →
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-8">
+                    <svg class="mx-auto h-12 w-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                    <p class="text-gray-500 mb-4">Nessun cliente attivo al momento</p>
+                    <a href="{{ path('pt_invitations') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                        Invita Primo Cliente
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {# Recent Workout Plans #}
+    <div class="bg-white rounded-lg shadow-md">
+        <div class="p-6 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-900">Piani Allenamento Recenti</h3>
+        </div>
+        <div class="p-6">
+            {% if recent_workout_plans|length > 0 %}
+                <div class="space-y-4">
+                    {% for plan in recent_workout_plans %}
+                        <div class="flex items-center justify-between pb-4 border-b border-gray-100 last:border-0 last:pb-0">
+                            <div>
+                                <p class="text-sm font-medium text-gray-900">{{ plan.name }}</p>
+                                <p class="text-xs text-gray-500">
+                                    {{ plan.user.firstName }} {{ plan.user.lastName }} -
+                                    {{ plan.durationWeeks }} settimane
+                                </p>
+                            </div>
+                            <span class="px-2 py-1 text-xs font-medium rounded-full
+                                {% if plan.status == 'active' %}bg-green-100 text-green-800
+                                {% elseif plan.status == 'completed' %}bg-gray-100 text-gray-800
+                                {% else %}bg-blue-100 text-blue-800{% endif %}">
+                                {{ plan.status|upper }}
+                            </span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-8">
+                    <svg class="mx-auto h-12 w-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                    </svg>
+                    <p class="text-gray-500 mb-4">Nessun piano di allenamento creato</p>
+                    <a href="{{ path('pt_workouts') }}" class="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                        Crea Primo Piano
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{# Quick Actions #}
+<div class="mt-8 bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg shadow-lg p-8 text-white">
+    <h3 class="text-2xl font-bold mb-4">Azioni Rapide</h3>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <a href="{{ path('pt_invitations') }}" class="bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-lg p-6 transition-colors">
+            <svg class="w-8 h-8 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+            </svg>
+            <h4 class="font-semibold mb-1">Invita Nuovo Cliente</h4>
+            <p class="text-sm text-white/80">Espandi la tua clientela</p>
+        </a>
+
+        <a href="{{ path('pt_workouts_create') }}" class="bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-lg p-6 transition-colors">
+            <svg class="w-8 h-8 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <h4 class="font-semibold mb-1">Crea Piano Allenamento</h4>
+            <p class="text-sm text-white/80">Nuovo workout personalizzato</p>
+        </a>
+
+        <a href="{{ path('pt_clients') }}" class="bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-lg p-6 transition-colors">
+            <svg class="w-8 h-8 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+            </svg>
+            <h4 class="font-semibold mb-1">Gestisci Clienti</h4>
+            <p class="text-sm text-white/80">Monitora progressi</p>
+        </a>
+    </div>
+</div>
+{% endblock %}

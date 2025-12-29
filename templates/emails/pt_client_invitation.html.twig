@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+        }
+        .content {
+            background: #f9f9f9;
+            padding: 30px;
+            border-radius: 0 0 10px 10px;
+        }
+        .button {
+            display: inline-block;
+            padding: 15px 30px;
+            margin: 20px 10px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .button.decline {
+            background: #e74c3c;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 12px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🏋️ Invito Personal Training</h1>
+    </div>
+    <div class="content">
+        <p>Ciao {{ clientName }},</p>
+
+        <p>Il Personal Trainer <strong>{{ trainerName }}</strong> ti ha invitato a diventare suo cliente su FITTY HUB!</p>
+
+        <p><strong>Cosa significa?</strong></p>
+        <ul>
+            <li>Riceverai schede di allenamento personalizzate</li>
+            <li>Il tuo PT potrà monitorare i tuoi progressi</li>
+            <li>Comunicazione diretta con il tuo trainer</li>
+            <li>Storico completo dei tuoi allenamenti</li>
+        </ul>
+
+        {% if message %}
+        <p><strong>Messaggio del trainer:</strong><br>
+        <em>"{{ message }}"</em></p>
+        {% endif %}
+
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="{{ acceptUrl }}" class="button">✅ Accetta Invito</a>
+            <a href="{{ declineUrl }}" class="button decline">❌ Rifiuta</a>
+        </div>
+
+        <p><small>Questo invito scadrà il {{ expiresAt|date('d/m/Y H:i') }}</small></p>
+    </div>
+    <div class="footer">
+        <p>FITTY HUB - La tua piattaforma fitness personale</p>
+        <p>Se non hai richiesto questo invito, puoi ignorare questa email</p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,217 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block page_title %}{{ trainer.user.firstName }} {{ trainer.user.lastName }}{% endblock %}
+{% block page_subtitle %}Profilo Personal Trainer{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <a href="{{ path('admin_trainers') }}" class="inline-flex items-center text-primary-600 hover:text-primary-700 font-medium">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+        Torna alla lista
+    </a>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    {# Main Content #}
+    <div class="lg:col-span-2 space-y-6">
+        {# Profile Card #}
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            {# Header with gradient #}
+            <div class="bg-gradient-to-r from-primary-600 to-primary-700 p-8 text-white">
+                <div class="flex items-center">
+                    <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center">
+                        <span class="text-white font-bold text-3xl">
+                            {{ trainer.user.firstName|slice(0, 1) ~ trainer.user.lastName|slice(0, 1) }}
+                        </span>
+                    </div>
+                    <div class="ml-6">
+                        <h2 class="text-2xl font-bold">
+                            {{ trainer.user.firstName }} {{ trainer.user.lastName }}
+                        </h2>
+                        <p class="text-white/80 mt-1">Personal Trainer Professionista</p>
+                    </div>
+                </div>
+            </div>
+
+            {# Content #}
+            <div class="p-6">
+                {# Bio #}
+                {% if trainer.bio %}
+                    <div class="mb-6">
+                        <h3 class="text-sm font-medium text-gray-600 mb-2">Biografia</h3>
+                        <p class="text-base text-gray-900">{{ trainer.bio }}</p>
+                    </div>
+                {% endif %}
+
+                {# Contact Info #}
+                <div class="grid grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <p class="text-sm text-gray-600 mb-1">Email</p>
+                        <a href="mailto:{{ trainer.user.email }}" class="text-base font-medium text-primary-600 hover:text-primary-700">
+                            {{ trainer.user.email }}
+                        </a>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600 mb-1">Telefono</p>
+                        <p class="text-base font-medium text-gray-900">
+                            {{ trainer.user.phoneNumber ?? 'N/D' }}
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600 mb-1">Data di Nascita</p>
+                        <p class="text-base font-medium text-gray-900">
+                            {{ trainer.user.dateOfBirth ? trainer.user.dateOfBirth|date('d/m/Y') : 'N/D' }}
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600 mb-1">Anni Esperienza</p>
+                        <p class="text-base font-medium text-gray-900">
+                            {{ trainer.yearsOfExperience ?? 0 }} anni
+                        </p>
+                    </div>
+                </div>
+
+                {# Specializations #}
+                {% if trainer.specializations %}
+                    <div class="mb-6">
+                        <h3 class="text-sm font-medium text-gray-600 mb-3">Specializzazioni</h3>
+                        <div class="flex flex-wrap gap-2">
+                            {% for specialization in trainer.specializations %}
+                                <span class="px-3 py-1 text-sm font-medium bg-blue-100 text-blue-800 rounded-full">
+                                    {{ specialization }}
+                                </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+
+                {# Certifications #}
+                {% if trainer.certifications %}
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-600 mb-3">Certificazioni</h3>
+                        <div class="flex flex-wrap gap-2">
+                            {% for certification in trainer.certifications %}
+                                <span class="px-3 py-1 text-sm font-medium bg-green-100 text-green-800 rounded-full">
+                                    {{ certification }}
+                                </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {# Active Clients #}
+        <div class="bg-white rounded-lg shadow-md">
+            <div class="p-6 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900">Clienti Attivi ({{ active_relations|length }})</h3>
+            </div>
+            <div class="p-6">
+                {% if active_relations|length > 0 %}
+                    <div class="space-y-4">
+                        {% for relation in active_relations %}
+                            <div class="flex items-center justify-between pb-4 border-b border-gray-100 last:border-0 last:pb-0">
+                                <div class="flex items-center">
+                                    <div class="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
+                                        <span class="text-primary-600 font-bold">
+                                            {{ relation.client.firstName|slice(0, 1) ~ relation.client.lastName|slice(0, 1) }}
+                                        </span>
+                                    </div>
+                                    <div class="ml-4">
+                                        <p class="text-sm font-medium text-gray-900">
+                                            {{ relation.client.firstName }} {{ relation.client.lastName }}
+                                        </p>
+                                        <p class="text-xs text-gray-500">
+                                            Dal {{ relation.startDate|date('d/m/Y') }}
+                                            {% if relation.endDate %}
+                                                - Fino al {{ relation.endDate|date('d/m/Y') }}
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                                <span class="px-3 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
+                                    ATTIVO
+                                </span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-8">
+                        <svg class="mx-auto h-12 w-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                        <p class="text-gray-500">Nessun cliente attivo al momento</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {# Sidebar #}
+    <div class="lg:col-span-1 space-y-6">
+        {# Stats Card #}
+        <div class="bg-gradient-to-br from-primary-600 to-primary-700 rounded-lg shadow-md p-6 text-white">
+            <h3 class="text-lg font-semibold mb-4">Statistiche</h3>
+
+            <div class="space-y-4">
+                <div>
+                    <p class="text-sm text-white/80">Clienti Totali</p>
+                    <p class="text-3xl font-bold mt-1">{{ stats.total_clients }}</p>
+                </div>
+                <div class="border-t border-white/20 pt-4">
+                    <p class="text-sm text-white/80">Clienti Attivi</p>
+                    <p class="text-3xl font-bold mt-1">{{ stats.active_clients }}</p>
+                </div>
+                <div class="border-t border-white/20 pt-4">
+                    <p class="text-sm text-white/80">Relazioni Completate</p>
+                    <p class="text-3xl font-bold mt-1">{{ stats.completed_relations }}</p>
+                </div>
+            </div>
+        </div>
+
+        {# Quick Actions #}
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Azioni Rapide</h3>
+
+            <div class="space-y-3">
+                <a
+                    href="mailto:{{ trainer.user.email }}"
+                    class="block w-full px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium text-center"
+                >
+                    <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                    Invia Email
+                </a>
+
+                {% if trainer.user.phoneNumber %}
+                    <a
+                        href="tel:{{ trainer.user.phoneNumber }}"
+                        class="block w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-center"
+                    >
+                        <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                        </svg>
+                        Chiama
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        {# Info Card #}
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div class="flex">
+                <svg class="w-5 h-5 text-blue-600 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <div class="text-sm text-blue-800">
+                    <p class="font-medium mb-1">Info</p>
+                    <p>Il Personal Trainer può gestire i propri clienti dalla dashboard PT.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

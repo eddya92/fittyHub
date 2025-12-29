@@ -1,0 +1,129 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block page_title %}Dashboard{% endblock %}
+{% block page_subtitle %}Benvenuto nel pannello amministrativo di FITTY HUB{% endblock %}
+
+{% block content %}
+{# Stats Cards #}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+    {# Iscritti Attivi #}
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-600 font-medium">Iscritti Attivi</p>
+                <p class="text-3xl font-bold text-gray-900 mt-2">{{ stats.active_memberships }}</p>
+                <p class="text-sm text-gray-500 mt-1">su {{ stats.total_memberships }} totali</p>
+            </div>
+            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+            </div>
+        </div>
+        <div class="mt-4">
+            <a href="{{ path('admin_memberships') }}" class="text-sm text-primary-600 hover:text-primary-700 font-medium">
+                Vedi tutti →
+            </a>
+        </div>
+    </div>
+
+    {# Personal Trainer #}
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-600 font-medium">Personal Trainer</p>
+                <p class="text-3xl font-bold text-gray-900 mt-2">{{ stats.total_trainers }}</p>
+                <p class="text-sm text-gray-500 mt-1">nel team</p>
+            </div>
+            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                </svg>
+            </div>
+        </div>
+        <div class="mt-4">
+            <a href="{{ path('admin_trainers') }}" class="text-sm text-primary-600 hover:text-primary-700 font-medium">
+                Gestisci →
+            </a>
+        </div>
+    </div>
+
+    {# Iscrizioni Totali #}
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-600 font-medium">Iscrizioni Totali</p>
+                <p class="text-3xl font-bold text-gray-900 mt-2">{{ stats.total_memberships }}</p>
+                <p class="text-sm text-gray-500 mt-1">dalla apertura</p>
+            </div>
+            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Iscrizioni Recenti #}
+<div class="bg-white rounded-lg shadow-md">
+        <div class="p-6 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-900">Iscrizioni Recenti</h3>
+        </div>
+        <div class="p-6">
+            {% if recent_memberships|length > 0 %}
+                <div class="space-y-4">
+                    {% for membership in recent_memberships %}
+                        <div class="flex items-center justify-between pb-4 border-b border-gray-100 last:border-0 last:pb-0">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
+                                    <span class="text-primary-600 font-bold text-sm">
+                                        {{ membership.user.firstName|slice(0, 1) ~ membership.user.lastName|slice(0, 1) }}
+                                    </span>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium text-gray-900">
+                                        {{ membership.user.firstName }} {{ membership.user.lastName }}
+                                    </p>
+                                    <p class="text-xs text-gray-500">
+                                        {{ membership.createdAt|date('d/m/Y H:i') }}
+                                    </p>
+                                </div>
+                            </div>
+                            <span class="px-2 py-1 text-xs font-medium rounded-full
+                                {% if membership.status == 'active' %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ membership.status|capitalize }}
+                            </span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-gray-500 text-center py-8">Nessuna iscrizione recente</p>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+{# Quick Actions #}
+<div class="mt-8 bg-gradient-to-r from-primary-600 to-primary-700 rounded-lg shadow-lg p-8 text-white">
+    <h3 class="text-2xl font-bold mb-4">Azioni Rapide</h3>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <a href="{{ path('admin_invitations') }}" class="bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-lg p-6 transition-colors">
+            <svg class="w-8 h-8 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+            </svg>
+            <h4 class="font-semibold mb-1">Invita Personal Trainer</h4>
+            <p class="text-sm text-white/80">Espandi il team della palestra</p>
+        </a>
+
+        <a href="{{ path('admin_trainers') }}" class="bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-lg p-6 transition-colors">
+            <svg class="w-8 h-8 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+            </svg>
+            <h4 class="font-semibold mb-1">Gestisci Personal Trainer</h4>
+            <p class="text-sm text-white/80">Visualizza il team</p>
+        </a>
+    </div>
+</div>
+{% endblock %}

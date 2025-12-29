@@ -1,0 +1,18 @@
+nelmio_api_doc:
+    documentation:
+        info:
+            title: FittyHub API
+            description: API automatica per gestione palestre, utenti, piani allenamento e iscrizioni
+            version: 1.0.0
+        components:
+            securitySchemes:
+                Bearer:
+                    type: http
+                    scheme: bearer
+                    bearerFormat: JWT
+        security:
+            - Bearer: []
+        openapi: 3.0.0
+    areas:
+        path_patterns:
+            - ^/api(?!/docs)

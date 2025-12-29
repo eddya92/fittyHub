@@ -1,0 +1,206 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block page_title %}Gestione Iscritti{% endblock %}
+{% block page_subtitle %}Visualizza e gestisci tutte le iscrizioni alle palestre{% endblock %}
+
+{% block content %}
+{# Stats Cards #}
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-600 font-medium">Totali</p>
+                <p class="text-3xl font-bold text-gray-900 mt-2">{{ stats.total }}</p>
+            </div>
+            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-600 font-medium">Attivi</p>
+                <p class="text-3xl font-bold text-green-600 mt-2">{{ stats.active }}</p>
+            </div>
+            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-600 font-medium">Scaduti</p>
+                <p class="text-3xl font-bold text-orange-600 mt-2">{{ stats.expired }}</p>
+            </div>
+            <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-600 font-medium">Cancellati</p>
+                <p class="text-3xl font-bold text-red-600 mt-2">{{ stats.cancelled }}</p>
+            </div>
+            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Filters #}
+<div class="bg-white rounded-lg shadow-md p-6 mb-6">
+    <form method="get" action="{{ path('admin_memberships') }}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div>
+            <label for="search" class="block text-sm font-medium text-gray-700 mb-2">Cerca Utente</label>
+            <input
+                type="text"
+                id="search"
+                name="search"
+                value="{{ current_search }}"
+                placeholder="Nome, cognome o email..."
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            >
+        </div>
+
+        <div>
+            <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Stato</label>
+            <select
+                id="status"
+                name="status"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            >
+                <option value="">Tutti</option>
+                <option value="active" {% if current_status == 'active' %}selected{% endif %}>Attivi</option>
+                <option value="expired" {% if current_status == 'expired' %}selected{% endif %}>Scaduti</option>
+                <option value="cancelled" {% if current_status == 'cancelled' %}selected{% endif %}>Cancellati</option>
+            </select>
+        </div>
+
+        <div class="flex items-end">
+            <button
+                type="submit"
+                class="w-full px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
+            >
+                Filtra
+            </button>
+        </div>
+
+        <div class="flex items-end">
+            <a
+                href="{{ path('admin_memberships') }}"
+                class="w-full px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium text-center"
+            >
+                Reset
+            </a>
+        </div>
+    </form>
+</div>
+
+{# Memberships Table #}
+<div class="bg-white rounded-lg shadow-md overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Utente
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Palestra
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Data Inizio
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Data Fine
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Stato
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Azioni
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% if memberships|length > 0 %}
+                    {% for membership in memberships %}
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
+                                        <span class="text-primary-600 font-bold text-sm">
+                                            {{ membership.user.firstName|slice(0, 1) ~ membership.user.lastName|slice(0, 1) }}
+                                        </span>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm font-medium text-gray-900">
+                                            {{ membership.user.firstName }} {{ membership.user.lastName }}
+                                        </p>
+                                        <p class="text-xs text-gray-500">
+                                            {{ membership.user.email }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <p class="text-sm text-gray-900">{{ membership.gym.name }}</p>
+                                <p class="text-xs text-gray-500">{{ membership.gym.city }}</p>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ membership.startDate|date('d/m/Y') }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ membership.endDate|date('d/m/Y') }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-3 py-1 text-xs font-medium rounded-full
+                                    {% if membership.status == 'active' %}bg-green-100 text-green-800
+                                    {% elseif membership.status == 'expired' %}bg-orange-100 text-orange-800
+                                    {% elseif membership.status == 'cancelled' %}bg-red-100 text-red-800
+                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                    {{ membership.status|upper }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                <a
+                                    href="{{ path('admin_membership_show', {'id': membership.id}) }}"
+                                    class="text-primary-600 hover:text-primary-900 font-medium"
+                                >
+                                    Dettagli →
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-12 text-center text-gray-500">
+                            <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+                            </svg>
+                            <p class="text-lg font-medium">Nessuna iscrizione trovata</p>
+                            <p class="text-sm mt-1">Prova a modificare i filtri di ricerca</p>
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

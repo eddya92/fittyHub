@@ -1,0 +1,105 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block page_title %}Impostazioni{% endblock %}
+{% block page_subtitle %}Configura le impostazioni della tua palestra{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl">
+    <form method="post" action="{{ path('admin_settings_update') }}" class="space-y-6">
+        {# Orari Calendario Corsi #}
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-6">Calendario Corsi</h3>
+            <p class="text-sm text-gray-600 mb-6">
+                Configura gli orari di visualizzazione del calendario corsi. Queste impostazioni determinano
+                quali fasce orarie vengono mostrate nel calendario settimanale.
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <label for="course_schedule_start" class="block text-sm font-medium text-gray-700 mb-2">
+                        Orario Inizio
+                    </label>
+                    <input
+                        type="time"
+                        id="course_schedule_start"
+                        name="course_schedule_start"
+                        value="{{ settings.courseScheduleStart|date('H:i') }}"
+                        required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                    >
+                    <p class="text-xs text-gray-500 mt-1">Es. 07:00</p>
+                </div>
+
+                <div>
+                    <label for="course_schedule_end" class="block text-sm font-medium text-gray-700 mb-2">
+                        Orario Fine
+                    </label>
+                    <input
+                        type="time"
+                        id="course_schedule_end"
+                        name="course_schedule_end"
+                        value="{{ settings.courseScheduleEnd|date('H:i') }}"
+                        required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                    >
+                    <p class="text-xs text-gray-500 mt-1">Es. 22:00</p>
+                </div>
+
+                <div>
+                    <label for="time_slot_duration" class="block text-sm font-medium text-gray-700 mb-2">
+                        Durata Slot (minuti)
+                    </label>
+                    <select
+                        id="time_slot_duration"
+                        name="time_slot_duration"
+                        required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                    >
+                        <option value="30" {% if settings.timeSlotDuration == 30 %}selected{% endif %}>30 minuti</option>
+                        <option value="60" {% if settings.timeSlotDuration == 60 %}selected{% endif %}>60 minuti</option>
+                        <option value="90" {% if settings.timeSlotDuration == 90 %}selected{% endif %}>90 minuti</option>
+                    </select>
+                    <p class="text-xs text-gray-500 mt-1">Intervallo griglia calendario</p>
+                </div>
+            </div>
+
+            <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div class="flex">
+                    <svg class="w-5 h-5 text-blue-600 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <div class="text-sm text-blue-800">
+                        <p class="font-medium mb-1">Anteprima</p>
+                        <p>
+                            Il calendario mostrerà fasce orarie da
+                            <strong>{{ settings.courseScheduleStart|date('H:i') }}</strong> a
+                            <strong>{{ settings.courseScheduleEnd|date('H:i') }}</strong>
+                            con intervalli di <strong>{{ settings.timeSlotDuration }} minuti</strong>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Actions #}
+        <div class="flex gap-4">
+            <button
+                type="submit"
+                class="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
+            >
+                <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                Salva Impostazioni
+            </button>
+
+            <a
+                href="{{ path('admin_dashboard') }}"
+                class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+            >
+                Annulla
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

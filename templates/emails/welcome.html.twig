@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+        }
+        .content {
+            background: #f9f9f9;
+            padding: 30px;
+            border-radius: 0 0 10px 10px;
+        }
+        .feature {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 12px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎉 Benvenuto su FITTY HUB!</h1>
+    </div>
+    <div class="content">
+        <p>Ciao <strong>{{ user.firstName }}</strong>,</p>
+
+        <p>Grazie per esserti registrato! Siamo felici di averti nella community FITTY HUB.</p>
+
+        <h3>🚀 Cosa puoi fare ora:</h3>
+
+        <div class="feature">
+            <strong>📝 Crea la tua prima scheda</strong><br>
+            Inizia subito a tracciare i tuoi allenamenti gratuitamente
+        </div>
+
+        <div class="feature">
+            <strong>🏋️ Biblioteca esercizi</strong><br>
+            Accedi a centinaia di esercizi con spiegazioni dettagliate
+        </div>
+
+        <div class="feature">
+            <strong>📊 Monitora i progressi</strong><br>
+            Visualizza grafici e statistiche dei tuoi miglioramenti
+        </div>
+
+        <div class="feature">
+            <strong>🤝 Connettiti con professionisti</strong><br>
+            Quando sei pronto, trova un Personal Trainer o iscriviti in palestra
+        </div>
+
+        <p style="margin-top: 30px;">
+            <strong>Il tuo account:</strong><br>
+            Email: {{ user.email }}<br>
+            Nome: {{ user.firstName }} {{ user.lastName }}
+        </p>
+
+        <p>Inizia subito la tua trasformazione! 💪</p>
+    </div>
+    <div class="footer">
+        <p>FITTY HUB - Il tuo compagno di allenamento per sempre</p>
+        <p>Hai domande? Rispondi a questa email, siamo qui per aiutarti!</p>
+    </div>
+</body>
+</html>

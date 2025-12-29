@@ -1,0 +1,52 @@
+# This file is the entry point to configure your own services.
+# Files in the packages/ subdirectory configure your dependencies.
+
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
+parameters:
+    medical_certificates_directory: '%kernel.project_dir%/var/uploads/medical_certificates'
+
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+    # makes classes in src/ available to be used as services
+    # this creates a service per class whose id is the fully-qualified class name
+    App\:
+        resource: '../src/'
+
+    # add more service definitions when explicit configuration is needed
+    # please note that last definitions always *replace* previous ones
+
+    # API Platform State Processors
+    App\Domain\User\State\UserPasswordHasher:
+        decorates: 'api_platform.doctrine.orm.state.persist_processor'
+        arguments:
+            $processor: '@App\Domain\User\State\UserPasswordHasher.inner'
+        decoration_priority: 10
+
+    App\Domain\Workout\State\WorkoutPlanProcessor:
+        decorates: 'App\Domain\User\State\UserPasswordHasher'
+        arguments:
+            $processor: '@App\Domain\Workout\State\WorkoutPlanProcessor.inner'
+
+    App\Domain\Membership\State\GymMembershipProcessor:
+        decorates: 'App\Domain\Workout\State\WorkoutPlanProcessor'
+        arguments:
+            $processor: '@App\Domain\Membership\State\GymMembershipProcessor.inner'
+
+    App\Domain\Invitation\State\PTClientInvitationProcessor:
+        decorates: 'App\Domain\Membership\State\GymMembershipProcessor'
+        arguments:
+            $processor: '@App\Domain\Invitation\State\PTClientInvitationProcessor.inner'
+
+    # File Upload Services
+    App\Infrastructure\Service\FileUploadService:
+        arguments:
+            $uploadDirectory: '%kernel.project_dir%/var/uploads'
+
+    App\Domain\Medical\Service\MedicalCertificateUploadService:
+        arguments:
+            $uploadDirectory: '%medical_certificates_directory%'

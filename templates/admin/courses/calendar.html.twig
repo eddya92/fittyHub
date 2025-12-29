@@ -1,0 +1,177 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block page_title %}Calendario Corsi{% endblock %}
+{% block page_subtitle %}Visualizza tutti i corsi della settimana{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex justify-between items-center">
+    <a href="{{ path('admin_courses') }}" class="inline-flex items-center text-primary-600 hover:text-primary-700 font-medium">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+        Torna alla lista
+    </a>
+
+    <div class="flex gap-3">
+        <a
+            href="{{ path('admin_settings') }}"
+            class="inline-flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium"
+        >
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+            Impostazioni Orari
+        </a>
+        <a
+            href="{{ path('admin_course_create') }}"
+            class="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
+        >
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+            Crea Corso
+        </a>
+    </div>
+</div>
+
+{# Weekly Time Grid Calendar #}
+<div class="bg-white rounded-lg shadow-md overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full border-collapse">
+            <thead>
+                <tr class="bg-gray-50">
+                    <th class="sticky left-0 z-10 bg-gray-50 border-r border-b border-gray-200 p-3 text-left font-semibold text-gray-900 min-w-[80px]">
+                        Orario
+                    </th>
+                    {% set dayLabels = {
+                        'monday': 'Lunedì',
+                        'tuesday': 'Martedì',
+                        'wednesday': 'Mercoledì',
+                        'thursday': 'Giovedì',
+                        'friday': 'Venerdì',
+                        'saturday': 'Sabato',
+                        'sunday': 'Domenica'
+                    } %}
+                    {% for day, label in dayLabels %}
+                        <th class="border-r border-b border-gray-200 p-3 text-center font-semibold text-gray-900 min-w-[150px] last:border-r-0">
+                            {{ label }}
+                        </th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for timeSlot in timeSlots %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="sticky left-0 z-10 bg-white border-r border-b border-gray-200 p-3 text-sm font-medium text-gray-700">
+                            {{ timeSlot }}
+                        </td>
+                        {% for day in ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] %}
+                            <td class="border-r border-b border-gray-200 p-2 align-top last:border-r-0 min-h-[80px]">
+                                {# Trova corsi che iniziano in questo slot #}
+                                {% if calendar[day]|length > 0 %}
+                                    {% for item in calendar[day] %}
+                                        {% set course = item.course %}
+                                        {% set schedule = item.schedule %}
+                                        {% set scheduleStart = schedule.startTime|date('H:i') %}
+
+                                        {% if scheduleStart == timeSlot %}
+                                            {% set categoryColor = course.category ? course.category.color : '#3B82F6' %}
+
+                                            <div
+                                                class="p-2 rounded-lg border-l-4 hover:shadow-md transition-shadow cursor-pointer mb-2"
+                                                style="background-color: {{ categoryColor }}20; border-left-color: {{ categoryColor }}"
+                                                onclick="window.location='{{ path('admin_course_show', {'id': course.id}) }}'"
+                                            >
+                                                <div class="text-xs font-bold mb-1" style="color: {{ categoryColor }}">
+                                                    {{ schedule.startTime|date('H:i') }} - {{ schedule.endTime|date('H:i') }}
+                                                </div>
+
+                                                <h4 class="font-semibold text-xs text-gray-900 mb-1">{{ course.name }}</h4>
+
+                                                {% if course.instructor %}
+                                                    <p class="text-xs text-gray-600 mb-1">
+                                                        {{ course.instructor.user.firstName|slice(0, 1) }}. {{ course.instructor.user.lastName }}
+                                                    </p>
+                                                {% endif %}
+
+                                                <div class="flex items-center justify-between mt-1">
+                                                    <span class="text-xs text-gray-600">
+                                                        {{ schedule.activeEnrollmentsCount }}/{{ course.maxParticipants }}
+                                                    </span>
+
+                                                    {% if schedule.activeEnrollmentsCount >= course.maxParticipants %}
+                                                        <span class="text-xs font-medium px-1.5 py-0.5 bg-red-100 text-red-800 rounded">
+                                                            PIENO
+                                                        </span>
+                                                    {% elseif schedule.activeEnrollmentsCount >= (course.maxParticipants * 0.8) %}
+                                                        <span class="text-xs font-medium px-1.5 py-0.5 bg-yellow-100 text-yellow-800 rounded">
+                                                            {{ course.maxParticipants - schedule.activeEnrollmentsCount }}
+                                                        </span>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{# Info e statistiche #}
+<div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+    {# Legend #}
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h3 class="font-semibold text-gray-900 mb-4">Legenda Categorie</h3>
+        {% if categories|length > 0 %}
+            <div class="grid grid-cols-2 gap-3">
+                {% for category in categories %}
+                    <div class="flex items-center">
+                        <div class="w-4 h-4 rounded mr-2" style="background-color: {{ category.color }}"></div>
+                        <span class="text-sm text-gray-700">{{ category.name }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-gray-500 text-sm">
+                Nessuna categoria disponibile.
+                <a href="{{ path('admin_course_category_create') }}" class="text-primary-600 hover:text-primary-700 underline">
+                    Crea la prima categoria
+                </a>
+            </p>
+        {% endif %}
+    </div>
+
+    {# Quick Info #}
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h3 class="font-semibold text-gray-900 mb-4">Informazioni</h3>
+        <div class="space-y-3 text-sm text-gray-700">
+            {% if settings %}
+                <div class="flex items-center">
+                    <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Orari: {{ settings.courseScheduleStart|date('H:i') }} - {{ settings.courseScheduleEnd|date('H:i') }}
+                </div>
+                <div class="flex items-center">
+                    <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                    </svg>
+                    Slot di {{ settings.timeSlotDuration }} minuti
+                </div>
+            {% endif %}
+            <div class="flex items-center">
+                <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Clicca su un corso per vedere i dettagli
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
