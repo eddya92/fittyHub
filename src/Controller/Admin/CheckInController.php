@@ -114,32 +114,12 @@ class CheckInController extends AbstractController
             ], 403);
         }
 
-        // Verifica se ha già un check-in attivo
-        $activeCheckIn = $this->checkInService->findActiveCheckIn($user, $gym);
-
-        if ($activeCheckIn) {
-            // Effettua check-out
-            $this->checkInService->checkOut($activeCheckIn);
-
-            return $this->json([
-                'success' => true,
-                'action' => 'check_out',
-                'message' => 'Check-out effettuato con successo!',
-                'user' => [
-                    'name' => $user->getFirstName() . ' ' . $user->getLastName(),
-                    'email' => $user->getEmail(),
-                    'duration' => $activeCheckIn->getDuration() . ' minuti'
-                ]
-            ]);
-        }
-
         // Effettua check-in
         $attendance = $this->checkInService->checkIn($user, $gym);
 
         return $this->json([
             'success' => true,
-            'action' => 'check_in',
-            'message' => 'Check-in effettuato con successo!',
+            'message' => 'Ingresso consentito!',
             'user' => [
                 'name' => $user->getFirstName() . ' ' . $user->getLastName(),
                 'email' => $user->getEmail(),

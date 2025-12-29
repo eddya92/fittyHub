@@ -98,36 +98,6 @@ class CheckInService
     }
 
     /**
-     * Effettua il check-out per un utente
-     */
-    public function checkOut(GymAttendance $attendance): void
-    {
-        if ($attendance->getCheckOutTime()) {
-            throw new \RuntimeException('Check-out già effettuato.');
-        }
-
-        $attendance->setCheckOutTime(new \DateTime());
-        $this->attendanceRepository->save($attendance, true);
-    }
-
-    /**
-     * Trova l'ultimo check-in attivo (senza check-out) per un utente
-     */
-    public function findActiveCheckIn(User $user, Gym $gym): ?GymAttendance
-    {
-        return $this->attendanceRepository->createQueryBuilder('a')
-            ->where('a.user = :user')
-            ->andWhere('a.gym = :gym')
-            ->andWhere('a.checkOutTime IS NULL')
-            ->setParameter('user', $user)
-            ->setParameter('gym', $gym)
-            ->orderBy('a.checkInTime', 'DESC')
-            ->setMaxResults(1)
-            ->getQuery()
-            ->getOneOrNullResult();
-    }
-
-    /**
      * Ottiene lo storico presenze di un utente
      */
     public function getUserAttendanceHistory(User $user, Gym $gym, int $limit = 10): array
@@ -164,12 +134,6 @@ class CheckInService
 
         $totalCheckIns = (clone $qb)->select('COUNT(a.id)')->getQuery()->getSingleScalarResult();
 
-        $avgDuration = (clone $qb)
-            ->select('AVG(a.duration)')
-            ->andWhere('a.duration IS NOT NULL')
-            ->getQuery()
-            ->getSingleScalarResult();
-
         $uniqueUsers = (clone $qb)
             ->select('COUNT(DISTINCT a.user)')
             ->getQuery()
@@ -177,7 +141,6 @@ class CheckInService
 
         return [
             'total_check_ins' => (int)$totalCheckIns,
-            'average_duration_minutes' => $avgDuration ? round($avgDuration) : null,
             'unique_users' => (int)$uniqueUsers
         ];
     }

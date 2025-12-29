@@ -85,17 +85,13 @@ form.addEventListener('submit', async (e) => {
         const result = await response.json();
 
         if (result.success) {
-            if (result.action === 'check_in') {
-                showMessage('success', `✓ Check-in effettuato!\n${result.user.name}\nOra: ${result.user.checkInTime}`, result.user);
-            } else {
-                showMessage('success', `✓ Check-out effettuato!\n${result.user.name}\nDurata: ${result.user.duration}`, result.user);
-            }
+            showMessage('success', `✓ ${result.message}\n${result.user.name}\nOra: ${result.user.checkInTime}`, result.user);
             searchInput.value = '';
 
-            // Ricarica dopo 3 secondi
+            // Ricarica dopo 2 secondi
             setTimeout(() => {
                 resultDiv.classList.add('hidden');
-            }, 3000);
+            }, 2000);
         } else {
             showMessage('error', result.message, result.user);
         }
