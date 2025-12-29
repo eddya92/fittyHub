@@ -49,12 +49,19 @@
   - [x] Iscrizione/cancellazione utenti ai corsi
   - [x] Gestione orari settimanali (aggiungi/elimina)
   - [x] Controllo posti disponibili automatico
-  - [x] Categorie corso personalizzabili con colore (da implementare UI gestione categorie)
-  - [ ] Gestione presenze/check-in
+  - [x] Categorie corso personalizzabili con colore
+  - [x] CRUD categorie personalizzate (nome + colore hex)
+  - [ ] Gestione presenze/check-in corsi
   - [ ] Report partecipazione corsi
-- [ ] **Gestione Categorie Corsi** (PROSSIMO)
-  - [ ] CRUD categorie personalizzate (nome + colore hex)
-  - [ ] Assegnazione categorie ai corsi
+- [x] **Sistema Check-in Tornello**
+  - [x] Impostazione per abilitare/disabilitare check-in tornello
+  - [x] Validazione automatica (abbonamento + certificato medico)
+  - [x] Blocco ingresso se abbonamento scaduto
+  - [x] Blocco ingresso se certificato medico scaduto
+  - [x] Dashboard con statistiche check-in giornalieri
+  - [x] Interfaccia scansione (email o ID utente)
+  - [x] Storico presenze con dettagli utente
+  - [x] Test unitari per business logic e entità
 
 ### Area Personal Trainer
 - [ ] **Gestione Piani Allenamento**
