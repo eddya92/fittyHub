@@ -1,25 +1,80 @@
-
 services:
-###> doctrine/doctrine-bundle ###
   database:
-    image: mysql:${MYSQL_VERSION:-8.0}
+    image: mysql:8.0
+    container_name: fitty-mysql
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-fitty_gym}
-      MYSQL_USER: ${MYSQL_USER:-fitty}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-fitty}
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: fitty_gym
+      MYSQL_USER: fitty
+      MYSQL_PASSWORD: fitty
     ports:
       - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - fitty
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 60s
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: fitty-phpmyadmin
+    environment:
+      PMA_HOST: database
+      PMA_USER: root
+      PMA_PASSWORD: root
+      PMA_PORT: 3306
+    ports:
+      - "8001:80"
+    depends_on:
+      - database
+    networks:
+      - fitty
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: fitty-mailpit
+    ports:
+      - "8025:8025"  # Web interface
+      - "1025:1025"  # SMTP server
+    networks:
+      - fitty
+
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fitty-php
     volumes:
-      - database_data:/var/lib/mysql:rw
-###< doctrine/doctrine-bundle ###
+      - .:/var/www/html
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - fitty
+    environment:
+      DATABASE_URL: mysql://fitty:fitty@database:3306/fitty_gym?serverVersion=8.0&charset=utf8mb4
+      MAILER_DSN: smtp://mailpit:1025
+
+  nginx:
+    image: nginx:alpine
+    container_name: fitty-nginx
+    ports:
+      - "8000:80"
+    volumes:
+      - .:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - php
+    networks:
+      - fitty
 
 volumes:
-###> doctrine/doctrine-bundle ###
-  database_data:
-###< doctrine/doctrine-bundle ###
+  db_data:
+
+networks:
+  fitty:

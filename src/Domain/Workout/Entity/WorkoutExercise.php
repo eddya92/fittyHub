@@ -18,6 +18,10 @@ class WorkoutExercise
     #[ORM\JoinColumn(nullable: false)]
     private ?WorkoutPlan $workoutPlan = null;
 
+    #[ORM\ManyToOne(targetEntity: Exercise::class)]
+    #[ORM\JoinColumn(name: 'exercise_id', nullable: true, onDelete: 'SET NULL')]
+    private ?Exercise $exercise = null;
+
     #[ORM\Column]
     private ?int $dayNumber = null;
 
@@ -85,6 +89,18 @@ class WorkoutExercise
     public function setWorkoutPlan(?WorkoutPlan $workoutPlan): static
     {
         $this->workoutPlan = $workoutPlan;
+
+        return $this;
+    }
+
+    public function getExercise(): ?Exercise
+    {
+        return $this->exercise;
+    }
+
+    public function setExercise(?Exercise $exercise): static
+    {
+        $this->exercise = $exercise;
 
         return $this;
     }

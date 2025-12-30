@@ -23,6 +23,10 @@
 - [x] Registrazione utente base
 - [x] Registrazione palestra (2-step: admin + gym info)
 - [x] Layout base responsive con sidebar
+- [x] Fix sidebar scrolling e layout (admin e PT)
+- [x] Fix calendario corsi responsive (table-fixed, colonne ottimizzate)
+- [x] Configurazione Docker (PHP-FPM, Nginx, MySQL, phpMyAdmin, Mailpit)
+- [x] Database Primer per test isolation
 
 ### Area Admin Palestra
 - [x] Dashboard con statistiche (iscritti attivi, PT, iscrizioni totali)
@@ -64,12 +68,23 @@
   - [x] Test unitari per business logic e entità
 
 ### Area Personal Trainer
-- [ ] **Gestione Piani Allenamento**
-  - [ ] Form creazione piano allenamento completo
-  - [ ] Dettaglio piano con esercizi, serie, ripetizioni
-  - [ ] Assegnazione esercizi da database
+- [x] **Sistema Interviste Clienti (Client Assessment)**
+  - [x] Entità ClientAssessment con 40+ campi (dati fisici, obiettivi, salute, stile di vita, preferenze)
+  - [x] Repository con query personalizzate (findByPersonalTrainer, findByClient, findLatestByClient)
+  - [x] Form completo intervista con validazione
+  - [x] Salvataggio bozze e completamento
+  - [x] Workflow: Intervista → Crea Piano da Intervista
+  - [x] Test unitari completi (36 test, 113 assertions)
+- [x] **Gestione Piani Allenamento Base**
+  - [x] Creazione piano da intervista completata
+  - [x] Metadati piano (nome, tipo, durata, descrizione)
+  - [x] Lista piani allenamento
+  - [x] Visualizzazione dettaglio piano
+  - [ ] Editor esercizi completo (aggiunta esercizi, serie, ripetizioni, carichi)
+  - [ ] Database esercizi con categorie
   - [ ] Modifica/aggiornamento piani esistenti
   - [ ] Storico modifiche piani
+  - [ ] Duplicazione piani
 
 ### Mobile App (Flutter)
 - [ ] Setup progetto Flutter
@@ -140,4 +155,4 @@ ROLE_SUPER_ADMIN → Super admin (eredita tutti)
 
 ---
 
-**Ultimo aggiornamento**: 2025-12-29
+**Ultimo aggiornamento**: 2025-12-31

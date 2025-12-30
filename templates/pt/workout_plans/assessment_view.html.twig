@@ -1,0 +1,51 @@
+{% extends 'pt/base.html.twig' %}
+
+{% block page_title %}Intervista: {{ assessment.client.firstName }} {{ assessment.client.lastName }}{% endblock %}
+{% block page_subtitle %}Visualizza dettagli intervista{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <a href="{{ path('pt_assessments') }}" class="text-blue-600 hover:underline">← Torna alle interviste</a>
+</div>
+
+<div class="bg-white rounded-lg shadow-md p-6 mb-6">
+    <div class="flex justify-between items-start mb-6">
+        <div>
+            <h3 class="text-xl font-semibold">{{ assessment.client.firstName }} {{ assessment.client.lastName }}</h3>
+            <p class="text-gray-600">{{ assessment.client.email }}</p>
+            <p class="text-sm text-gray-500 mt-2">Creata il: {{ assessment.createdAt|date('d/m/Y H:i') }}</p>
+        </div>
+        {% if assessment.status == 'completed' %}
+            <a href="{{ path('pt_workout_plan_create_from_assessment', {assessmentId: assessment.id}) }}" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg">
+                Crea Piano di Allenamento →
+            </a>
+        {% endif %}
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div>
+            <h4 class="font-semibold mb-3">📊 Dati Fisici</h4>
+            <dl class="space-y-2 text-sm">
+                <div class="flex"><dt class="w-32 text-gray-600">Età:</dt><dd class="font-medium">{{ assessment.age ?? 'N/D' }}</dd></div>
+                <div class="flex"><dt class="w-32 text-gray-600">Altezza:</dt><dd class="font-medium">{{ assessment.height ?? 'N/D' }} cm</dd></div>
+                <div class="flex"><dt class="w-32 text-gray-600">Peso:</dt><dd class="font-medium">{{ assessment.weight ?? 'N/D' }} kg</dd></div>
+            </dl>
+        </div>
+
+        <div>
+            <h4 class="font-semibold mb-3">🎯 Obiettivi</h4>
+            <p class="text-sm"><strong>Obiettivo Principale:</strong></p>
+            <p class="text-sm text-gray-700 mb-2">{{ assessment.primaryGoal }}</p>
+            <p class="text-sm"><strong>Livello:</strong> {{ assessment.fitnessLevel|upper }}</p>
+            <p class="text-sm"><strong>Disponibilità:</strong> {{ assessment.weeklyAvailability }} giorni/settimana</p>
+        </div>
+    </div>
+
+    {% if assessment.ptNotes %}
+    <div class="mt-6 pt-6 border-t">
+        <h4 class="font-semibold mb-2">📝 Note PT</h4>
+        <p class="text-sm text-gray-700 bg-gray-50 p-4 rounded">{{ assessment.ptNotes }}</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

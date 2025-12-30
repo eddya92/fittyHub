@@ -94,23 +94,19 @@
                     </div>
 
                     {# Bio #}
-                    {% if trainer.bio %}
+                    {% if trainer.biography %}
                         <div class="mb-4">
-                            <p class="text-sm text-gray-700 line-clamp-3">{{ trainer.bio }}</p>
+                            <p class="text-sm text-gray-700 line-clamp-3">{{ trainer.biography }}</p>
                         </div>
                     {% endif %}
 
-                    {# Specializations #}
-                    {% if trainer.specializations %}
+                    {# Specialization #}
+                    {% if trainer.specialization %}
                         <div class="mb-4">
-                            <p class="text-xs font-medium text-gray-600 mb-2">Specializzazioni:</p>
-                            <div class="flex flex-wrap gap-1">
-                                {% for specialization in trainer.specializations %}
-                                    <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded">
-                                        {{ specialization }}
-                                    </span>
-                                {% endfor %}
-                            </div>
+                            <p class="text-xs font-medium text-gray-600 mb-2">Specializzazione:</p>
+                            <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded">
+                                {{ trainer.specialization }}
+                            </span>
                         </div>
                     {% endif %}
 
@@ -132,7 +128,7 @@
                     <div class="border-t border-gray-200 pt-4 mt-4">
                         <div class="flex items-center justify-between text-sm">
                             <span class="text-gray-600">Anni Esperienza:</span>
-                            <span class="font-medium text-gray-900">{{ trainer.yearsOfExperience ?? 0 }}</span>
+                            <span class="font-medium text-gray-900">{{ trainer.experience ?? 0 }}</span>
                         </div>
                     </div>
 

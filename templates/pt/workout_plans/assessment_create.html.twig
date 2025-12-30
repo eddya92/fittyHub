@@ -1,0 +1,238 @@
+{% extends 'pt/base.html.twig' %}
+
+{% block page_title %}Nuova Intervista Cliente{% endblock %}
+{% block page_subtitle %}Compilare i dati per creare un piano personalizzato{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-lg shadow-md">
+    <form method="post" class="p-6">
+        <div class="mb-8">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Cliente: {{ client.firstName }} {{ client.lastName }}</h3>
+            <p class="text-gray-600 text-sm">Compila il questionario di valutazione iniziale per creare un piano allenamento personalizzato.</p>
+        </div>
+
+        {# Dati Fisici #}
+        <div class="mb-8 pb-8 border-b">
+            <h4 class="text-md font-semibold text-gray-800 mb-4">📊 Dati Fisici</h4>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Età</label>
+                    <input type="number" name="age" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Altezza (cm)</label>
+                    <input type="number" step="0.01" name="height" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Peso (kg)</label>
+                    <input type="number" step="0.01" name="weight" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Sesso</label>
+                    <select name="gender" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                        <option value="">Seleziona...</option>
+                        <option value="M">Maschile</option>
+                        <option value="F">Femminile</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        {# Esperienza e Obiettivi #}
+        <div class="mb-8 pb-8 border-b">
+            <h4 class="text-md font-semibold text-gray-800 mb-4">🎯 Esperienza e Obiettivi</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Livello Fitness</label>
+                    <select name="fitnessLevel" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                        <option value="">Seleziona...</option>
+                        <option value="beginner">Principiante</option>
+                        <option value="intermediate">Intermedio</option>
+                        <option value="advanced">Avanzato</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Anni di Esperienza</label>
+                    <input type="number" name="trainingExperience" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                </div>
+                <div class="col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Obiettivo Principale *</label>
+                    <textarea name="primaryGoal" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="Es: Perdita peso, aumento massa muscolare, miglioramento resistenza..."></textarea>
+                </div>
+                <div class="col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Obiettivi Secondari</label>
+                    <textarea name="secondaryGoals" rows="2" class="w-full px-4 py-2 border border-gray-300 rounded-lg"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Giorni Disponibili/Settimana</label>
+                    <input type="number" name="weeklyAvailability" min="1" max="7" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Durata Sessione (min)</label>
+                    <input type="number" name="sessionDuration" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                </div>
+            </div>
+        </div>
+
+        {# Salute e Infortuni #}
+        <div class="mb-8 pb-8 border-b">
+            <h4 class="text-md font-semibold text-gray-800 mb-4">🏥 Stato di Salute</h4>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Infortuni Attuali</label>
+                    <div id="currentInjuries" class="space-y-2">
+                        <input type="text" name="currentInjuries[]" placeholder="Es: Tendinite spalla destra" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                    </div>
+                    <button type="button" onclick="addField('currentInjuries')" class="mt-2 text-blue-600 text-sm hover:underline">+ Aggiungi infortunio</button>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Infortuni Passati (risolti)</label>
+                    <div id="pastInjuries" class="space-y-2">
+                        <input type="text" name="pastInjuries[]" placeholder="Es: Distorsione caviglia (2020)" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                    </div>
+                    <button type="button" onclick="addField('pastInjuries')" class="mt-2 text-blue-600 text-sm hover:underline">+ Aggiungi</button>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Condizioni Mediche</label>
+                    <div id="medicalConditions" class="space-y-2">
+                        <input type="text" name="medicalConditions[]" placeholder="Es: Ipertensione, diabete, asma..." class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                    </div>
+                    <button type="button" onclick="addField('medicalConditions')" class="mt-2 text-blue-600 text-sm hover:underline">+ Aggiungi</button>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Farmaci Assunti</label>
+                    <textarea name="medications" rows="2" class="w-full px-4 py-2 border border-gray-300 rounded-lg"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Allergie</label>
+                    <textarea name="allergies" rows="2" class="w-full px-4 py-2 border border-gray-300 rounded-lg"></textarea>
+                </div>
+            </div>
+        </div>
+
+        {# Stile di Vita #}
+        <div class="mb-8 pb-8 border-b">
+            <h4 class="text-md font-semibold text-gray-800 mb-4">🌟 Stile di Vita</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Livello di Attività Giornaliera</label>
+                    <select name="activityLevel" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                        <option value="">Seleziona...</option>
+                        <option value="sedentary">Sedentario</option>
+                        <option value="light">Leggero</option>
+                        <option value="moderate">Moderato</option>
+                        <option value="active">Attivo</option>
+                        <option value="very_active">Molto Attivo</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Tipo di Lavoro</label>
+                    <input type="text" name="occupation" placeholder="Es: Lavoro sedentario d'ufficio" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Ore di Sonno Medie</label>
+                    <input type="number" name="sleepHours" min="1" max="24" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Livello Stress (1-10)</label>
+                    <input type="number" name="stressLevel" min="1" max="10" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                </div>
+                <div class="col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Abitudini Alimentari</label>
+                    <textarea name="nutritionHabits" rows="3" placeholder="Descrivi le tue abitudini alimentari..." class="w-full px-4 py-2 border border-gray-300 rounded-lg"></textarea>
+                </div>
+            </div>
+        </div>
+
+        {# Preferenze Allenamento #}
+        <div class="mb-8 pb-8 border-b">
+            <h4 class="text-md font-semibold text-gray-800 mb-4">💪 Preferenze Allenamento</h4>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Esercizi Preferiti</label>
+                    <div id="preferredExercises" class="space-y-2">
+                        <input type="text" name="preferredExercises[]" placeholder="Es: Panca piana, squat..." class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                    </div>
+                    <button type="button" onclick="addField('preferredExercises')" class="mt-2 text-blue-600 text-sm hover:underline">+ Aggiungi esercizio</button>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Esercizi da Evitare</label>
+                    <div id="dislikedExercises" class="space-y-2">
+                        <input type="text" name="dislikedExercises[]" placeholder="Es: Corsa, burpees..." class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                    </div>
+                    <button type="button" onclick="addField('dislikedExercises')" class="mt-2 text-blue-600 text-sm hover:underline">+ Aggiungi</button>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Preferenze Generali</label>
+                    <textarea name="trainingPreferences" rows="3" placeholder="Preferenze su tipo di allenamento, ambiente, musica, ecc..." class="w-full px-4 py-2 border border-gray-300 rounded-lg"></textarea>
+                </div>
+            </div>
+        </div>
+
+        {# Misurazioni (opzionale) #}
+        <div class="mb-8 pb-8 border-b">
+            <h4 class="text-md font-semibold text-gray-800 mb-4">📏 Misurazioni Corporee (Opzionale)</h4>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">% Massa Grassa</label>
+                    <input type="number" step="0.1" name="bodyFatPercentage" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Massa Muscolare (kg)</label>
+                    <input type="number" step="0.1" name="muscleMass" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Petto (cm)</label>
+                    <input type="number" step="0.1" name="chest" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Vita (cm)</label>
+                    <input type="number" step="0.1" name="waist" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Fianchi (cm)</label>
+                    <input type="number" step="0.1" name="hips" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Braccia (cm)</label>
+                    <input type="number" step="0.1" name="arms" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Cosce (cm)</label>
+                    <input type="number" step="0.1" name="thighs" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                </div>
+            </div>
+        </div>
+
+        {# Note PT #}
+        <div class="mb-8">
+            <h4 class="text-md font-semibold text-gray-800 mb-4">📝 Note Personali PT</h4>
+            <textarea name="ptNotes" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="Note private visibili solo a te..."></textarea>
+        </div>
+
+        {# Actions #}
+        <div class="flex gap-4">
+            <button type="submit" name="complete" value="0" class="px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors">
+                Salva Bozza
+            </button>
+            <button type="submit" name="complete" value="1" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+                Completa e Crea Piano →
+            </button>
+            <a href="{{ path('pt_assessments') }}" class="px-6 py-3 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                Annulla
+            </a>
+        </div>
+    </form>
+</div>
+
+<script>
+function addField(containerId) {
+    const container = document.getElementById(containerId);
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.name = containerId + '[]';
+    input.className = 'w-full px-4 py-2 border border-gray-300 rounded-lg mt-2';
+    container.appendChild(input);
+}
+</script>
+{% endblock %}

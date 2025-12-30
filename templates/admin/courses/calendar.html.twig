@@ -4,7 +4,8 @@
 {% block page_subtitle %}Visualizza tutti i corsi della settimana{% endblock %}
 
 {% block content %}
-<div class="mb-6 flex justify-between items-center">
+<div class="-mx-8">
+<div class="mb-6 flex justify-between items-center px-8">
     <a href="{{ path('admin_courses') }}" class="inline-flex items-center text-primary-600 hover:text-primary-700 font-medium">
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
@@ -37,11 +38,11 @@
 
 {# Weekly Time Grid Calendar #}
 <div class="bg-white rounded-lg shadow-md overflow-hidden">
-    <div class="overflow-x-auto">
-        <table class="w-full border-collapse">
+    <div class="overflow-x-auto max-w-full">
+        <table class="w-full border-collapse table-fixed">
             <thead>
                 <tr class="bg-gray-50">
-                    <th class="sticky left-0 z-10 bg-gray-50 border-r border-b border-gray-200 p-3 text-left font-semibold text-gray-900 min-w-[80px]">
+                    <th class="sticky left-0 z-10 bg-gray-50 border-r border-b border-gray-200 p-2 text-left font-semibold text-gray-900 text-xs w-16">
                         Orario
                     </th>
                     {% set dayLabels = {
@@ -54,7 +55,7 @@
                         'sunday': 'Domenica'
                     } %}
                     {% for day, label in dayLabels %}
-                        <th class="border-r border-b border-gray-200 p-3 text-center font-semibold text-gray-900 min-w-[150px] last:border-r-0">
+                        <th class="border-r border-b border-gray-200 p-2 text-center font-semibold text-gray-900 text-sm last:border-r-0">
                             {{ label }}
                         </th>
                     {% endfor %}
@@ -63,7 +64,7 @@
             <tbody>
                 {% for timeSlot in timeSlots %}
                     <tr class="hover:bg-gray-50">
-                        <td class="sticky left-0 z-10 bg-white border-r border-b border-gray-200 p-3 text-sm font-medium text-gray-700">
+                        <td class="sticky left-0 z-10 bg-white border-r border-b border-gray-200 p-2 text-xs font-medium text-gray-700">
                             {{ timeSlot }}
                         </td>
                         {% for day in ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] %}
@@ -124,7 +125,7 @@
 </div>
 
 {# Info e statistiche #}
-<div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6 px-8">
     {# Legend #}
     <div class="bg-white rounded-lg shadow-md p-6">
         <h3 class="font-semibold text-gray-900 mb-4">Legenda Categorie</h3>
@@ -173,5 +174,6 @@
             </div>
         </div>
     </div>
+</div>
 </div>
 {% endblock %}

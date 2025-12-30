@@ -38,10 +38,10 @@
             {# Content #}
             <div class="p-6">
                 {# Bio #}
-                {% if trainer.bio %}
+                {% if trainer.biography %}
                     <div class="mb-6">
                         <h3 class="text-sm font-medium text-gray-600 mb-2">Biografia</h3>
-                        <p class="text-base text-gray-900">{{ trainer.bio }}</p>
+                        <p class="text-base text-gray-900">{{ trainer.biography }}</p>
                     </div>
                 {% endif %}
 
@@ -68,22 +68,18 @@
                     <div>
                         <p class="text-sm text-gray-600 mb-1">Anni Esperienza</p>
                         <p class="text-base font-medium text-gray-900">
-                            {{ trainer.yearsOfExperience ?? 0 }} anni
+                            {{ trainer.experience ?? 0 }} anni
                         </p>
                     </div>
                 </div>
 
-                {# Specializations #}
-                {% if trainer.specializations %}
+                {# Specialization #}
+                {% if trainer.specialization %}
                     <div class="mb-6">
-                        <h3 class="text-sm font-medium text-gray-600 mb-3">Specializzazioni</h3>
-                        <div class="flex flex-wrap gap-2">
-                            {% for specialization in trainer.specializations %}
-                                <span class="px-3 py-1 text-sm font-medium bg-blue-100 text-blue-800 rounded-full">
-                                    {{ specialization }}
-                                </span>
-                            {% endfor %}
-                        </div>
+                        <h3 class="text-sm font-medium text-gray-600 mb-3">Specializzazione</h3>
+                        <span class="px-3 py-1 text-sm font-medium bg-blue-100 text-blue-800 rounded-full">
+                            {{ trainer.specialization }}
+                        </span>
                     </div>
                 {% endif %}
 
