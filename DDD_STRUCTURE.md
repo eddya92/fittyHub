@@ -1,386 +1,577 @@
-# 🏗️ FITTY GYM - Struttura DDD Completa
+# 📐 Architettura DDD - FittyHub
 
-## ✅ Lavoro Completato
+## ✅ Struttura Vertical Slice Implementata
 
-### 1. Riorganizzazione Architetturale (DDD)
-
-Il progetto è stato completamente riorganizzato secondo **Domain-Driven Design** con 7 domini bounded context:
+### 📁 Struttura Generale (Organizzata per Modulo)
 
 ```
-src/Domain/
-├── 📁 User/                 (Gestione Utenti)
-│   ├── Entity/User.php
-│   ├── Repository/UserRepository.php
-│   └── UseCase/README.md    → 6 use case documentati
+src/
+├── Domain/                          # Organizzazione per MODULO (Vertical Slice)
+│   ├── Membership/
+│   │   ├── Entity/                 # Entità del dominio
+│   │   ├── Repository/             # Interfacce repository
+│   │   ├── UseCase/                # Use Cases del modulo
+│   │   ├── Service/                # Service applicativi (se necessari)
+│   │   └── State/                  # State processors (API Platform)
+│   │
+│   ├── Course/
+│   │   ├── Entity/
+│   │   ├── Repository/
+│   │   ├── UseCase/
+│   │   └── Service/
+│   │
+│   ├── PersonalTrainer/
+│   │   ├── Entity/
+│   │   ├── Repository/
+│   │   ├── UseCase/
+│   │   └── Service/
+│   │
+│   ├── Medical/                    # Certificati medici
+│   │   ├── Entity/
+│   │   ├── Repository/
+│   │   ├── UseCase/
+│   │   └── Service/
+│   │
+│   ├── Gym/                        # Check-in e presenze
+│   │   ├── Entity/
+│   │   ├── Repository/
+│   │   ├── UseCase/
+│   │   └── Service/
+│   │
+│   ├── Invitation/
+│   │   ├── Entity/
+│   │   ├── Repository/
+│   │   ├── UseCase/
+│   │   └── Service/
+│   │
+│   └── User/
+│       ├── Entity/
+│       ├── Repository/
+│       ├── UseCase/
+│       └── Service/
 │
-├── 📁 Gym/                  (Gestione Palestre)
-│   ├── Entity/
-│   │   ├── Gym.php
-│   │   └── GymAttendance.php
-│   ├── Repository/
-│   │   ├── GymRepository.php
-│   │   └── GymAttendanceRepository.php
-│   └── UseCase/README.md    → 11 use case documentati
+├── Infrastructure/Persistence/      # Implementazioni tecniche (Doctrine)
+│   └── Doctrine/Repository/
+│       ├── DoctrineMembershipRepository.php
+│       ├── DoctrineCourseRepository.php
+│       └── ...
 │
-├── 📁 PersonalTrainer/      (PT e Relazioni Clienti)
-│   ├── Entity/
-│   │   ├── PersonalTrainer.php
-│   │   └── PTClientRelation.php
-│   ├── Repository/
-│   │   ├── PersonalTrainerRepository.php
-│   │   └── PTClientRelationRepository.php
-│   └── UseCase/README.md    → 13 use case documentati
-│
-├── 📁 Membership/           (Abbonamenti)
-│   ├── Entity/
-│   │   ├── GymMembership.php
-│   │   └── SubscriptionPlan.php
-│   ├── Repository/
-│   │   ├── GymMembershipRepository.php
-│   │   └── SubscriptionPlanRepository.php
-│   └── UseCase/README.md    → 16 use case documentati
-│
-├── 📁 Workout/              (Allenamenti)
-│   ├── Entity/
-│   │   ├── WorkoutPlan.php
-│   │   ├── WorkoutExercise.php
-│   │   └── WorkoutSession.php
-│   ├── Repository/
-│   │   ├── WorkoutPlanRepository.php
-│   │   ├── WorkoutExerciseRepository.php
-│   │   └── WorkoutSessionRepository.php
-│   └── UseCase/README.md    → 20 use case documentati
-│
-├── 📁 Medical/              (Certificati Medici)
-│   ├── Entity/MedicalCertificate.php
-│   ├── Repository/MedicalCertificateRepository.php
-│   └── UseCase/README.md    → 12 use case documentati
-│
-├── 📁 Invitation/           (Sistema Inviti)
-│   ├── Entity/
-│   │   ├── PTClientInvitation.php
-│   │   └── GymPTInvitation.php
-│   ├── Repository/
-│   │   ├── PTClientInvitationRepository.php
-│   │   └── GymPTInvitationRepository.php
-│   └── UseCase/README.md    → 14 use case documentati
-│
-└── 📁 Shared/               (Codice Condiviso)
-    ├── ValueObject/
-    ├── Exception/
-    └── Service/
+└── Controller/Admin/                # HTTP Layer
+    ├── MembershipController.php
+    ├── CourseController.php
+    └── ...
 ```
 
-### 2. Statistiche
+### 🎯 Vantaggi Vertical Slice
 
-- **13 Entity** create e spostate nei rispettivi domini
-- **13 Repository** con query personalizzate
-- **92 Use Case** totali documentati
-- **7 Domini** bounded context
-- **Namespace aggiornati** completamente
-- **Doctrine configurato** per multi-domain mapping
-
-## 📋 Use Case per Dominio
-
-### User Domain (6 use case)
-1. RegisterUser
-2. LoginUser
-3. UpdateUserProfile
-4. UploadProfileImage
-5. PromoteUserToPersonalTrainer
-6. PromoteUserToGymAdmin
-
-### Gym Domain (11 use case)
-1. CreateGym
-2. UpdateGymDetails
-3. SetGymOpeningHours
-4. SetGymAmenities
-5. DeactivateGym
-6. RecordCheckIn
-7. RecordCheckOut
-8. GetGymAttendanceStats
-9. InviteInternalPT
-10. AcceptGymPTInvitation
-11. RemoveInternalPT
-
-### PersonalTrainer Domain (13 use case)
-1. CreatePersonalTrainerProfile
-2. UpdatePersonalTrainerProfile
-3. SetAvailabilityForNewClients
-4. InviteClient
-5. AcceptPTClientInvitation
-6. RejectPTClientInvitation
-7. SuspendClientRelation
-8. TerminateClientRelation
-9. AssignInternalPTToMember
-10. GetPTClients
-11. GetClientProgress
-12. FindAvailablePTs
-13. GetPTPublicProfile
-
-### Membership Domain (16 use case)
-1. CreateSubscriptionPlan
-2. UpdateSubscriptionPlan
-3. DeactivateSubscriptionPlan
-4. GetActiveSubscriptionPlans
-5. SubscribeToGym
-6. ActivateMembership
-7. SuspendMembership
-8. CancelMembership
-9. RenewMembership
-10. ChangeSubscriptionPlan
-11. ChooseInternalPT
-12. ChangePT
-13. ProcessPayment
-14. GetExpiringMemberships
-15. GetMembershipHistory
-16. GetGymMembershipStats
-
-### Workout Domain (20 use case)
-1. CreateWorkoutPlan
-2. UpdateWorkoutPlan
-3. AddExerciseToPlan
-4. UpdateExercise
-5. RemoveExerciseFromPlan
-6. ReorderExercises
-7. SavePlanAsTemplate
-8. CreatePlanFromTemplate
-9. GetPTTemplates
-10. LogWorkoutSession
-11. CompleteWorkoutSession
-12. GetClientWorkoutHistory
-13. GetClientProgressStats
-14. GetActivePlansForClient
-15. GetPlanDetails
-16. GetDayWorkout
-17. DuplicatePlan
-18. ArchivePlan
-19. GetExerciseProgressChart
-20. GetWorkoutFrequencyStats
-
-### Medical Domain (12 use case)
-1. UploadMedicalCertificate
-2. UpdateMedicalCertificate
-3. ReviewMedicalCertificate
-4. GetPendingCertificatesForReview
-5. CheckCertificateValidity
-6. GetUserValidCertificate
-7. GetExpiringCertificates
-8. NotifyExpiringCertificate
-9. SuspendMembershipForExpiredCertificate
-10. GetUserCertificateHistory
-11. DownloadCertificate
-12. GetCertificateComplianceStats
-
-### Invitation Domain (14 use case)
-1. SendPTClientInvitation
-2. ResendPTClientInvitation
-3. AcceptPTClientInvitation
-4. RejectPTClientInvitation
-5. GetPTPendingInvitations
-6. CancelPTClientInvitation
-7. SendGymPTInvitation
-8. AcceptGymPTInvitation
-9. RejectGymPTInvitation
-10. GetGymPendingInvitations
-11. CancelGymPTInvitation
-12. ExpireOldInvitations
-13. ValidateInvitationToken
-14. GetInvitationStats
-
-## 🔧 Configurazione Symfony
-
-### Doctrine Multi-Domain Mapping
-```yaml
-# config/packages/doctrine.yaml
-mappings:
-    User:
-        dir: '%kernel.project_dir%/src/Domain/User/Entity'
-        prefix: 'App\Domain\User\Entity'
-    Gym:
-        dir: '%kernel.project_dir%/src/Domain/Gym/Entity'
-        prefix: 'App\Domain\Gym\Entity'
-    # ... altri 5 domini
-```
-
-### Security Provider
-```yaml
-# config/packages/security.yaml
-providers:
-    app_user_provider:
-        entity:
-            class: App\Domain\User\Entity\User
-            property: email
-```
-
-## 📖 Namespace Aggiornati
-
-Tutti i namespace sono stati aggiornati:
-
-**Prima:**
-```php
-namespace App\Entity;
-use App\Repository\UserRepository;
-```
-
-**Dopo:**
-```php
-namespace App\Domain\User\Entity;
-use App\Domain\User\Repository\UserRepository;
-```
-
-## 🎯 Pattern Use Case
-
-La logica business andrà implementata nei **Use Case** invece che nei Controller:
-
-```php
-// ✅ CORRETTO - Use Case
-namespace App\Domain\Membership\UseCase\SubscribeToGym;
-
-class SubscribeToGymUseCase
-{
-    public function __construct(
-        private GymMembershipRepository $membershipRepo,
-        private SubscriptionPlanRepository $planRepo,
-        private EventDispatcherInterface $eventDispatcher,
-    ) {}
-
-    public function execute(SubscribeToGymCommand $command): GymMembership
-    {
-        // 1. Validazioni business
-        $this->validateBusinessRules($command);
-
-        // 2. Creazione oggetto dominio
-        $membership = $this->createMembership($command);
-
-        // 3. Persistenza
-        $this->membershipRepo->save($membership);
-
-        // 4. Eventi
-        $this->eventDispatcher->dispatch(
-            new MembershipCreatedEvent($membership)
-        );
-
-        return $membership;
-    }
-
-    private function validateBusinessRules(SubscribeToGymCommand $command): void
-    {
-        // Business rules validation
-    }
-
-    private function createMembership(SubscribeToGymCommand $command): GymMembership
-    {
-        // Factory logic
-    }
-}
-```
-
-```php
-// Controller THIN
-namespace App\Application\Controller;
-
-class MembershipController extends AbstractController
-{
-    #[Route('/membership/subscribe', methods: ['POST'])]
-    public function subscribe(
-        Request $request,
-        SubscribeToGymUseCase $useCase
-    ): JsonResponse {
-        $command = new SubscribeToGymCommand(
-            userId: $this->getUser()->getId(),
-            gymId: $request->request->getInt('gymId'),
-            subscriptionPlanId: $request->request->getInt('planId'),
-            startDate: new \DateTime(),
-        );
-
-        $membership = $useCase->execute($command);
-
-        return $this->json(['id' => $membership->getId()]);
-    }
-}
-```
-
-## 📁 Cartelle Applicative
-
-Oltre ai Domini, abbiamo preparato:
-
-```
-src/Application/
-├── Controller/     → Controller HTTP (thin layer)
-├── Form/          → Symfony Forms
-└── Security/      → Voters, Guards, Authenticators
-```
-
-## 🚀 Prossimi Step
-
-### Fase 1: Database Setup
-```bash
-# Avvia MySQL
-# Poi:
-php bin/console doctrine:database:create
-php bin/console doctrine:migrations:diff
-php bin/console doctrine:migrations:migrate
-```
-
-### Fase 2: Implementare Use Case Prioritari
-Iniziare con i use case critici in questo ordine:
-
-1. **User Domain**
-   - RegisterUser
-   - LoginUser
-
-2. **Gym Domain**
-   - CreateGym
-   - RecordCheckIn/CheckOut
-
-3. **Membership Domain**
-   - CreateSubscriptionPlan
-   - SubscribeToGym
-   - ActivateMembership
-
-4. **Medical Domain**
-   - UploadMedicalCertificate
-   - ReviewMedicalCertificate
-
-5. **PersonalTrainer Domain**
-   - CreatePersonalTrainerProfile
-   - InviteClient
-
-6. **Workout Domain**
-   - CreateWorkoutPlan
-   - LogWorkoutSession
-
-7. **Invitation Domain**
-   - SendPTClientInvitation
-   - AcceptPTClientInvitation
-
-### Fase 3: Controller e UI
-- Creare Controller che utilizzano i Use Case
-- Creare Form per validazione input
-- Creare Template Twig per interfaccia
-
-## 💡 Vantaggi Architettura Attuale
-
-✅ **Testabilità**: Use Case testabili in isolamento
-✅ **Manutenibilità**: Business logic separata da framework
-✅ **Scalabilità**: Facile aggiungere nuovi domini
-✅ **Team Work**: Team diversi su domini diversi
-✅ **Riusabilità**: Use Case riutilizzabili (API, CLI, Jobs)
-✅ **Chiarezza**: Responsabilità ben definite
-
-## 📚 Documentazione
-
-Ogni dominio ha il suo README dettagliato:
-- `src/Domain/README.md` - Panoramica architettura
-- `src/Domain/User/UseCase/README.md` - Use case User
-- `src/Domain/Gym/UseCase/README.md` - Use case Gym
-- `src/Domain/PersonalTrainer/UseCase/README.md` - Use case PT
-- `src/Domain/Membership/UseCase/README.md` - Use case Membership
-- `src/Domain/Workout/UseCase/README.md` - Use case Workout
-- `src/Domain/Medical/UseCase/README.md` - Use case Medical
-- `src/Domain/Invitation/UseCase/README.md` - Use case Invitation
+- ✅ **Tutto relativo a un modulo sta insieme** (facile trovare codice)
+- ✅ **Zero cartelle duplicate** (era: Application/UseCase/Membership + Domain/Membership)
+- ✅ **Più semplice da capire** (1 cartella = 1 modulo completo)
+- ✅ **Facile aggiungere nuovi moduli** (basta copiare la struttura)
 
 ---
 
-**La struttura è pronta per iniziare l'implementazione dei Use Case! 🎉**
+## 🎯 Moduli Implementati
+
+### ✅ 1. Membership (Completo - Riferimento)
+
+**Domain:**
+- ✓ `MembershipRepositoryInterface`
+- ✓ `SubscriptionPlanRepositoryInterface`
+- ✓ `EnrollmentRepositoryInterface`
+
+**Infrastructure:**
+- ✓ `DoctrineMembershipRepository`
+- ✓ `DoctrineSubscriptionPlanRepository`
+- ✓ `DoctrineEnrollmentRepository`
+
+**Use Cases - Membership:**
+- ✓ `GetMembershipById`
+- ✓ `SearchMemberships`
+- ✓ `CancelMembership`
+- ✓ `RenewMembership`
+- ✓ `GetMembershipStats`
+- ✓ `GetExpiringMemberships`
+- ✓ `ReactivateMembership`
+- ✓ `UpdateMembershipAndUser`
+
+**Use Cases - Enrollment (Quote Iscrizione):**
+- ✓ `GetAllEnrollments`
+- ✓ `GetExpiringEnrollments`
+- ✓ `GetEnrollmentById`
+- ✓ `GetUserEnrollmentHistory`
+- ✓ `CreateEnrollment`
+- ✓ `ExpireEnrollment`
+
+**Use Cases - Subscription Plans:**
+- ✓ `GetAllSubscriptionPlans`
+- ✓ `GetSubscriptionPlanById`
+- ✓ `CreateSubscriptionPlan`
+- ✓ `UpdateSubscriptionPlan`
+- ✓ `ToggleSubscriptionPlan`
+- ✓ `DeleteSubscriptionPlan`
+
+**Controllers:**
+- ✓ `MembershipController` (aggiornato con Use Cases)
+- ✓ `EnrollmentController` (aggiornato con Use Cases)
+- ✓ `SubscriptionPlanController` (aggiornato con Use Cases)
+
+---
+
+### ✅ 2. Course (Completo)
+
+**Domain:**
+- ✓ `CourseRepositoryInterface`
+- ✓ `CourseScheduleRepositoryInterface`
+- ✓ `CourseEnrollmentRepositoryInterface`
+- ✓ `CourseCategoryRepositoryInterface`
+
+**Infrastructure:**
+- ✓ `DoctrineCourseRepository`
+- ✓ `DoctrineCourseScheduleRepository`
+- ✓ `DoctrineCourseEnrollmentRepository`
+- ✓ `DoctrineCourseCategoryRepository`
+
+**Use Cases:**
+- ✓ `GetCourseById`
+- ✓ `SearchCourses`
+- ✓ `GetCourseStats`
+- ✓ `GetScheduleById`
+- ✓ `GetEnrollmentById`
+
+**Controller:**
+- ✓ `CourseController` (aggiornato con Use Cases)
+
+---
+
+### ✅ 3. Trainer (Completo)
+
+**Domain:**
+- ✓ `TrainerRepositoryInterface`
+- ✓ `PTClientRelationRepositoryInterface`
+
+**Infrastructure:**
+- ✓ `DoctrineTrainerRepository`
+- ✓ `DoctrinePTClientRelationRepository`
+
+**Use Cases:**
+- ✓ `GetTrainerById`
+- ✓ `SearchTrainers`
+- ✓ `AssignTrainerToClient`
+
+**Controller:**
+- ✓ `TrainerController` (aggiornato con Use Cases)
+
+---
+
+### ✅ 4. Certificate (Completo)
+
+**Domain:**
+- ✓ `MedicalCertificateRepositoryInterface`
+
+**Infrastructure:**
+- ✓ `DoctrineMedicalCertificateRepository`
+
+**Use Cases:**
+- ✓ `GetCertificateById`
+- ✓ `SearchCertificates`
+- ✓ `GetCertificateStats`
+- ✓ `ApproveCertificate`
+- ✓ `RejectCertificate`
+- ✓ `UploadCertificate`
+
+**Controller:**
+- ✓ `CertificateController` (aggiornato con Use Cases)
+
+---
+
+### ✅ 5. Invitation (Completo)
+
+**Domain:**
+- ✓ `InvitationRepositoryInterface`
+
+**Infrastructure:**
+- ✓ `DoctrineInvitationRepository`
+
+**Use Cases:**
+- ✓ `GetInvitationById`
+- ✓ `SearchInvitations`
+- ✓ `GetInvitationStats`
+- ✓ `CreateInvitation`
+- ✓ `ResendInvitation`
+- ✓ `CancelInvitation`
+
+**Controller:**
+- ✓ `InvitationController` (aggiornato con Use Cases)
+
+---
+
+### ✅ 6. User (Completo)
+
+**Domain:**
+- ✓ `UserRepositoryInterface`
+
+**Infrastructure:**
+- ✓ `DoctrineUserRepository`
+
+---
+
+### ✅ 7. Gym/CheckIn (Completo)
+
+**Domain:**
+- ✓ `GymAttendanceRepositoryInterface`
+
+**Infrastructure:**
+- ✓ `DoctrineGymAttendanceRepository`
+
+**Use Cases:**
+- ✓ `ValidateCheckIn`
+- ✓ `ProcessCheckIn`
+- ✓ `GetUserAttendanceHistory`
+- ✓ `GetAttendanceStats`
+- ✓ `GetRecentAttendances`
+
+**Controller:**
+- ✓ `CheckInController` (aggiornato con Use Cases)
+
+---
+
+## 🔗 Configurazione (services.yaml)
+
+Tutti i binding sono configurati:
+
+```yaml
+# Membership
+App\Domain\Membership\Repository\MembershipRepositoryInterface:
+    alias: App\Infrastructure\Persistence\Doctrine\Repository\DoctrineMembershipRepository
+
+# Course
+App\Domain\Course\Repository\CourseRepositoryInterface:
+    alias: App\Infrastructure\Persistence\Doctrine\Repository\DoctrineCourseRepository
+
+# Trainer
+App\Domain\PersonalTrainer\Repository\TrainerRepositoryInterface:
+    alias: App\Infrastructure\Persistence\Doctrine\Repository\DoctrineTrainerRepository
+
+# Medical
+App\Domain\Medical\Repository\MedicalCertificateRepositoryInterface:
+    alias: App\Infrastructure\Persistence\Doctrine\Repository\DoctrineMedicalCertificateRepository
+
+# Invitation
+App\Domain\Invitation\Repository\InvitationRepositoryInterface:
+    alias: App\Infrastructure\Persistence\Doctrine\Repository\DoctrineInvitationRepository
+
+# User
+App\Domain\User\Repository\UserRepositoryInterface:
+    alias: App\Infrastructure\Persistence\Doctrine\Repository\DoctrineUserRepository
+
+# Gym
+App\Domain\Gym\Repository\GymAttendanceRepositoryInterface:
+    alias: App\Infrastructure\Persistence\Doctrine\Repository\DoctrineGymAttendanceRepository
+```
+
+---
+
+## 📚 Come Funziona
+
+### Prima (❌ Male)
+
+```php
+// Controller con troppa logica
+class MembershipController {
+    public function __construct(
+        private GymMembershipRepository $repo,  // ❌ Implementazione concreta
+        private EntityManager $em              // ❌ Dettaglio tecnico
+    ) {}
+
+    public function renew(int $id) {
+        $membership = $this->repo->find($id);   // ❌ Query diretta
+        // ... 50 righe di logica business ...
+        $this->em->persist($new);               // ❌ Persistenza nel controller
+        $this->em->flush();
+    }
+}
+```
+
+### Dopo (✅ Bene)
+
+```php
+// Controller pulito con Use Case
+class MembershipController {
+    public function __construct(
+        private GetMembershipById $getMembership,    // ✅ Use Case
+        private RenewMembership $renewMembership     // ✅ Use Case
+    ) {}
+
+    public function renew(int $id, Request $request) {
+        $membership = $this->getMembership->execute($id);
+        
+        $newMembership = $this->renewMembership->execute(
+            $membership,
+            $plan,
+            actualPrice: 50.0,
+            bonusMonths: 1
+        );
+        
+        // ✅ Controller = 5 righe chiare!
+    }
+}
+```
+
+---
+
+## 🎓 Best Practices
+
+### 1. **Organizzazione Vertical Slice (per modulo)**
+
+Ogni modulo in `Domain/` contiene **tutto** quello che serve:
+```
+Domain/Membership/
+  ├── Entity/              ← Entità del dominio
+  ├── Repository/          ← Interfacce repository
+  ├── UseCase/             ← Use Cases (business logic)
+  └── Service/             ← Service applicativi (se necessari)
+```
+
+**Vantaggi:**
+- ✅ Tutto relativo a "Membership" sta in 1 cartella
+- ✅ Non devi saltare tra Domain/ e Application/
+- ✅ Nuovo dev trova subito tutto
+
+### 2. **Separazione Layer**
+
+- **Domain/{Modulo}** = regole business (NO Symfony, NO Doctrine)
+  - Contiene: Entity, Repository (interfacce), UseCase, Service
+  - Usano **solo interfacce**, mai implementazioni Doctrine
+- **Infrastructure** = implementazioni tecniche (Doctrine, file, API)
+  - Contiene le **implementazioni** dei Repository
+  - **Le query SQL/DQL stanno QUI**, non in QueryService!
+- **Controller** = solo HTTP
+  - Orchestrano Use Cases, niente di più
+
+### 3. **Naming e Namespace**
+
+```php
+// ✅ GIUSTO - Namespace riflette il modulo
+namespace App\Domain\Membership\UseCase;
+class RenewMembership { ... }
+
+namespace App\Domain\Course\UseCase;
+class GetCourseById { ... }
+
+// Import diretto dal modulo
+use App\Domain\Membership\UseCase\RenewMembership;
+use App\Domain\Course\UseCase\GetCourseById;
+```
+
+- ✅ `RenewMembership` (verbo + sostantivo)
+- ❌ `MembershipRenewer` (sostantivo)
+- ✅ `GetCourseById` (chiaro)
+- ❌ `CourseService::get()` (generico)
+
+### 4. **Use Case = 1 Azione**
+
+```php
+// ✅ Giusto
+class RenewMembership { ... }
+class CancelMembership { ... }
+class SearchMemberships { ... }
+
+// ❌ Sbagliato
+class MembershipService {
+    public function renew() { ... }
+    public function cancel() { ... }
+    public function search() { ... }
+}
+```
+
+### 5. **Interfacce vs Implementazioni**
+
+```php
+// ✅ Domain usa INTERFACCIA
+class RenewMembership {
+    public function __construct(
+        private MembershipRepositoryInterface $repo  // ✅
+    ) {}
+}
+
+// ✅ Infrastructure implementa
+class DoctrineMembershipRepository implements MembershipRepositoryInterface {
+    // Dettagli Doctrine qui
+}
+
+// ✅ Symfony fa il binding automatico
+```
+
+### 6. **Query nei Repository (NO QueryService!)**
+
+```php
+// ❌ SBAGLIATO - QueryService è un livello inutile
+class CertificateQueryService {
+    public function searchCertificates($status) {
+        return $this->repo->findWithFilters($status); // wrapper inutile!
+    }
+}
+
+// ✅ GIUSTO - Query direttamente nel Repository
+interface MedicalCertificateRepositoryInterface {
+    public function findWithFilters(?string $status, ?string $search): array;
+}
+
+class DoctrineMedicalCertificateRepository {
+    public function findWithFilters(?string $status, ?string $search): array {
+        // Query Doctrine QUI nel repository
+        return $this->createQueryBuilder('c')
+            ->where('c.status = :status')
+            ->setParameter('status', $status)
+            ->getQuery()
+            ->getResult();
+    }
+}
+
+// Use Case usa direttamente il repository
+class SearchCertificates {
+    public function execute($status) {
+        return $this->certificateRepository->findWithFilters($status);
+    }
+}
+```
+
+### 7. **Testing**
+
+```php
+// ✅ Facile testare
+$mockRepo = $this->createMock(MembershipRepositoryInterface::class);
+$useCase = new RenewMembership($mockRepo);
+
+// ❌ Difficile testare
+$controller = new MembershipController($em, $repo, ...); // troppi mock!
+```
+
+---
+
+## 🚀 Vantaggi Ottenuti
+
+1. ✅ **Codice più leggibile**: 1 Use Case = 1 azione chiara
+2. ✅ **Testing facile**: Mock solo interfacce
+3. ✅ **Manutenzione**: cambio database? Solo Infrastructure!
+4. ✅ **Onboarding**: nuovo dev capisce subito Use Cases
+5. ✅ **Scalabilità**: aggiungi funzionalità senza toccare esistenti
+6. ✅ **Query nei Repository**: zero livelli inutili (QueryService eliminati)
+7. ✅ **Separation of Concerns**: ogni layer ha responsabilità chiare
+8. ✅ **Vertical Slice**: tutto relativo a un modulo in 1 cartella
+9. ✅ **Zero cartelle duplicate**: eliminata Application/, tutto in Domain/
+
+---
+
+## 📋 Prossimi Step
+
+1. ✅ Tutte le interfacce create
+2. ✅ Tutte le implementazioni create
+3. ✅ Use Cases principali creati
+4. ✅ Binding configurato
+5. ✅ Controller aggiornati con Use Cases
+6. ✅ Tutti i controller principali (Membership, Enrollment, SubscriptionPlan, Course, Trainer, Certificate, Invitation, CheckIn) ora usano Use Cases
+7. ✅ **Riorganizzazione Vertical Slice completata** (Application/ eliminata, tutto in Domain/)
+8. ✅ **QueryService eliminati** (query nei Repository dove devono stare)
+9. ✅ **Tutti i controller del modulo Membership completati** (Membership, Enrollment, SubscriptionPlan)
+10. ⏳ Scrivere test per Use Cases
+11. ⏳ Aggiungere Use Cases per controller rimanenti (Dashboard, etc.)
+
+---
+
+## 💡 Esempio Pratico Completo
+
+### Struttura File (Vertical Slice)
+
+```
+src/
+├── Domain/Membership/                               ← TUTTO qui!
+│   ├── Entity/GymMembership.php                    ← Entità
+│   ├── Repository/MembershipRepositoryInterface.php ← Contratto
+│   └── UseCase/RenewMembership.php                 ← Business logic
+│
+├── Infrastructure/Persistence/Doctrine/Repository/
+│   └── DoctrineMembershipRepository.php            ← Implementazione Doctrine
+│
+└── Controller/Admin/
+    └── MembershipController.php                     ← HTTP layer
+```
+
+### Flusso Richiesta
+
+```
+1. HTTP Request
+   ↓
+2. Controller (prende parametri)
+   ↓
+3. Use Case (esegue business logic)
+   ↓
+4. Repository Interface (chiede dati)
+   ↓
+5. Infrastructure Implementation (query Doctrine)
+   ↓
+6. Domain Entity (ritorna entità)
+   ↓
+7. Controller (renderizza risposta)
+```
+
+---
+
+## 📊 Riepilogo Use Cases Creati
+
+### Membership (22 Use Cases)
+- **Membership (8)**: GetMembershipById, SearchMemberships, CancelMembership, RenewMembership, GetMembershipStats, GetExpiringMemberships, ReactivateMembership, UpdateMembershipAndUser
+- **Enrollment (6)**: GetAllEnrollments, GetExpiringEnrollments, GetEnrollmentById, GetUserEnrollmentHistory, CreateEnrollment, ExpireEnrollment
+- **Subscription Plans (6)**: GetAllSubscriptionPlans, GetSubscriptionPlanById, CreateSubscriptionPlan, UpdateSubscriptionPlan, ToggleSubscriptionPlan, DeleteSubscriptionPlan
+- **Trainer Assignment (2)**: AssignTrainerToClient, GetPTClientRelations
+
+### Course (5 Use Cases)
+- GetCourseById, SearchCourses, GetCourseStats, GetScheduleById, GetEnrollmentById
+
+### Trainer (3 Use Cases)
+- GetTrainerById, SearchTrainers, AssignTrainerToClient
+
+### Certificate (6 Use Cases)
+- GetCertificateById, SearchCertificates, GetCertificateStats
+- ApproveCertificate, RejectCertificate, UploadCertificate
+
+### Invitation (6 Use Cases)
+- GetInvitationById, SearchInvitations, GetInvitationStats
+- CreateInvitation, ResendInvitation, CancelInvitation
+
+### CheckIn (5 Use Cases)
+- ValidateCheckIn, ProcessCheckIn, GetUserAttendanceHistory
+- GetAttendanceStats, GetRecentAttendances
+
+**Totale: 47 Use Cases implementati** ✅
+
+---
+
+## 🎉 Risultato Finale
+
+**Codice:**
+- ✅ Più chiaro
+- ✅ Più testabile
+- ✅ Più manutenibile
+- ✅ Più scalabile
+
+**Controller:**
+- ✅ Tutti i controller principali aggiornati
+- ✅ Nessun TODO rimasto
+- ✅ Solo orchestrazione HTTP, zero business logic
+- ✅ Media 5-10 righe per metodo
+
+**Architettura:**
+- ✅ DDD completo su 7 moduli
+- ✅ Clean Architecture applicata
+- ✅ Dependency Injection configurata
+- ✅ Repository Pattern su tutte le entità
+
+**Team:**
+- ✅ Capisce velocemente
+- ✅ Aggiunge features facilmente
+- ✅ Trova bug rapidamente
+
+**FittyHub:**
+- ✅ Pronto per crescere! 🚀

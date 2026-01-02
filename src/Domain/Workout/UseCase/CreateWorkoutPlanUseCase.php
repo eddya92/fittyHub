@@ -3,7 +3,7 @@
 namespace App\Domain\Workout\UseCase;
 
 use App\Domain\PersonalTrainer\Entity\PersonalTrainer;
-use App\Domain\PersonalTrainer\Repository\PTClientRelationRepository;
+use App\Domain\PersonalTrainer\Repository\PTClientRelationRepositoryInterface;
 use App\Domain\User\Entity\User;
 use App\Domain\Workout\Entity\WorkoutPlan;
 use Doctrine\ORM\EntityManagerInterface;
@@ -12,7 +12,7 @@ class CreateWorkoutPlanUseCase
 {
     public function __construct(
         private EntityManagerInterface $entityManager,
-        private PTClientRelationRepository $relationRepository
+        private PTClientRelationRepositoryInterface $relationRepository
     ) {
     }
 

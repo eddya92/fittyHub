@@ -8,7 +8,6 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Delete;
-use App\Domain\Membership\Repository\GymMembershipRepository;
 use App\Domain\Gym\Entity\Gym;
 use App\Domain\Gym\Entity\GymAttendance;
 use App\Domain\User\Entity\User;
@@ -20,7 +19,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
-#[ORM\Entity(repositoryClass: GymMembershipRepository::class)]
+#[ORM\Entity]
 #[ApiResource(
     operations: [
         new Get(
@@ -79,6 +78,26 @@ class GymMembership
     private ?\DateTimeInterface $endDate = null; // "Abbonato fino al..."
 
     #[ORM\ManyToOne]
+    #[Groups(['membership:read', 'membership:create'])]
+    private ?SubscriptionPlan $subscriptionPlan = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
+    #[Groups(['membership:read'])]
+    private ?string $originalPrice = null; // Prezzo originale del piano
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
+    #[Groups(['membership:read', 'membership:create'])]
+    private ?string $actualPrice = null; // Prezzo effettivamente pagato (con eventuale sconto)
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['membership:read', 'membership:create'])]
+    private ?int $bonusMonths = 0; // Mesi bonus aggiunti
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['membership:read', 'membership:create'])]
+    private ?string $discountReason = null; // Motivo sconto/bonus
+
+    #[ORM\ManyToOne]
     #[Groups(['membership:read', 'membership:update'])]
     private ?PersonalTrainer $assignedPT = null;
 
@@ -109,7 +128,7 @@ class GymMembership
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();
         $this->status = 'pending';
-        $this->autoRenew = false;
+        $this->bonusMonths = 0;
     }
 
     public function getId(): ?int
@@ -275,5 +294,81 @@ class GymMembership
         }
 
         return $this;
+    }
+
+    public function getSubscriptionPlan(): ?SubscriptionPlan
+    {
+        return $this->subscriptionPlan;
+    }
+
+    public function setSubscriptionPlan(?SubscriptionPlan $subscriptionPlan): static
+    {
+        $this->subscriptionPlan = $subscriptionPlan;
+
+        return $this;
+    }
+
+    public function getOriginalPrice(): ?string
+    {
+        return $this->originalPrice;
+    }
+
+    public function setOriginalPrice(?string $originalPrice): static
+    {
+        $this->originalPrice = $originalPrice;
+
+        return $this;
+    }
+
+    public function getActualPrice(): ?string
+    {
+        return $this->actualPrice;
+    }
+
+    public function setActualPrice(?string $actualPrice): static
+    {
+        $this->actualPrice = $actualPrice;
+
+        return $this;
+    }
+
+    public function getBonusMonths(): ?int
+    {
+        return $this->bonusMonths;
+    }
+
+    public function setBonusMonths(?int $bonusMonths): static
+    {
+        $this->bonusMonths = $bonusMonths;
+
+        return $this;
+    }
+
+    public function getDiscountReason(): ?string
+    {
+        return $this->discountReason;
+    }
+
+    public function setDiscountReason(?string $discountReason): static
+    {
+        $this->discountReason = $discountReason;
+
+        return $this;
+    }
+
+    public function getDiscountAmount(): ?string
+    {
+        if ($this->originalPrice && $this->actualPrice) {
+            return (string)(floatval($this->originalPrice) - floatval($this->actualPrice));
+        }
+        return null;
+    }
+
+    public function getDiscountPercentage(): ?float
+    {
+        if ($this->originalPrice && $this->actualPrice && floatval($this->originalPrice) > 0) {
+            return ((floatval($this->originalPrice) - floatval($this->actualPrice)) / floatval($this->originalPrice)) * 100;
+        }
+        return null;
     }
 }

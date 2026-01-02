@@ -3,8 +3,8 @@
 namespace App\Controller\Admin;
 
 use App\Domain\Course\Entity\CourseCategory;
-use App\Domain\Course\Repository\CourseCategoryRepository;
-use App\Domain\Gym\Repository\GymRepository;
+use App\Domain\Course\Repository\CourseCategoryRepositoryInterface;
+use App\Domain\Gym\Repository\GymRepositoryInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,12 +15,9 @@ class CourseCategoryController extends AbstractController
 {
     #[Route('/', name: 'admin_course_categories')]
     public function index(
-        CourseCategoryRepository $categoryRepo
+        CourseCategoryRepositoryInterface $categoryRepo
     ): Response {
-        $categories = $categoryRepo->createQueryBuilder('c')
-            ->orderBy('c.name', 'ASC')
-            ->getQuery()
-            ->getResult();
+        $categories = $categoryRepo->findAllOrderedByName();
 
         return $this->render('admin/course_categories/index.html.twig', [
             'categories' => $categories,
@@ -30,8 +27,8 @@ class CourseCategoryController extends AbstractController
     #[Route('/create', name: 'admin_course_category_create')]
     public function create(
         Request $request,
-        CourseCategoryRepository $categoryRepo,
-        GymRepository $gymRepo
+        CourseCategoryRepositoryInterface $categoryRepo,
+        GymRepositoryInterface $gymRepo
     ): Response {
         if ($request->isMethod('POST')) {
             $category = new CourseCategory();
@@ -67,7 +64,7 @@ class CourseCategoryController extends AbstractController
     public function edit(
         int $id,
         Request $request,
-        CourseCategoryRepository $categoryRepo
+        CourseCategoryRepositoryInterface $categoryRepo
     ): Response {
         $category = $categoryRepo->find($id);
 
@@ -94,7 +91,7 @@ class CourseCategoryController extends AbstractController
     #[Route('/{id}/delete', name: 'admin_course_category_delete', methods: ['POST'])]
     public function delete(
         int $id,
-        CourseCategoryRepository $categoryRepo
+        CourseCategoryRepositoryInterface $categoryRepo
     ): Response {
         $category = $categoryRepo->find($id);
 

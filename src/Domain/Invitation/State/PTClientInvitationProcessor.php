@@ -6,7 +6,7 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Domain\Invitation\Entity\PTClientInvitation;
 use App\Domain\Invitation\Service\PTClientInvitationService;
-use App\Domain\PersonalTrainer\Repository\PersonalTrainerRepository;
+use App\Domain\PersonalTrainer\Repository\TrainerRepositoryInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 
 final class PTClientInvitationProcessor implements ProcessorInterface
@@ -15,7 +15,7 @@ final class PTClientInvitationProcessor implements ProcessorInterface
         private readonly ProcessorInterface $processor,
         private readonly Security $security,
         private readonly PTClientInvitationService $invitationService,
-        private readonly PersonalTrainerRepository $trainerRepository
+        private readonly TrainerRepositoryInterface $trainerRepository
     ) {
     }
 

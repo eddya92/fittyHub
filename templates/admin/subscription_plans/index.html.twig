@@ -1,0 +1,140 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block page_title %}Piani Abbonamento{% endblock %}
+{% block page_subtitle %}Gestisci i piani abbonamento della palestra{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex justify-between items-center">
+    <div>
+        <p class="text-gray-600">Crea e gestisci i piani abbonamento disponibili per i clienti</p>
+    </div>
+    <a href="{{ path('admin_subscription_plan_create') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+        </svg>
+        Nuovo Piano
+    </a>
+</div>
+
+{% if plans|length > 0 %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for plan in plans %}
+            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow {% if not plan.isActive %}opacity-60{% endif %}">
+                {# Header #}
+                <div class="bg-gradient-to-r from-blue-600 to-blue-700 p-6 text-white">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-xl font-bold">{{ plan.name }}</h3>
+                        {% if not plan.isActive %}
+                            <span class="px-2 py-1 bg-red-500 text-white text-xs font-medium rounded">DISATTIVO</span>
+                        {% endif %}
+                    </div>
+                    <div class="flex items-baseline">
+                        <span class="text-3xl font-bold">€{{ plan.price }}</span>
+                        <span class="ml-2 text-blue-100">/ {{ plan.duration }} mesi</span>
+                    </div>
+                </div>
+
+                {# Content #}
+                <div class="p-6">
+                    {% if plan.description %}
+                        <p class="text-gray-600 text-sm mb-4">{{ plan.description }}</p>
+                    {% endif %}
+
+                    <div class="space-y-3 mb-4">
+                        <div class="flex items-center text-sm">
+                            <svg class="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <span class="text-gray-700"><strong>{{ plan.duration }}</strong> mesi di validità</span>
+                        </div>
+
+                        {% if plan.maxAccessPerWeek %}
+                            <div class="flex items-center text-sm">
+                                <svg class="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                </svg>
+                                <span class="text-gray-700"><strong>{{ plan.maxAccessPerWeek }}</strong> accessi/settimana</span>
+                            </div>
+                        {% endif %}
+
+                        {% if plan.isIncludePT %}
+                            <div class="flex items-center text-sm">
+                                <svg class="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span class="text-gray-700">
+                                    <strong>Personal Trainer incluso</strong>
+                                    {% if plan.ptSessionsIncluded %}
+                                        ({{ plan.ptSessionsIncluded }} sessioni)
+                                    {% endif %}
+                                </span>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    {% if plan.features|length > 0 %}
+                        <div class="border-t border-gray-200 pt-4 mb-4">
+                            <p class="text-sm font-medium text-gray-700 mb-2">Caratteristiche:</p>
+                            <ul class="space-y-1">
+                                {% for feature in plan.features %}
+                                    <li class="flex items-start text-sm text-gray-600">
+                                        <svg class="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                        </svg>
+                                        {{ feature }}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+
+                    <div class="text-xs text-gray-500 mb-4">
+                        <p>Palestra: <strong>{{ plan.gym.name }}</strong></p>
+                        <p>Creato il: {{ plan.createdAt|date('d/m/Y') }}</p>
+                    </div>
+
+                    {# Actions #}
+                    <div class="flex gap-2">
+                        <a href="{{ path('admin_subscription_plan_edit', {id: plan.id}) }}" class="flex-1 px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors font-medium text-center">
+                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                            </svg>
+                            Modifica
+                        </a>
+
+                        <form method="post" action="{{ path('admin_subscription_plan_toggle', {id: plan.id}) }}" class="flex-1">
+                            <button type="submit" class="w-full px-3 py-2 {% if plan.isActive %}bg-orange-600 hover:bg-orange-700{% else %}bg-green-600 hover:bg-green-700{% endif %} text-white text-sm rounded-lg transition-colors font-medium">
+                                {% if plan.isActive %}
+                                    <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    Disattiva
+                                {% else %}
+                                    <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    Attiva
+                                {% endif %}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="bg-white rounded-lg shadow-md p-12 text-center">
+        <svg class="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+        </svg>
+        <p class="text-lg font-medium text-gray-900 mb-2">Nessun piano abbonamento</p>
+        <p class="text-sm text-gray-600 mb-6">Crea il tuo primo piano abbonamento per iniziare</p>
+        <a href="{{ path('admin_subscription_plan_create') }}" class="inline-flex items-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+            Crea Primo Piano
+        </a>
+    </div>
+{% endif %}
+{% endblock %}

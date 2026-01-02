@@ -2,12 +2,11 @@
 
 namespace App\Domain\Membership\Entity;
 
-use App\Domain\Membership\Repository\SubscriptionPlanRepository;
 use App\Domain\Gym\Entity\Gym;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: SubscriptionPlanRepository::class)]
+#[ORM\Entity]
 class SubscriptionPlan
 {
     #[ORM\Id]

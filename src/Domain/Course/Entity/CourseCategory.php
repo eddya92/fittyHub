@@ -2,13 +2,12 @@
 
 namespace App\Domain\Course\Entity;
 
-use App\Domain\Course\Repository\CourseCategoryRepository;
 use App\Domain\Gym\Entity\Gym;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\ApiResource;
 use Symfony\Component\Serializer\Annotation\Groups;
 
-#[ORM\Entity(repositoryClass: CourseCategoryRepository::class)]
+#[ORM\Entity]
 #[ORM\Table(name: 'course_categories')]
 #[ApiResource(
     normalizationContext: ['groups' => ['category:read']],

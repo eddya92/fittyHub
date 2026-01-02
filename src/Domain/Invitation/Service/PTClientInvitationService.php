@@ -3,12 +3,12 @@
 namespace App\Domain\Invitation\Service;
 
 use App\Domain\Invitation\Entity\PTClientInvitation;
-use App\Domain\Invitation\Repository\PTClientInvitationRepository;
+use App\Domain\Invitation\Repository\PTClientInvitationRepositoryInterface;
 use App\Domain\PersonalTrainer\Entity\PersonalTrainer;
 use App\Domain\PersonalTrainer\Entity\PTClientRelation;
-use App\Domain\PersonalTrainer\Repository\PTClientRelationRepository;
+use App\Domain\PersonalTrainer\Repository\PTClientRelationRepositoryInterface;
 use App\Domain\User\Entity\User;
-use App\Domain\User\Repository\UserRepository;
+use App\Domain\User\Repository\UserRepositoryInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mailer\MailerInterface;
@@ -18,9 +18,9 @@ class PTClientInvitationService
 {
     public function __construct(
         private EntityManagerInterface $entityManager,
-        private PTClientInvitationRepository $invitationRepository,
-        private UserRepository $userRepository,
-        private PTClientRelationRepository $relationRepository,
+        private PTClientInvitationRepositoryInterface $invitationRepository,
+        private UserRepositoryInterface $userRepository,
+        private PTClientRelationRepositoryInterface $relationRepository,
         private MailerInterface $mailer,
         private UrlGeneratorInterface $urlGenerator
     ) {

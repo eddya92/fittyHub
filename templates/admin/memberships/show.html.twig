@@ -1,7 +1,7 @@
 {% extends 'admin/base.html.twig' %}
 
-{% block page_title %}Dettaglio Iscrizione #{{ membership.id }}{% endblock %}
-{% block page_subtitle %}Informazioni complete sull'iscrizione{% endblock %}
+{% block page_title %}{{ membership.user.firstName }} {{ membership.user.lastName }}{% endblock %}
+{% block page_subtitle %}{{ membership.gym.name }}{% endblock %}
 
 {% block content %}
 <div class="mb-6">
@@ -13,320 +13,440 @@
     </a>
 </div>
 
+{# Expiry Alert #}
+{% set today = 'now'|date('Y-m-d') %}
+{% set endDate = membership.endDate|date('Y-m-d') %}
+{% set daysRemaining = membership.endDate.diff(date(today)).days %}
+
+{% if membership.status == 'expired' or endDate < today %}
+    <div class="mb-6 bg-red-50 border-l-4 border-red-400 rounded-lg p-4">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center">
+                <svg class="w-6 h-6 text-red-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <div>
+                    <p class="font-bold text-red-900">Abbonamento Scaduto</p>
+                    <p class="text-sm text-red-800">Scaduto il {{ membership.endDate|date('d/m/Y') }} ({{ daysRemaining * -1 }} giorni fa)</p>
+                </div>
+            </div>
+            <a href="{{ path('admin_membership_renew', {'id': membership.id}) }}" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium">
+                Rinnova Ora
+            </a>
+        </div>
+    </div>
+{% elseif daysRemaining <= 7 and daysRemaining > 0 %}
+    <div class="mb-6 bg-orange-50 border-l-4 border-orange-400 rounded-lg p-4">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center">
+                <svg class="w-6 h-6 text-orange-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+                <div>
+                    <p class="font-bold text-orange-900">In Scadenza</p>
+                    <p class="text-sm text-orange-800">Scade il {{ membership.endDate|date('d/m/Y') }} ({{ daysRemaining }} {{ daysRemaining == 1 ? 'giorno' : 'giorni' }})</p>
+                </div>
+            </div>
+            <a href="{{ path('admin_membership_renew', {'id': membership.id}) }}" class="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium">
+                Rinnova
+            </a>
+        </div>
+    </div>
+{% endif %}
+
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    {# Main Info #}
+    {# Main Content #}
     <div class="lg:col-span-2 space-y-6">
-        {# Membership Info Card #}
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-lg font-semibold text-gray-900">Informazioni Iscrizione</h3>
-                <span class="px-3 py-1 text-sm font-medium rounded-full
-                    {% if membership.status == 'active' %}bg-green-100 text-green-800
-                    {% elseif membership.status == 'expired' %}bg-orange-100 text-orange-800
-                    {% elseif membership.status == 'cancelled' %}bg-red-100 text-red-800
-                    {% else %}bg-gray-100 text-gray-800{% endif %}">
-                    {{ membership.status|upper }}
-                </span>
-            </div>
 
-            <div class="grid grid-cols-2 gap-6">
-                <div>
-                    <p class="text-sm text-gray-600 mb-1">Data Inizio</p>
-                    <p class="text-base font-medium text-gray-900">{{ membership.startDate|date('d/m/Y') }}</p>
-                </div>
-                <div>
-                    <p class="text-sm text-gray-600 mb-1">Data Fine</p>
-                    <p class="text-base font-medium text-gray-900">{{ membership.endDate|date('d/m/Y') }}</p>
-                </div>
-                <div>
-                    <p class="text-sm text-gray-600 mb-1">Data Creazione</p>
-                    <p class="text-base font-medium text-gray-900">{{ membership.createdAt|date('d/m/Y H:i') }}</p>
-                </div>
-                <div>
-                    <p class="text-sm text-gray-600 mb-1">Ultimo Aggiornamento</p>
-                    <p class="text-base font-medium text-gray-900">{{ membership.updatedAt|date('d/m/Y H:i') }}</p>
+        {# Current Membership Card #}
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 text-white">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold">Abbonamento Corrente</h3>
+                    <span class="px-3 py-1 text-sm font-medium rounded-full
+                        {% if membership.status == 'active' %}bg-green-500
+                        {% elseif membership.status == 'expired' %}bg-orange-500
+                        {% elseif membership.status == 'cancelled' %}bg-red-500
+                        {% else %}bg-gray-500{% endif %}">
+                        {{ membership.status|upper }}
+                    </span>
                 </div>
             </div>
-
-            {% if membership.notes %}
-                <div class="mt-6 pt-6 border-t border-gray-200">
-                    <p class="text-sm text-gray-600 mb-2">Note</p>
-                    <p class="text-base text-gray-900">{{ membership.notes }}</p>
+            <div class="p-6">
+                <div class="grid grid-cols-3 gap-6 mb-6">
+                    <div>
+                        <p class="text-sm text-gray-600 mb-1">Inizio</p>
+                        <p class="text-lg font-bold text-gray-900">{{ membership.startDate|date('d/m/Y') }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600 mb-1">Scadenza</p>
+                        <p class="text-lg font-bold text-gray-900">{{ membership.endDate|date('d/m/Y') }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600 mb-1">Giorni rimanenti</p>
+                        <p class="text-lg font-bold {% if daysRemaining > 30 %}text-green-600{% elseif daysRemaining > 7 %}text-orange-600{% else %}text-red-600{% endif %}">
+                            {{ daysRemaining > 0 ? daysRemaining : 0 }}
+                        </p>
+                    </div>
                 </div>
-            {% endif %}
+
+                {% if membership.subscriptionPlan or membership.actualPrice %}
+                <div class="border-t border-gray-200 pt-4">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {% if membership.subscriptionPlan %}
+                        <div>
+                            <p class="text-sm text-gray-600">Piano</p>
+                            <p class="font-medium text-gray-900">{{ membership.subscriptionPlan.name }}</p>
+                        </div>
+                        {% endif %}
+                        {% if membership.actualPrice %}
+                        <div>
+                            <p class="text-sm text-gray-600">Prezzo</p>
+                            <p class="font-medium text-green-600">€{{ membership.actualPrice }}</p>
+                        </div>
+                        {% endif %}
+                        {% if membership.discountAmount %}
+                        <div>
+                            <p class="text-sm text-gray-600">Sconto</p>
+                            <p class="font-medium text-orange-600">€{{ membership.discountAmount }}</p>
+                        </div>
+                        {% endif %}
+                        {% if membership.bonusMonths > 0 %}
+                        <div>
+                            <p class="text-sm text-gray-600">Bonus</p>
+                            <p class="font-medium text-purple-600">+{{ membership.bonusMonths }} mesi</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% if membership.discountReason %}
+                    <div class="mt-3 pt-3 border-t border-gray-200">
+                        <p class="text-xs text-gray-600">Motivo:</p>
+                        <p class="text-sm text-gray-900">{{ membership.discountReason }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
         </div>
 
         {# User Info Card #}
         <div class="bg-white rounded-lg shadow-md p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-6">Informazioni Utente</h3>
-
-            <div class="flex items-center mb-6">
-                <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center">
-                    <span class="text-primary-600 font-bold text-xl">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Informazioni Cliente</h3>
+            <div class="flex items-center mb-4">
+                <div class="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center mr-3">
+                    <span class="text-primary-600 font-bold text-lg">
                         {{ membership.user.firstName|slice(0, 1) ~ membership.user.lastName|slice(0, 1) }}
                     </span>
                 </div>
-                <div class="ml-4">
-                    <p class="text-xl font-semibold text-gray-900">
-                        {{ membership.user.firstName }} {{ membership.user.lastName }}
-                    </p>
+                <div>
+                    <p class="font-semibold text-gray-900">{{ membership.user.firstName }} {{ membership.user.lastName }}</p>
                     <p class="text-sm text-gray-600">{{ membership.user.email }}</p>
                 </div>
             </div>
-
-            <div class="grid grid-cols-2 gap-6">
+            <div class="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                    <p class="text-sm text-gray-600 mb-1">Data di Nascita</p>
-                    <p class="text-base font-medium text-gray-900">
-                        {{ membership.user.dateOfBirth ? membership.user.dateOfBirth|date('d/m/Y') : 'N/D' }}
-                    </p>
+                    <p class="text-gray-600">Telefono</p>
+                    <p class="font-medium text-gray-900">{{ membership.user.phoneNumber ?? 'N/D' }}</p>
                 </div>
                 <div>
-                    <p class="text-sm text-gray-600 mb-1">Telefono</p>
-                    <p class="text-base font-medium text-gray-900">
-                        {{ membership.user.phoneNumber ?? 'N/D' }}
-                    </p>
-                </div>
-                <div>
-                    <p class="text-sm text-gray-600 mb-1">Genere</p>
-                    <p class="text-base font-medium text-gray-900">
-                        {% if membership.user.gender == 'male' %}Maschio
-                        {% elseif membership.user.gender == 'female' %}Femmina
-                        {% else %}Altro{% endif %}
-                    </p>
-                </div>
-                <div>
-                    <p class="text-sm text-gray-600 mb-1">Ruoli</p>
-                    <div class="flex flex-wrap gap-1">
-                        {% for role in membership.user.roles %}
-                            <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded">
-                                {{ role }}
-                            </span>
-                        {% endfor %}
-                    </div>
+                    <p class="text-gray-600">Data di Nascita</p>
+                    <p class="font-medium text-gray-900">{{ membership.user.dateOfBirth ? membership.user.dateOfBirth|date('d/m/Y') : 'N/D' }}</p>
                 </div>
             </div>
         </div>
 
-        {# Gym Info Card #}
+        {# Medical Certificate #}
         <div class="bg-white rounded-lg shadow-md p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-6">Informazioni Palestra</h3>
-
-            <div class="mb-6">
-                <p class="text-xl font-semibold text-gray-900">{{ membership.gym.name }}</p>
-                <p class="text-sm text-gray-600 mt-1">{{ membership.gym.description }}</p>
-            </div>
-
-            <div class="grid grid-cols-2 gap-6">
-                <div>
-                    <p class="text-sm text-gray-600 mb-1">Indirizzo</p>
-                    <p class="text-base font-medium text-gray-900">{{ membership.gym.address }}</p>
-                </div>
-                <div>
-                    <p class="text-sm text-gray-600 mb-1">Città</p>
-                    <p class="text-base font-medium text-gray-900">{{ membership.gym.city }} ({{ membership.gym.postalCode }})</p>
-                </div>
-                <div>
-                    <p class="text-sm text-gray-600 mb-1">Email</p>
-                    <p class="text-base font-medium text-gray-900">{{ membership.gym.email }}</p>
-                </div>
-                <div>
-                    <p class="text-sm text-gray-600 mb-1">Telefono</p>
-                    <p class="text-base font-medium text-gray-900">{{ membership.gym.phoneNumber }}</p>
-                </div>
-            </div>
-        </div>
-
-        {# Medical Certificate Card #}
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-semibold text-gray-900">Certificato Medico</h3>
                 {% if certificate %}
-                    <span class="px-3 py-1 text-sm font-medium rounded-full
+                    <span class="px-3 py-1 text-xs font-medium rounded-full
                         {% if certificate.status == 'approved' %}bg-green-100 text-green-800
                         {% elseif certificate.status == 'pending_review' %}bg-yellow-100 text-yellow-800
-                        {% elseif certificate.status == 'rejected' %}bg-red-100 text-red-800
-                        {% else %}bg-gray-100 text-gray-800{% endif %}">
+                        {% else %}bg-red-100 text-red-800{% endif %}">
                         {% if certificate.status == 'approved' %}APPROVATO
                         {% elseif certificate.status == 'pending_review' %}IN REVISIONE
-                        {% elseif certificate.status == 'rejected' %}RIFIUTATO
-                        {% else %}{{ certificate.status|upper }}{% endif %}
+                        {% else %}RIFIUTATO{% endif %}
                     </span>
                 {% endif %}
             </div>
 
             {% if certificate %}
-                <div class="grid grid-cols-2 gap-6">
+                <div class="grid grid-cols-2 gap-4 text-sm mb-4">
                     <div>
-                        <p class="text-sm text-gray-600 mb-1">Tipo Certificato</p>
-                        <p class="text-base font-medium text-gray-900">
-                            {% if certificate.certificateType == 'agonistic' %}Agonistico
-                            {% elseif certificate.certificateType == 'non_agonistic' %}Non Agonistico
-                            {% else %}{{ certificate.certificateType }}{% endif %}
+                        <p class="text-gray-600">Tipo</p>
+                        <p class="font-medium text-gray-900">
+                            {% if certificate.certificateType == 'agonistic' %}Agonistico{% else %}Non Agonistico{% endif %}
                         </p>
                     </div>
                     <div>
-                        <p class="text-sm text-gray-600 mb-1">Data Scadenza</p>
-                        <p class="text-base font-medium text-gray-900">
+                        <p class="text-gray-600">Scadenza</p>
+                        <p class="font-medium text-gray-900">
                             {{ certificate.expiryDate|date('d/m/Y') }}
-                            {% set today = 'now'|date('Y-m-d') %}
                             {% if certificate.expiryDate|date('Y-m-d') < today %}
-                                <span class="ml-2 px-2 py-0.5 text-xs font-medium bg-red-100 text-red-800 rounded">SCADUTO</span>
+                                <span class="ml-1 px-2 py-0.5 text-xs bg-red-100 text-red-800 rounded">SCADUTO</span>
                             {% endif %}
                         </p>
                     </div>
-                    <div>
-                        <p class="text-sm text-gray-600 mb-1">Data Caricamento</p>
-                        <p class="text-base font-medium text-gray-900">{{ certificate.uploadedAt|date('d/m/Y H:i') }}</p>
-                    </div>
-                    {% if certificate.reviewedAt %}
-                        <div>
-                            <p class="text-sm text-gray-600 mb-1">Data Revisione</p>
-                            <p class="text-base font-medium text-gray-900">{{ certificate.reviewedAt|date('d/m/Y H:i') }}</p>
-                        </div>
-                    {% endif %}
                 </div>
-
-                {% if certificate.notes %}
-                    <div class="mt-6 pt-6 border-t border-gray-200">
-                        <p class="text-sm text-gray-600 mb-2">Note</p>
-                        <p class="text-base text-gray-900">{{ certificate.notes }}</p>
-                    </div>
-                {% endif %}
-
-                <div class="mt-6 pt-6 border-t border-gray-200 flex gap-3">
+                <div class="flex gap-2">
                     {% if certificate.filePath %}
-                        <a
-                            href="{{ path('admin_certificate_show', {'id': certificate.id}) }}"
-                            target="_blank"
-                            class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-                        >
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                            </svg>
+                        <a href="{{ path('admin_certificate_show', {'id': certificate.id}) }}" target="_blank" class="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors">
                             Visualizza PDF
                         </a>
                     {% endif %}
-
-                    {% if certificate.status == 'pending_review' %}
-                        <form method="post" action="{{ path('admin_certificate_approve', {'id': certificate.id}) }}" class="inline">
-                            <button type="submit" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                Approva
-                            </button>
-                        </form>
-                        <form method="post" action="{{ path('admin_certificate_reject', {'id': certificate.id}) }}" class="inline" onsubmit="return confirm('Sei sicuro di voler rifiutare questo certificato?')">
-                            <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                </svg>
-                                Rifiuta
-                            </button>
-                        </form>
-                    {% endif %}
                 </div>
             {% else %}
-                <div class="text-center py-8">
-                    <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="text-center py-6">
+                    <svg class="mx-auto h-10 w-10 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                     </svg>
-                    <p class="text-gray-500 font-medium">Nessun certificato medico caricato</p>
-                    <p class="text-sm text-gray-400 mt-1">L'utente non ha ancora caricato un certificato medico</p>
-                    <div class="mt-6">
-                        <a
-                            href="{{ path('admin_certificate_upload', {'userId': membership.user.id}) }}"
-                            class="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
-                        >
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
-                            </svg>
-                            Carica Certificato
-                        </a>
-                    </div>
+                    <p class="text-sm text-gray-500">Nessun certificato caricato</p>
                 </div>
             {% endif %}
         </div>
-    </div>
 
-    {# Sidebar Actions #}
-    <div class="lg:col-span-1 space-y-6">
-        {# Quick Stats #}
-        <div class="bg-gradient-to-br from-primary-600 to-primary-700 rounded-lg shadow-md p-6 text-white">
-            <h3 class="text-lg font-semibold mb-4">Riepilogo Rapido</h3>
-
-            <div class="space-y-4">
-                <div class="flex items-center justify-between">
-                    <span class="text-sm">Giorni Totali</span>
-                    <span class="text-xl font-bold">
-                        {{ membership.startDate.diff(membership.endDate).days }}
-                    </span>
-                </div>
-                <div class="flex items-center justify-between">
-                    <span class="text-sm">Giorni Rimanenti</span>
-                    <span class="text-xl font-bold">
-                        {% set today = 'now'|date('Y-m-d') %}
-                        {% set remaining = membership.endDate.diff(date(today)).days %}
-                        {{ remaining > 0 ? remaining : 0 }}
-                    </span>
-                </div>
+        {# Membership History #}
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Storico Completo Abbonamenti
+                    <span class="ml-2 px-2 py-1 bg-gray-200 text-gray-700 text-xs font-bold rounded-full">{{ membership_history|length }}</span>
+                </h3>
+            </div>
+            <div class="p-6 space-y-3">
+                {% for historyItem in membership_history %}
+                    <div class="border {% if historyItem.id == membership.id %}border-blue-500 border-2 bg-blue-50{% else %}border-gray-200{% endif %} rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-3">
+                                {% if historyItem.id == membership.id %}
+                                    <span class="px-3 py-1 text-xs font-bold bg-blue-600 text-white rounded-full">
+                                        ★ CORRENTE
+                                    </span>
+                                {% else %}
+                                    <span class="px-3 py-1 text-xs font-medium rounded-full
+                                        {% if historyItem.status == 'active' %}bg-green-100 text-green-800
+                                        {% elseif historyItem.status == 'expired' %}bg-orange-100 text-orange-800
+                                        {% else %}bg-red-100 text-red-800{% endif %}">
+                                        {{ historyItem.status|upper }}
+                                    </span>
+                                {% endif %}
+                                {% if historyItem.subscriptionPlan %}
+                                    <span class="text-sm font-medium text-gray-900">{{ historyItem.subscriptionPlan.name }}</span>
+                                {% endif %}
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm font-medium text-gray-900">{{ historyItem.startDate|date('d/m/Y') }} - {{ historyItem.endDate|date('d/m/Y') }}</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-4 gap-4 text-sm">
+                            {% if historyItem.actualPrice %}
+                            <div>
+                                <p class="text-gray-600">Prezzo</p>
+                                <p class="font-medium text-gray-900">€{{ historyItem.actualPrice }}</p>
+                            </div>
+                            {% endif %}
+                            {% if historyItem.discountAmount %}
+                            <div>
+                                <p class="text-gray-600">Sconto</p>
+                                <p class="font-medium text-orange-600">€{{ historyItem.discountAmount }}</p>
+                            </div>
+                            {% endif %}
+                            {% if historyItem.bonusMonths > 0 %}
+                            <div>
+                                <p class="text-gray-600">Bonus</p>
+                                <p class="font-medium text-purple-600">+{{ historyItem.bonusMonths }} mesi</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% if historyItem.discountReason %}
+                        <div class="mt-3 pt-3 border-t border-gray-200">
+                            <p class="text-xs text-gray-600">Motivo sconto/bonus:</p>
+                            <p class="text-sm text-gray-900">{{ historyItem.discountReason }}</p>
+                        </div>
+                        {% endif %}
+                        {% if historyItem.notes %}
+                        <div class="mt-3 {% if not historyItem.discountReason %}pt-3 border-t border-gray-200{% endif %}">
+                            <p class="text-xs text-gray-600">Note:</p>
+                            <p class="text-sm text-gray-900">{{ historyItem.notes }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
             </div>
         </div>
+    </div>
 
-        {# Actions Card #}
+    {# Sidebar #}
+    <div class="lg:col-span-1 space-y-6">
+        {# Actions #}
         <div class="bg-white rounded-lg shadow-md p-6">
             <h3 class="text-lg font-semibold text-gray-900 mb-4">Azioni</h3>
-
             <div class="space-y-3">
-                <a href="{{ path('admin_membership_edit', {'id': membership.id}) }}" class="block w-full px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium text-center">
-                    <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <a href="{{ path('admin_membership_renew', {'id': membership.id}) }}" class="block w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-center text-sm">
+                    <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    Rinnova Abbonamento
+                </a>
+
+                <a href="{{ path('admin_membership_edit', {'id': membership.id}) }}" class="block w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-center text-sm">
+                    <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                     </svg>
                     Modifica Dati
                 </a>
 
                 {% if membership.status == 'active' %}
-                    <form method="post" action="{{ path('admin_membership_cancel', {'id': membership.id}) }}" onsubmit="return confirm('Sei sicuro di voler cancellare questa iscrizione?');">
-                        <button type="submit" class="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium">
-                            <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
+                    <form method="post" action="{{ path('admin_membership_cancel', {'id': membership.id}) }}" onsubmit="return confirm('Sei sicuro?');">
+                        <button type="submit" class="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium text-sm">
                             Cancella Iscrizione
-                        </button>
-                    </form>
-                {% elseif membership.status == 'cancelled' or membership.status == 'expired' %}
-                    <form method="post" action="{{ path('admin_membership_reactivate', {'id': membership.id}) }}" onsubmit="return confirm('Sei sicuro di voler riattivare questa iscrizione?');">
-                        <button type="submit" class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
-                            <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            Riattiva Iscrizione
                         </button>
                     </form>
                 {% endif %}
 
-                <a href="mailto:{{ membership.user.email }}" class="block w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium text-center">
-                    <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                    </svg>
+                <a href="mailto:{{ membership.user.email }}" class="block w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium text-center text-sm">
                     Invia Email
                 </a>
             </div>
         </div>
 
-        {# Info Card #}
-        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <div class="flex">
-                <svg class="w-5 h-5 text-blue-600 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                <div class="text-sm text-blue-800">
-                    <p class="font-medium mb-1">Nota</p>
-                    <p>Le modifiche alle iscrizioni vengono registrate nel sistema e possono essere auditate.</p>
-                </div>
+        {# Enrollment Fee #}
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">Quota Iscrizione</h3>
+                {% if membership.gym.enrollmentFeeAmount and membership.gym.enrollmentFeeAmount > 0 %}
+                    {% if active_enrollment %}
+                        <span class="px-3 py-1 text-xs font-medium rounded-full
+                            {% if active_enrollment.isExpired %}bg-red-100 text-red-800
+                            {% else %}bg-green-100 text-green-800{% endif %}">
+                            {% if active_enrollment.isExpired %}SCADUTA{% else %}PAGATA{% endif %}
+                        </span>
+                    {% else %}
+                        <span class="px-3 py-1 text-xs font-bold bg-red-100 text-red-800 rounded-full">
+                            NON PAGATA
+                        </span>
+                    {% endif %}
+                {% endif %}
             </div>
+
+            {% if membership.gym.enrollmentFeeAmount and membership.gym.enrollmentFeeAmount > 0 %}
+                {# Quota richiesta dalla palestra #}
+                {% if active_enrollment %}
+                <div class="space-y-3">
+                    <div class="p-3 {% if active_enrollment.isExpired %}bg-red-50 border border-red-200{% else %}bg-green-50 border border-green-200{% endif %} rounded-lg">
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-sm text-gray-600">Importo</p>
+                            <p class="font-bold text-green-600 text-lg">€{{ active_enrollment.amount }}</p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <div>
+                                <p class="text-gray-600">Pagamento</p>
+                                <p class="font-medium text-gray-900">{{ active_enrollment.paymentDate|date('d/m/Y') }}</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-600">Scadenza</p>
+                                {% if active_enrollment.expiryDate %}
+                                    <p class="font-medium {% if active_enrollment.isExpired %}text-red-600{% else %}text-gray-900{% endif %}">
+                                        {{ active_enrollment.expiryDate|date('d/m/Y') }}
+                                    </p>
+                                    {% if active_enrollment.isExpired %}
+                                        <span class="px-2 py-0.5 bg-red-100 text-red-800 rounded text-xs">SCADUTA</span>
+                                    {% endif %}
+                                {% else %}
+                                    <p class="font-medium text-gray-500">Illimitata</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% if active_enrollment.notes %}
+                            <div class="mt-2 pt-2 border-t border-gray-300">
+                                <p class="text-xs text-gray-600">Note</p>
+                                <p class="text-xs text-gray-900">{{ active_enrollment.notes }}</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <a href="{{ path('admin_enrollment_user_history', {'userId': membership.user.id}) }}" class="block w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium text-center text-sm">
+                        Vedi Storico Quote
+                    </a>
+                    {% if active_enrollment.isExpired or not active_enrollment.expiryDate %}
+                        <a href="{{ path('admin_enrollment_create', {'user_id': membership.user.id}) }}" class="block w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-center text-sm">
+                            Rinnova Quota
+                        </a>
+                    {% endif %}
+                </div>
+                {% else %}
+                    {# Quota richiesta ma non pagata #}
+                    <div class="p-4 bg-red-50 border border-red-200 rounded-lg mb-4">
+                        <div class="flex items-center mb-3">
+                            <svg class="w-6 h-6 text-red-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                            </svg>
+                            <div>
+                                <p class="font-bold text-red-900">Quota non pagata</p>
+                                <p class="text-sm text-red-800">L'utente deve pagare la quota iscrizione di <strong>€{{ membership.gym.enrollmentFeeAmount }}</strong></p>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="{{ path('admin_enrollment_create', {'user_id': membership.user.id}) }}" class="block w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium text-center text-sm">
+                        Registra Pagamento Quota
+                    </a>
+                {% endif %}
+            {% else %}
+                {# Quota non richiesta dalla palestra #}
+                <div class="text-center py-4">
+                    <svg class="mx-auto h-10 w-10 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <p class="text-sm text-gray-500 mb-2">Quota iscrizione non configurata</p>
+                    <p class="text-xs text-gray-400">Vai in Impostazioni per configurare la quota</p>
+                </div>
+            {% endif %}
+        </div>
+
+        {# Assign PT #}
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Personal Trainer</h3>
+
+            {% if active_relations|length > 0 %}
+                <div class="mb-4 space-y-2">
+                    {% for relation in active_relations %}
+                        <div class="flex items-center p-3 bg-green-50 rounded-lg">
+                            <div class="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center mr-2">
+                                <span class="text-white font-bold text-xs">
+                                    {{ relation.personalTrainer.user.firstName|slice(0, 1) ~ relation.personalTrainer.user.lastName|slice(0, 1) }}
+                                </span>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium text-gray-900">
+                                    {{ relation.personalTrainer.user.firstName }} {{ relation.personalTrainer.user.lastName }}
+                                </p>
+                                <p class="text-xs text-gray-500">Dal {{ relation.startDate|date('d/m/Y') }}</p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% if trainers|length > 0 %}
+                <form method="post" action="{{ path('admin_membership_assign_pt', {'id': membership.id}) }}">
+                    <div class="space-y-3">
+                        <select name="trainer_id" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                            <option value="">Assegna un PT...</option>
+                            {% for trainer in trainers %}
+                                <option value="{{ trainer.id }}">{{ trainer.user.firstName }} {{ trainer.user.lastName }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm">
+                            Assegna
+                        </button>
+                    </div>
+                </form>
+            {% else %}
+                <p class="text-sm text-gray-500 text-center py-4">Nessun PT disponibile</p>
+            {% endif %}
         </div>
     </div>
 </div>

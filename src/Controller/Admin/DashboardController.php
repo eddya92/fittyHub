@@ -2,9 +2,9 @@
 
 namespace App\Controller\Admin;
 
-use App\Domain\Gym\Repository\GymRepository;
-use App\Domain\Membership\Repository\GymMembershipRepository;
-use App\Domain\PersonalTrainer\Repository\PersonalTrainerRepository;
+use App\Domain\Gym\Repository\GymRepositoryInterface;
+use App\Domain\Membership\Repository\MembershipRepositoryInterface;
+use App\Domain\PersonalTrainer\Repository\TrainerRepositoryInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -14,9 +14,9 @@ class DashboardController extends AbstractController
 {
     #[Route('/', name: 'admin_dashboard')]
     public function index(
-        GymRepository $gymRepo,
-        GymMembershipRepository $membershipRepo,
-        PersonalTrainerRepository $trainerRepo
+        GymRepositoryInterface $gymRepo,
+        MembershipRepositoryInterface $membershipRepo,
+        TrainerRepositoryInterface $trainerRepo
     ): Response {
         // Stats generali
         $stats = [

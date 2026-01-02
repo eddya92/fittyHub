@@ -1,9 +1,27 @@
 {% extends 'pt/base.html.twig' %}
 
-{% block page_title %}I Miei Clienti{% endblock %}
-{% block page_subtitle %}Gestisci i tuoi clienti assegnati{% endblock %}
+{% block page_title %}Clienti{% endblock %}
+{% block page_subtitle %}Gestisci i tuoi clienti e visualizza tutti i membri della palestra{% endblock %}
 
 {% block content %}
+{# View Tabs #}
+<div class="mb-6">
+    <div class="border-b border-gray-200">
+        <nav class="-mb-px flex space-x-8">
+            <a href="{{ path('pt_clients', {view: 'my-clients', search: current_search, status: current_status}) }}"
+               class="{% if current_view == 'my-clients' %}border-blue-500 text-blue-600{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300{% endif %} whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                I Miei Clienti ({{ stats.total }})
+            </a>
+            <a href="{{ path('pt_clients', {view: 'gym-clients', search: current_search}) }}"
+               class="{% if current_view == 'gym-clients' %}border-blue-500 text-blue-600{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300{% endif %} whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                Tutti i Clienti Palestra ({{ gym_stats.total }})
+            </a>
+        </nav>
+    </div>
+</div>
+
+{% if current_view == 'my-clients' %}
+{# My Clients View #}
 {# Stats Cards #}
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
     <div class="bg-white rounded-lg shadow-md p-6">
@@ -195,5 +213,176 @@
         <p class="text-lg font-medium text-gray-900 mb-2">Nessun cliente assegnato</p>
         <p class="text-sm text-gray-600">L'amministratore della palestra assegnerà i clienti al tuo profilo</p>
     </div>
+{% endif %}
+
+{% else %}
+{# Gym Clients View #}
+{# Stats Cards #}
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-600 font-medium">Membri Totali</p>
+                <p class="text-3xl font-bold text-gray-900 mt-2">{{ gym_stats.total }}</p>
+            </div>
+            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-600 font-medium">Abbonamenti Attivi</p>
+                <p class="text-3xl font-bold text-green-600 mt-2">{{ gym_stats.active }}</p>
+            </div>
+            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-600 font-medium">Scaduti</p>
+                <p class="text-3xl font-bold text-red-600 mt-2">{{ gym_stats.expired }}</p>
+            </div>
+            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Search #}
+<div class="bg-white rounded-lg shadow-md p-6 mb-6">
+    <form method="get" action="{{ path('pt_clients') }}" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <input type="hidden" name="view" value="gym-clients">
+        <div class="md:col-span-1">
+            <label for="search-gym" class="block text-sm font-medium text-gray-700 mb-2">Cerca Membro</label>
+            <input
+                type="text"
+                id="search-gym"
+                name="search"
+                value="{{ current_search }}"
+                placeholder="Nome, cognome o email..."
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+        </div>
+
+        <div class="flex items-end">
+            <button
+                type="submit"
+                class="w-full px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            >
+                Cerca
+            </button>
+        </div>
+
+        <div class="flex items-end">
+            <a
+                href="{{ path('pt_clients', {view: 'gym-clients'}) }}"
+                class="w-full px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium text-center"
+            >
+                Reset
+            </a>
+        </div>
+    </form>
+</div>
+
+{# Gym Members Grid #}
+{% if gym_memberships|length > 0 %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for membership in gym_memberships %}
+            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
+                {# Header #}
+                <div class="bg-gradient-to-r from-purple-600 to-purple-700 p-6 text-white">
+                    <div class="flex items-center">
+                        <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+                            <span class="text-white font-bold text-2xl">
+                                {{ membership.user.firstName|slice(0, 1) ~ membership.user.lastName|slice(0, 1) }}
+                            </span>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="text-lg font-semibold">
+                                {{ membership.user.firstName }} {{ membership.user.lastName }}
+                            </h3>
+                            <p class="text-sm text-white/80">Membro Palestra</p>
+                        </div>
+                    </div>
+                </div>
+
+                {# Content #}
+                <div class="p-6">
+                    {# Contact Info #}
+                    <div class="space-y-2 mb-4">
+                        <div class="flex items-center text-sm text-gray-600">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                            </svg>
+                            <span class="truncate">{{ membership.user.email }}</span>
+                        </div>
+                        {% if membership.user.phoneNumber %}
+                            <div class="flex items-center text-sm text-gray-600">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                                </svg>
+                                {{ membership.user.phoneNumber }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    {# Membership Info #}
+                    <div class="border-t border-gray-200 pt-4 mb-4">
+                        <div class="grid grid-cols-2 gap-3 text-sm">
+                            <div>
+                                <p class="text-gray-600">Inizio</p>
+                                <p class="font-medium text-gray-900">{{ membership.startDate|date('d/m/Y') }}</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-600">Scadenza</p>
+                                <p class="font-medium text-gray-900">{{ membership.endDate|date('d/m/Y') }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {# Status Badge #}
+                    <div class="mb-4">
+                        <span class="px-3 py-1 text-xs font-medium rounded-full
+                            {% if membership.status == 'active' %}bg-green-100 text-green-800
+                            {% elseif membership.status == 'expired' %}bg-red-100 text-red-800
+                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                            {{ membership.status|upper }}
+                        </span>
+                    </div>
+
+                    {# Notes #}
+                    {% if membership.notes %}
+                        <div class="p-3 bg-purple-50 rounded-lg">
+                            <p class="text-xs text-purple-600 mb-1">Note:</p>
+                            <p class="text-sm text-purple-900">{{ membership.notes }}</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="bg-white rounded-lg shadow-md p-12 text-center">
+        <svg class="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+        </svg>
+        <p class="text-lg font-medium text-gray-900 mb-2">Nessun membro nella palestra</p>
+        <p class="text-sm text-gray-600">Non ci sono ancora clienti iscritti alla palestra</p>
+    </div>
+{% endif %}
 {% endif %}
 {% endblock %}

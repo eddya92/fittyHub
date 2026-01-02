@@ -2,9 +2,9 @@
 
 namespace App\Controller\PT;
 
-use App\Domain\PersonalTrainer\Repository\PersonalTrainerRepository;
+use App\Domain\PersonalTrainer\Repository\TrainerRepositoryInterface;
 use App\Domain\Workout\Repository\WorkoutPlanRepository;
-use App\Domain\User\Repository\UserRepository;
+use App\Domain\User\Repository\UserRepositoryInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,7 +18,7 @@ class WorkoutController extends AbstractController
     #[Route('/', name: 'pt_workouts')]
     public function index(
         Request $request,
-        PersonalTrainerRepository $trainerRepo,
+        TrainerRepositoryInterface $trainerRepo,
         WorkoutPlanRepository $workoutRepo
     ): Response {
         // Recupera il PT loggato
@@ -73,8 +73,8 @@ class WorkoutController extends AbstractController
     #[Route('/create', name: 'pt_workouts_create')]
     public function create(
         Request $request,
-        PersonalTrainerRepository $trainerRepo,
-        UserRepository $userRepo
+        TrainerRepositoryInterface $trainerRepo,
+        UserRepositoryInterface $userRepo
     ): Response {
         // Recupera il PT loggato
         $user = $this->getUser();
@@ -109,7 +109,7 @@ class WorkoutController extends AbstractController
     #[Route('/{id}', name: 'pt_workout_show', requirements: ['id' => '\d+'])]
     public function show(
         int $id,
-        PersonalTrainerRepository $trainerRepo,
+        TrainerRepositoryInterface $trainerRepo,
         WorkoutPlanRepository $workoutRepo
     ): Response {
         // Recupera il PT loggato

@@ -2,13 +2,12 @@
 
 namespace App\Domain\Gym\Entity;
 
-use App\Domain\Gym\Repository\GymAttendanceRepository;
 use App\Domain\User\Entity\User;
 use App\Domain\Membership\Entity\GymMembership;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: GymAttendanceRepository::class)]
+#[ORM\Entity]
 class GymAttendance
 {
     #[ORM\Id]

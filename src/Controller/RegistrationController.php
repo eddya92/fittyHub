@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use App\Domain\User\Entity\User;
-use App\Domain\User\Repository\UserRepository;
+use App\Domain\User\Repository\UserRepositoryInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,7 +16,7 @@ class RegistrationController extends AbstractController
     public function register(
         Request $request,
         UserPasswordHasherInterface $passwordHasher,
-        UserRepository $userRepository
+        UserRepositoryInterface $userRepository
     ): Response {
         // If already logged in, redirect to home
         if ($this->getUser()) {

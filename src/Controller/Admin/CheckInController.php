@@ -2,10 +2,13 @@
 
 namespace App\Controller\Admin;
 
-use App\Application\Service\CheckInService;
-use App\Application\Service\GymUserService;
-use App\Domain\Gym\Repository\GymAttendanceRepository;
-use App\Domain\User\Repository\UserRepository;
+use App\Domain\Gym\UseCase\ValidateCheckIn;
+use App\Domain\Gym\UseCase\ProcessCheckIn;
+use App\Domain\Gym\UseCase\GetUserAttendanceHistory;
+use App\Domain\Gym\UseCase\GetAttendanceStats;
+use App\Domain\Gym\UseCase\GetRecentAttendances;
+use App\Domain\User\Service\GymUserService;
+use App\Domain\User\Repository\UserRepositoryInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,10 +18,13 @@ use Symfony\Component\Routing\Annotation\Route;
 class CheckInController extends AbstractController
 {
     public function __construct(
-        private CheckInService $checkInService,
+        private ValidateCheckIn $validateCheckIn,
+        private ProcessCheckIn $processCheckIn,
+        private GetUserAttendanceHistory $getUserAttendanceHistory,
+        private GetAttendanceStats $getAttendanceStats,
+        private GetRecentAttendances $getRecentAttendances,
         private GymUserService $gymUserService,
-        private GymAttendanceRepository $attendanceRepository,
-        private UserRepository $userRepository
+        private UserRepositoryInterface $userRepository
     ) {}
 
     #[Route('/', name: 'admin_check_in')]
@@ -31,27 +37,13 @@ class CheckInController extends AbstractController
             return $this->redirectToRoute('admin_dashboard');
         }
 
-        // Ottieni le ultime 20 presenze
-        $recentAttendances = $this->attendanceRepository->createQueryBuilder('a')
-            ->where('a.gym = :gym')
-            ->andWhere('a.type = :type')
-            ->setParameter('gym', $gym)
-            ->setParameter('type', 'gym_entrance')
-            ->orderBy('a.checkInTime', 'DESC')
-            ->setMaxResults(20)
-            ->getQuery()
-            ->getResult();
-
-        // Statistiche oggi
         $today = new \DateTime('today');
         $tomorrow = new \DateTime('tomorrow');
 
-        $todayStats = $this->checkInService->getAttendanceStats($gym, $today, $tomorrow);
-
         return $this->render('admin/check_in/index.html.twig', [
             'gym' => $gym,
-            'recentAttendances' => $recentAttendances,
-            'todayStats' => $todayStats,
+            'recentAttendances' => $this->getRecentAttendances->execute($gym, 20),
+            'todayStats' => $this->getAttendanceStats->execute($gym, $today, $tomorrow),
         ]);
     }
 
@@ -101,7 +93,7 @@ class CheckInController extends AbstractController
         }
 
         // Verifica se può fare check-in
-        $validation = $this->checkInService->canCheckIn($user, $gym);
+        $validation = $this->validateCheckIn->execute($user, $gym);
 
         if (!$validation['allowed']) {
             return $this->json([
@@ -115,7 +107,7 @@ class CheckInController extends AbstractController
         }
 
         // Effettua check-in
-        $attendance = $this->checkInService->checkIn($user, $gym);
+        $attendance = $this->processCheckIn->execute($user, $gym);
 
         return $this->json([
             'success' => true,
@@ -145,7 +137,7 @@ class CheckInController extends AbstractController
             return $this->redirectToRoute('admin_check_in');
         }
 
-        $history = $this->checkInService->getUserAttendanceHistory($user, $gym, 50);
+        $history = $this->getUserAttendanceHistory->execute($user, $gym, 50);
 
         return $this->render('admin/check_in/history.html.twig', [
             'gym' => $gym,

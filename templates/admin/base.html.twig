@@ -35,7 +35,7 @@
                     </svg>
                 </button>
                 <div id="users-menu" class="hidden bg-gray-800">
-                    <a href="{{ path('admin_memberships') }}" class="flex items-center pl-14 pr-6 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-700 transition-colors {% if app.request.get('_route') starts with 'admin_memberships' %}text-white bg-gray-700{% endif %}">
+                    <a href="{{ path('admin_memberships') }}" class="flex items-center pl-14 pr-6 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-700 transition-colors {% if app.request.get('_route') starts with 'admin_membership' and app.request.get('_route') != 'admin_memberships_expiring' %}text-white bg-gray-700{% endif %}">
                         Iscritti
                     </a>
                     <a href="{{ path('admin_trainers') }}" class="flex items-center pl-14 pr-6 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-700 transition-colors {% if app.request.get('_route') starts with 'admin_trainers' %}text-white bg-gray-700{% endif %}">
@@ -43,6 +43,36 @@
                     </a>
                     <a href="{{ path('admin_invitations') }}" class="flex items-center pl-14 pr-6 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-700 transition-colors {% if app.request.get('_route') starts with 'admin_invitations' %}text-white bg-gray-700{% endif %}">
                         Inviti
+                    </a>
+                </div>
+            </div>
+
+            {# Abbonamenti #}
+            <div class="mt-2">
+                <button onclick="toggleAccordion('subscriptions')" class="w-full flex items-center justify-between px-6 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-colors">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                        </svg>
+                        <span>Abbonamenti</span>
+                    </div>
+                    <svg id="subscriptions-icon" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                <div id="subscriptions-menu" class="hidden bg-gray-800">
+                    <a href="{{ path('admin_subscription_plans') }}" class="flex items-center pl-14 pr-6 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-700 transition-colors {% if app.request.get('_route') starts with 'admin_subscription_plan' %}text-white bg-gray-700{% endif %}">
+                        Piani Abbonamento
+                    </a>
+                    <a href="{{ path('admin_memberships_expiring') }}" class="flex items-center pl-14 pr-6 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-700 transition-colors {% if app.request.get('_route') == 'admin_memberships_expiring' %}text-white bg-gray-700{% endif %}">
+                        In Scadenza
+                    </a>
+                    <div class="border-t border-gray-700 my-2"></div>
+                    <a href="{{ path('admin_enrollments') }}" class="flex items-center pl-14 pr-6 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-700 transition-colors {% if app.request.get('_route') starts with 'admin_enrollment' and app.request.get('_route') != 'admin_enrollments_expiring' %}text-white bg-gray-700{% endif %}">
+                        Quote Iscrizione
+                    </a>
+                    <a href="{{ path('admin_enrollments_expiring') }}" class="flex items-center pl-14 pr-6 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-700 transition-colors {% if app.request.get('_route') == 'admin_enrollments_expiring' %}text-white bg-gray-700{% endif %}">
+                        Quote in Scadenza
                     </a>
                 </div>
             </div>
@@ -164,13 +194,23 @@ document.addEventListener('DOMContentLoaded', function() {
     const currentRoute = '{{ app.request.get('_route') }}';
 
     // Gestione Utenti accordion
-    if (currentRoute.startsWith('admin_memberships') ||
+    if ((currentRoute.startsWith('admin_membership') && currentRoute !== 'admin_memberships_expiring') ||
         currentRoute.startsWith('admin_trainers') ||
         currentRoute.startsWith('admin_invitations')) {
         const usersMenu = document.getElementById('users-menu');
         const usersIcon = document.getElementById('users-icon');
         usersMenu.classList.remove('hidden');
         usersIcon.style.transform = 'rotate(180deg)';
+    }
+
+    // Abbonamenti accordion
+    if (currentRoute.startsWith('admin_subscription_plan') ||
+        currentRoute === 'admin_memberships_expiring' ||
+        currentRoute.startsWith('admin_enrollment')) {
+        const subscriptionsMenu = document.getElementById('subscriptions-menu');
+        const subscriptionsIcon = document.getElementById('subscriptions-icon');
+        subscriptionsMenu.classList.remove('hidden');
+        subscriptionsIcon.style.transform = 'rotate(180deg)';
     }
 
     // Corsi accordion

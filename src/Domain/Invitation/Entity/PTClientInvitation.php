@@ -6,7 +6,6 @@ use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
-use App\Domain\Invitation\Repository\PTClientInvitationRepository;
 use App\Domain\Invitation\State\PTClientInvitationProcessor;
 use App\Domain\PersonalTrainer\Entity\PersonalTrainer;
 use App\Domain\User\Entity\User;
@@ -14,7 +13,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
-#[ORM\Entity(repositoryClass: PTClientInvitationRepository::class)]
+#[ORM\Entity]
 #[ApiResource(
     operations: [
         new Get(

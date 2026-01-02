@@ -20,6 +20,59 @@ services:
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
 
+    # DDD Repository Binding: Interface -> Implementazione
+    # Quando viene richiesta l'interfaccia, Symfony inietta l'implementazione Doctrine
+    App\Domain\Membership\Repository\MembershipRepositoryInterface:
+        alias: App\Infrastructure\Persistence\Doctrine\Repository\DoctrineMembershipRepository
+
+    App\Domain\Membership\Repository\SubscriptionPlanRepositoryInterface:
+        alias: App\Infrastructure\Persistence\Doctrine\Repository\DoctrineSubscriptionPlanRepository
+
+    App\Domain\Membership\Repository\EnrollmentRepositoryInterface:
+        alias: App\Infrastructure\Persistence\Doctrine\Repository\DoctrineEnrollmentRepository
+
+    # Course Repositories
+    App\Domain\Course\Repository\CourseRepositoryInterface:
+        alias: App\Infrastructure\Persistence\Doctrine\Repository\DoctrineCourseRepository
+
+    App\Domain\Course\Repository\CourseScheduleRepositoryInterface:
+        alias: App\Infrastructure\Persistence\Doctrine\Repository\DoctrineCourseScheduleRepository
+
+    App\Domain\Course\Repository\CourseEnrollmentRepositoryInterface:
+        alias: App\Infrastructure\Persistence\Doctrine\Repository\DoctrineCourseEnrollmentRepository
+
+    App\Domain\Course\Repository\CourseCategoryRepositoryInterface:
+        alias: App\Infrastructure\Persistence\Doctrine\Repository\DoctrineCourseCategoryRepository
+
+    # Trainer Repositories
+    App\Domain\PersonalTrainer\Repository\TrainerRepositoryInterface:
+        alias: App\Infrastructure\Persistence\Doctrine\Repository\DoctrineTrainerRepository
+
+    App\Domain\PersonalTrainer\Repository\PTClientRelationRepositoryInterface:
+        alias: App\Infrastructure\Persistence\Doctrine\Repository\DoctrinePTClientRelationRepository
+
+    # Medical Repositories
+    App\Domain\Medical\Repository\MedicalCertificateRepositoryInterface:
+        alias: App\Infrastructure\Persistence\Doctrine\Repository\DoctrineMedicalCertificateRepository
+
+    # Invitation Repositories
+    App\Domain\Invitation\Repository\InvitationRepositoryInterface:
+        alias: App\Infrastructure\Persistence\Doctrine\Repository\DoctrineInvitationRepository
+
+    App\Domain\Invitation\Repository\PTClientInvitationRepositoryInterface:
+        alias: App\Infrastructure\Persistence\Doctrine\Repository\DoctrinePTClientInvitationRepository
+
+    # User Repositories
+    App\Domain\User\Repository\UserRepositoryInterface:
+        alias: App\Infrastructure\Persistence\Doctrine\Repository\DoctrineUserRepository
+
+    # Gym Repositories
+    App\Domain\Gym\Repository\GymRepositoryInterface:
+        alias: App\Infrastructure\Persistence\Doctrine\Repository\DoctrineGymRepository
+
+    App\Domain\Gym\Repository\GymAttendanceRepositoryInterface:
+        alias: App\Infrastructure\Persistence\Doctrine\Repository\DoctrineGymAttendanceRepository
+
     # API Platform State Processors
     App\Domain\User\State\UserPasswordHasher:
         decorates: 'api_platform.doctrine.orm.state.persist_processor'

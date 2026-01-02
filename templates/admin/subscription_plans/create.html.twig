@@ -1,0 +1,142 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block page_title %}Nuovo Piano Abbonamento{% endblock %}
+{% block page_subtitle %}Crea un nuovo piano abbonamento per la palestra{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <a href="{{ path('admin_subscription_plans') }}" class="inline-flex items-center text-primary-600 hover:text-primary-700 font-medium">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+        Torna ai piani
+    </a>
+</div>
+
+<div class="bg-white rounded-lg shadow-md p-6">
+    <form method="post" action="{{ path('admin_subscription_plan_create') }}">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {# Gym Selection #}
+            <div class="col-span-2">
+                <label for="gym_id" class="block text-sm font-medium text-gray-700 mb-2">Palestra *</label>
+                <select id="gym_id" name="gym_id" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <option value="">Seleziona una palestra...</option>
+                    {% for gym in gyms %}
+                        <option value="{{ gym.id }}">{{ gym.name }}</option>
+                    {% endfor %}
+                </select>
+                <p class="mt-1 text-sm text-gray-500">Seleziona la palestra a cui associare questo piano</p>
+            </div>
+
+            {# Plan Name #}
+            <div class="col-span-2">
+                <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Nome Piano *</label>
+                <input type="text" id="name" name="name" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Es: Mensile Base, Trimestrale Premium...">
+                <p class="mt-1 text-sm text-gray-500">Il nome del piano che vedrà il cliente</p>
+            </div>
+
+            {# Description #}
+            <div class="col-span-2">
+                <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Descrizione</label>
+                <textarea id="description" name="description" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Breve descrizione del piano..."></textarea>
+                <p class="mt-1 text-sm text-gray-500">Descrizione opzionale del piano (max 250 caratteri)</p>
+            </div>
+
+            {# Duration #}
+            <div>
+                <label for="duration" class="block text-sm font-medium text-gray-700 mb-2">Durata (mesi) *</label>
+                <input type="number" id="duration" name="duration" min="1" max="36" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="12">
+                <p class="mt-1 text-sm text-gray-500">Durata in mesi dell'abbonamento</p>
+            </div>
+
+            {# Price #}
+            <div>
+                <label for="price" class="block text-sm font-medium text-gray-700 mb-2">Prezzo (€) *</label>
+                <input type="number" id="price" name="price" step="0.01" min="0" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="49.90">
+                <p class="mt-1 text-sm text-gray-500">Prezzo di listino del piano</p>
+            </div>
+
+            {# Max Access Per Week #}
+            <div>
+                <label for="max_access_per_week" class="block text-sm font-medium text-gray-700 mb-2">Accessi Settimanali</label>
+                <input type="number" id="max_access_per_week" name="max_access_per_week" min="1" max="7" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Illimitati">
+                <p class="mt-1 text-sm text-gray-500">Numero massimo di accessi settimanali (lascia vuoto per illimitati)</p>
+            </div>
+
+            {# Include PT Checkbox #}
+            <div class="col-span-2">
+                <div class="flex items-center">
+                    <input type="checkbox" id="include_pt" name="include_pt" value="1" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                    <label for="include_pt" class="ml-2 block text-sm font-medium text-gray-700">
+                        Include Personal Trainer
+                    </label>
+                </div>
+                <p class="mt-1 ml-6 text-sm text-gray-500">Spunta se il piano include sessioni con Personal Trainer</p>
+            </div>
+
+            {# PT Sessions (shown only if Include PT is checked) #}
+            <div id="pt_sessions_container" class="col-span-2 hidden">
+                <label for="pt_sessions_included" class="block text-sm font-medium text-gray-700 mb-2">Sessioni PT Incluse</label>
+                <input type="number" id="pt_sessions_included" name="pt_sessions_included" min="1" max="100" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="4">
+                <p class="mt-1 text-sm text-gray-500">Numero di sessioni con Personal Trainer incluse nel piano</p>
+            </div>
+
+            {# Features #}
+            <div class="col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Caratteristiche Piano</label>
+                <div id="features_container" class="space-y-2">
+                    <div class="flex gap-2">
+                        <input type="text" name="features[]" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Es: Accesso illimitato">
+                    </div>
+                </div>
+                <button type="button" onclick="addFeature()" class="mt-2 inline-flex items-center px-3 py-1.5 bg-gray-200 text-gray-700 text-sm rounded-lg hover:bg-gray-300 transition-colors">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Aggiungi Caratteristica
+                </button>
+                <p class="mt-1 text-sm text-gray-500">Aggiungi le caratteristiche e i benefici del piano</p>
+            </div>
+        </div>
+
+        <div class="mt-8 flex justify-between">
+            <a href="{{ path('admin_subscription_plans') }}" class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium">
+                Annulla
+            </a>
+            <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
+                <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                Crea Piano
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+document.getElementById('include_pt').addEventListener('change', function() {
+    const container = document.getElementById('pt_sessions_container');
+    if (this.checked) {
+        container.classList.remove('hidden');
+    } else {
+        container.classList.add('hidden');
+        document.getElementById('pt_sessions_included').value = '';
+    }
+});
+
+function addFeature() {
+    const container = document.getElementById('features_container');
+    const div = document.createElement('div');
+    div.className = 'flex gap-2';
+    div.innerHTML = `
+        <input type="text" name="features[]" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Es: Accesso illimitato">
+        <button type="button" onclick="this.parentElement.remove()" class="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+    `;
+    container.appendChild(div);
+}
+</script>
+{% endblock %}

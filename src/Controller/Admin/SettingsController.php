@@ -2,8 +2,10 @@
 
 namespace App\Controller\Admin;
 
-use App\Application\Service\GymUserService;
-use App\Application\Service\SettingsService;
+use App\Domain\User\Service\GymUserService;
+use App\Domain\Gym\Service\SettingsService;
+use App\Domain\Gym\Repository\GymRepositoryInterface;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,7 +16,8 @@ class SettingsController extends AbstractController
 {
     public function __construct(
         private SettingsService $settingsService,
-        private GymUserService $gymUserService
+        private GymUserService $gymUserService,
+        private EntityManagerInterface $entityManager
     ) {}
 
     #[Route('/', name: 'admin_settings')]
@@ -48,7 +51,22 @@ class SettingsController extends AbstractController
         $settings = $this->settingsService->getOrCreateSettings($gym);
 
         try {
+            // Aggiorna le impostazioni generali
             $this->settingsService->updateSettings($settings, $request->request->all());
+
+            // Gestisci quota iscrizione
+            $enrollmentFeeAmount = $request->request->get('enrollment_fee_amount');
+            $enrollmentFeeValidityMonths = $request->request->get('enrollment_fee_validity_months');
+
+            if ($enrollmentFeeAmount !== null && $enrollmentFeeAmount !== '') {
+                // Aggiorna impostazioni palestra
+                $gym->setEnrollmentFeeAmount($enrollmentFeeAmount);
+                $gym->setEnrollmentFeeValidityMonths($enrollmentFeeValidityMonths ?: 12);
+                $this->entityManager->persist($gym);
+            }
+
+            $this->entityManager->flush();
+
             $this->addFlash('success', 'Impostazioni aggiornate con successo.');
         } catch (\Exception $e) {
             $this->addFlash('error', 'Errore: ' . $e->getMessage());

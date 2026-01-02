@@ -2,7 +2,7 @@
 
 namespace App\Command;
 
-use App\Domain\Membership\Repository\GymMembershipRepository;
+use App\Domain\Membership\Repository\MembershipRepositoryInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -17,7 +17,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class ExpireMembershipsCommand extends Command
 {
     public function __construct(
-        private GymMembershipRepository $membershipRepo,
+        private MembershipRepositoryInterface $membershipRepo,
         private EntityManagerInterface $entityManager
     ) {
         parent::__construct();

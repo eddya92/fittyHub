@@ -148,6 +148,19 @@ class Gym
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $nextPaymentDate = null;
 
+    // Enrollment Fee Configuration (Quote Iscrizione/Affiliazione)
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
+    private ?string $enrollmentFeeAmount = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $enrollmentFeeType = 'manual'; // one_time, annual, manual
+
+    #[ORM\Column(nullable: true)]
+    private ?int $enrollmentFeeValidityMonths = 12; // Validità in mesi (default 12 per annuale)
+
+    #[ORM\Column(nullable: true)]
+    private ?bool $showEnrollmentInRenewal = false; // Se mostrare nel processo rinnovo
+
     #[ORM\Column]
     #[Groups(['gym:read'])]
     private ?\DateTimeImmutable $createdAt = null;
@@ -613,6 +626,51 @@ class Gym
     public function setNextPaymentDate(?\DateTimeInterface $nextPaymentDate): static
     {
         $this->nextPaymentDate = $nextPaymentDate;
+        return $this;
+    }
+
+    // Enrollment Fee Configuration Getters/Setters
+    public function getEnrollmentFeeAmount(): ?string
+    {
+        return $this->enrollmentFeeAmount;
+    }
+
+    public function setEnrollmentFeeAmount(?string $enrollmentFeeAmount): static
+    {
+        $this->enrollmentFeeAmount = $enrollmentFeeAmount;
+        return $this;
+    }
+
+    public function getEnrollmentFeeType(): ?string
+    {
+        return $this->enrollmentFeeType;
+    }
+
+    public function setEnrollmentFeeType(?string $enrollmentFeeType): static
+    {
+        $this->enrollmentFeeType = $enrollmentFeeType;
+        return $this;
+    }
+
+    public function getEnrollmentFeeValidityMonths(): ?int
+    {
+        return $this->enrollmentFeeValidityMonths;
+    }
+
+    public function setEnrollmentFeeValidityMonths(?int $enrollmentFeeValidityMonths): static
+    {
+        $this->enrollmentFeeValidityMonths = $enrollmentFeeValidityMonths;
+        return $this;
+    }
+
+    public function getShowEnrollmentInRenewal(): ?bool
+    {
+        return $this->showEnrollmentInRenewal;
+    }
+
+    public function setShowEnrollmentInRenewal(?bool $showEnrollmentInRenewal): static
+    {
+        $this->showEnrollmentInRenewal = $showEnrollmentInRenewal;
         return $this;
     }
 }

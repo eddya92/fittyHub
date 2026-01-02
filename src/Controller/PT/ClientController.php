@@ -2,8 +2,9 @@
 
 namespace App\Controller\PT;
 
-use App\Domain\PersonalTrainer\Repository\PersonalTrainerRepository;
-use App\Domain\PersonalTrainer\Repository\PTClientRelationRepository;
+use App\Domain\PersonalTrainer\Repository\TrainerRepositoryInterface;
+use App\Domain\PersonalTrainer\Repository\PTClientRelationRepositoryInterface;
+use App\Domain\Membership\Repository\MembershipRepositoryInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,8 +18,9 @@ class ClientController extends AbstractController
     #[Route('/', name: 'pt_clients')]
     public function index(
         Request $request,
-        PersonalTrainerRepository $trainerRepo,
-        PTClientRelationRepository $relationRepo
+        TrainerRepositoryInterface $trainerRepo,
+        PTClientRelationRepositoryInterface $relationRepo,
+        MembershipRepositoryInterface $membershipRepo
     ): Response {
         // Recupera il PT loggato
         $user = $this->getUser();
@@ -32,7 +34,9 @@ class ClientController extends AbstractController
         // Filtri
         $status = $request->query->get('status');
         $search = $request->query->get('search');
+        $view = $request->query->get('view', 'my-clients'); // 'my-clients' o 'gym-clients'
 
+        // Clienti assegnati al PT
         $qb = $relationRepo->createQueryBuilder('r')
             ->leftJoin('r.client', 'c')
             ->where('r.personalTrainer = :trainer')
@@ -53,27 +57,59 @@ class ClientController extends AbstractController
 
         $relations = $qb->getQuery()->getResult();
 
-        // Stats
+        // Stats clienti PT
         $stats = [
             'total' => $relationRepo->count(['personalTrainer' => $trainer]),
             'active' => $relationRepo->count(['personalTrainer' => $trainer, 'status' => 'active']),
             'completed' => $relationRepo->count(['personalTrainer' => $trainer, 'status' => 'completed']),
         ];
 
+        // Tutti i clienti della palestra
+        $gymMemberships = [];
+        $gymStats = [
+            'total' => 0,
+            'active' => 0,
+            'expired' => 0,
+        ];
+
+        if ($trainer->getGym()) {
+            $gymMembershipsQb = $membershipRepo->createQueryBuilder('m')
+                ->leftJoin('m.user', 'u')
+                ->where('m.gym = :gym')
+                ->setParameter('gym', $trainer->getGym())
+                ->orderBy('m.startDate', 'DESC');
+
+            if ($search) {
+                $gymMembershipsQb->andWhere('u.firstName LIKE :search OR u.lastName LIKE :search OR u.email LIKE :search')
+                    ->setParameter('search', '%' . $search . '%');
+            }
+
+            $gymMemberships = $gymMembershipsQb->getQuery()->getResult();
+
+            $gymStats = [
+                'total' => $membershipRepo->count(['gym' => $trainer->getGym()]),
+                'active' => $membershipRepo->count(['gym' => $trainer->getGym(), 'status' => 'active']),
+                'expired' => $membershipRepo->count(['gym' => $trainer->getGym(), 'status' => 'expired']),
+            ];
+        }
+
         return $this->render('pt/clients/index.html.twig', [
             'trainer' => $trainer,
             'relations' => $relations,
             'stats' => $stats,
+            'gym_memberships' => $gymMemberships,
+            'gym_stats' => $gymStats,
             'current_status' => $status,
             'current_search' => $search,
+            'current_view' => $view,
         ]);
     }
 
     #[Route('/{id}', name: 'pt_client_show', requirements: ['id' => '\d+'])]
     public function show(
         int $id,
-        PersonalTrainerRepository $trainerRepo,
-        PTClientRelationRepository $relationRepo
+        TrainerRepositoryInterface $trainerRepo,
+        PTClientRelationRepositoryInterface $relationRepo
     ): Response {
         // Recupera il PT loggato
         $user = $this->getUser();

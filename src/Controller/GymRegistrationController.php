@@ -3,9 +3,9 @@
 namespace App\Controller;
 
 use App\Domain\Gym\Entity\Gym;
-use App\Domain\Gym\Repository\GymRepository;
+use App\Domain\Gym\Repository\GymRepositoryInterface;
 use App\Domain\User\Entity\User;
-use App\Domain\User\Repository\UserRepository;
+use App\Domain\User\Repository\UserRepositoryInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,8 +18,8 @@ class GymRegistrationController extends AbstractController
     public function register(
         Request $request,
         UserPasswordHasherInterface $passwordHasher,
-        UserRepository $userRepository,
-        GymRepository $gymRepository
+        UserRepositoryInterface $userRepository,
+        GymRepositoryInterface $gymRepository
     ): Response {
         // If already logged in, redirect to home
         if ($this->getUser()) {

@@ -2,12 +2,11 @@
 
 namespace App\Domain\PersonalTrainer\Entity;
 
-use App\Domain\PersonalTrainer\Repository\PTClientRelationRepository;
 use App\Domain\User\Entity\User;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: PTClientRelationRepository::class)]
+#[ORM\Entity]
 class PTClientRelation
 {
     #[ORM\Id]

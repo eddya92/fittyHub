@@ -2,8 +2,8 @@
 
 namespace App\Command;
 
-use App\Domain\Invitation\Repository\GymPTInvitationRepository;
-use App\Domain\Invitation\Repository\PTClientInvitationRepository;
+use App\Domain\Invitation\Repository\InvitationRepositoryInterface;
+use App\Domain\Invitation\Repository\PTClientInvitationRepositoryInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -18,8 +18,8 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class ExpireInvitationsCommand extends Command
 {
     public function __construct(
-        private PTClientInvitationRepository $ptClientInvitationRepo,
-        private GymPTInvitationRepository $gymPTInvitationRepo,
+        private PTClientInvitationRepositoryInterface $ptClientInvitationRepo,
+        private InvitationRepositoryInterface $gymPTInvitationRepo,
         private EntityManagerInterface $entityManager
     ) {
         parent::__construct();

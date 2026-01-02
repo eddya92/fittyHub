@@ -2,13 +2,12 @@
 
 namespace App\Domain\Invitation\Entity;
 
-use App\Domain\Invitation\Repository\GymPTInvitationRepository;
 use App\Domain\Gym\Entity\Gym;
 use App\Domain\User\Entity\User;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: GymPTInvitationRepository::class)]
+#[ORM\Entity]
 class GymPTInvitation
 {
     #[ORM\Id]

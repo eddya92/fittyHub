@@ -3,8 +3,8 @@
 namespace App\Domain\Membership\UseCase;
 
 use App\Domain\Gym\Entity\Gym;
-use App\Domain\Gym\Repository\GymRepository;
-use App\Domain\Medical\Repository\MedicalCertificateRepository;
+use App\Domain\Gym\Repository\GymRepositoryInterface;
+use App\Domain\Medical\Repository\MedicalCertificateRepositoryInterface;
 use App\Domain\Membership\Entity\GymMembership;
 use App\Domain\User\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
@@ -13,8 +13,8 @@ class CreateGymMembershipUseCase
 {
     public function __construct(
         private EntityManagerInterface $entityManager,
-        private GymRepository $gymRepository,
-        private MedicalCertificateRepository $medicalCertificateRepository
+        private GymRepositoryInterface $gymRepository,
+        private MedicalCertificateRepositoryInterface $medicalCertificateRepository
     ) {
     }
 

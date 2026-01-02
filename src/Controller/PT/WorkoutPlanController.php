@@ -9,9 +9,9 @@ use App\Domain\Workout\Entity\Exercise;
 use App\Domain\Workout\Repository\ClientAssessmentRepository;
 use App\Domain\Workout\Repository\WorkoutPlanRepository;
 use App\Domain\Workout\Repository\ExerciseRepository;
-use App\Domain\PersonalTrainer\Repository\PersonalTrainerRepository;
-use App\Domain\PersonalTrainer\Repository\PTClientRelationRepository;
-use App\Domain\User\Repository\UserRepository;
+use App\Domain\PersonalTrainer\Repository\TrainerRepositoryInterface;
+use App\Domain\PersonalTrainer\Repository\PTClientRelationRepositoryInterface;
+use App\Domain\User\Repository\UserRepositoryInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -25,11 +25,11 @@ class WorkoutPlanController extends AbstractController
 {
     public function __construct(
         private EntityManagerInterface $entityManager,
-        private PersonalTrainerRepository $ptRepository,
-        private PTClientRelationRepository $relationRepository,
+        private TrainerRepositoryInterface $ptRepository,
+        private PTClientRelationRepositoryInterface $relationRepository,
         private ClientAssessmentRepository $assessmentRepository,
         private WorkoutPlanRepository $workoutPlanRepository,
-        private UserRepository $userRepository,
+        private UserRepositoryInterface $userRepository,
         private ExerciseRepository $exerciseRepository,
     ) {}
 
@@ -98,8 +98,17 @@ class WorkoutPlanController extends AbstractController
             $assessment->setClient($client);
             $assessment->setPersonalTrainer($pt);
 
+            // Helper per convertire valori in int o null
+            $getIntOrNull = function(string $key) use ($request): ?int {
+                $value = $request->request->get($key);
+                if ($value === null || $value === '') {
+                    return null;
+                }
+                return is_numeric($value) ? (int)$value : null;
+            };
+
             // Dati anagrafici
-            $assessment->setAge($request->request->getInt('age') ?: null);
+            $assessment->setAge($getIntOrNull('age'));
             $assessment->setHeight($request->request->get('height') ?: null);
             $assessment->setWeight($request->request->get('weight') ?: null);
             $assessment->setGender($request->request->get('gender') ?: null);
@@ -108,9 +117,9 @@ class WorkoutPlanController extends AbstractController
             $assessment->setFitnessLevel($request->request->get('fitnessLevel') ?: null);
             $assessment->setPrimaryGoal($request->request->get('primaryGoal') ?: null);
             $assessment->setSecondaryGoals($request->request->get('secondaryGoals') ?: null);
-            $assessment->setTrainingExperience($request->request->getInt('trainingExperience') ?: null);
-            $assessment->setWeeklyAvailability($request->request->getInt('weeklyAvailability') ?: null);
-            $assessment->setSessionDuration($request->request->getInt('sessionDuration') ?: null);
+            $assessment->setTrainingExperience($getIntOrNull('trainingExperience'));
+            $assessment->setWeeklyAvailability($getIntOrNull('weeklyAvailability'));
+            $assessment->setSessionDuration($getIntOrNull('sessionDuration'));
 
             // Infortuni e salute
             $currentInjuries = array_filter($request->request->all('currentInjuries') ?? []);
@@ -128,8 +137,8 @@ class WorkoutPlanController extends AbstractController
             // Stile di vita
             $assessment->setActivityLevel($request->request->get('activityLevel') ?: null);
             $assessment->setOccupation($request->request->get('occupation') ?: null);
-            $assessment->setSleepHours($request->request->getInt('sleepHours') ?: null);
-            $assessment->setStressLevel($request->request->getInt('stressLevel') ?: null);
+            $assessment->setSleepHours($getIntOrNull('sleepHours'));
+            $assessment->setStressLevel($getIntOrNull('stressLevel'));
             $assessment->setNutritionHabits($request->request->get('nutritionHabits') ?: null);
 
             // Preferenze
@@ -211,6 +220,15 @@ class WorkoutPlanController extends AbstractController
         }
 
         if ($request->isMethod('POST')) {
+            // Helper per convertire valori in int o null
+            $getIntOrNull = function(string $key) use ($request): ?int {
+                $value = $request->request->get($key);
+                if ($value === null || $value === '') {
+                    return null;
+                }
+                return is_numeric($value) ? (int)$value : null;
+            };
+
             $plan = new WorkoutPlan();
             $plan->setClient($assessment->getClient());
             $plan->setPersonalTrainer($pt);
@@ -224,7 +242,7 @@ class WorkoutPlanController extends AbstractController
                 $plan->setEndDate(new \DateTime($endDate));
             }
 
-            $plan->setWeeksCount($request->request->getInt('weeksCount'));
+            $plan->setWeeksCount($getIntOrNull('weeksCount') ?? 4);
             $plan->setNotes($request->request->get('notes'));
 
             $this->entityManager->persist($plan);
@@ -268,7 +286,16 @@ class WorkoutPlanController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
-        $exerciseId = $request->request->getInt('exerciseId');
+        // Helper per convertire valori in int con default
+        $getIntOrDefault = function(string $key, int $default) use ($request): int {
+            $value = $request->request->get($key);
+            if ($value === null || $value === '') {
+                return $default;
+            }
+            return is_numeric($value) ? (int)$value : $default;
+        };
+
+        $exerciseId = $getIntOrDefault('exerciseId', 0);
         $exercise = $this->exerciseRepository->find($exerciseId);
 
         if (!$exercise) {
@@ -280,11 +307,11 @@ class WorkoutPlanController extends AbstractController
         $workoutExercise->setWorkoutPlan($plan);
         $workoutExercise->setExercise($exercise);
         $workoutExercise->setName($exercise->getName());
-        $workoutExercise->setDayOfWeek($request->request->getInt('dayOfWeek') ?: 1);
-        $workoutExercise->setWeek($request->request->getInt('week') ?: 1);
-        $workoutExercise->setSets($request->request->getInt('sets') ?: 3);
+        $workoutExercise->setDayOfWeek($getIntOrDefault('dayOfWeek', 1));
+        $workoutExercise->setWeek($getIntOrDefault('week', 1));
+        $workoutExercise->setSets($getIntOrDefault('sets', 3));
         $workoutExercise->setReps($request->request->get('reps') ?: '10');
-        $workoutExercise->setRestTime($request->request->getInt('restTime') ?: 60);
+        $workoutExercise->setRestTime($getIntOrDefault('restTime', 60));
 
         if ($weight = $request->request->get('weight')) {
             $workoutExercise->setWeight($weight);

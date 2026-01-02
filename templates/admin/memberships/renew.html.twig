@@ -1,0 +1,241 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block page_title %}Rinnova Abbonamento{% endblock %}
+{% block page_subtitle %}{{ membership.user.firstName }} {{ membership.user.lastName }}{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <a href="{{ path('admin_membership_show', {id: membership.id}) }}" class="inline-flex items-center text-primary-600 hover:text-primary-700 font-medium">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+        Torna ai dettagli
+    </a>
+</div>
+
+{# Current Membership Info #}
+<div class="mb-6 bg-blue-50 border-l-4 border-blue-400 rounded-lg shadow-md overflow-hidden">
+    <div class="p-6">
+        <h3 class="text-lg font-bold text-blue-900 mb-4 flex items-center">
+            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Abbonamento Corrente
+        </h3>
+        <div class="grid grid-cols-2 gap-6">
+            <div>
+                <p class="text-sm text-blue-700"><strong>Cliente:</strong> {{ membership.user.firstName }} {{ membership.user.lastName }}</p>
+                <p class="text-sm text-blue-700"><strong>Email:</strong> {{ membership.user.email }}</p>
+                <p class="text-sm text-blue-700">
+                    <strong>Stato:</strong>
+                    <span class="px-2 py-1 text-xs font-medium rounded
+                        {% if membership.status == 'active' %}bg-green-100 text-green-800
+                        {% else %}bg-red-100 text-red-800{% endif %}">
+                        {{ membership.status|upper }}
+                    </span>
+                </p>
+            </div>
+            <div>
+                <p class="text-sm text-blue-700"><strong>Data Inizio:</strong> {{ membership.startDate|date('d/m/Y') }}</p>
+                <p class="text-sm text-blue-700"><strong>Data Fine:</strong> {{ membership.endDate|date('d/m/Y') }}</p>
+                {% if membership.subscriptionPlan %}
+                    <p class="text-sm text-blue-700"><strong>Piano Corrente:</strong> {{ membership.subscriptionPlan.name }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Renewal Form #}
+<div class="bg-white rounded-lg shadow-md p-6">
+    <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+        <svg class="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+        </svg>
+        Nuovo Abbonamento
+    </h3>
+
+    {% if subscription_plans|length > 0 %}
+        <form method="post" action="{{ path('admin_membership_renew', {id: membership.id}) }}">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                {# Subscription Plan Selection #}
+                <div class="col-span-3 md:col-span-2">
+                    <label for="subscription_plan_id" class="block text-sm font-medium text-gray-700 mb-2">Piano Abbonamento *</label>
+                    <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" id="subscription_plan_id" name="subscription_plan_id" required onchange="updatePriceAndDuration()">
+                        <option value="">Seleziona un piano...</option>
+                        {% for plan in subscription_plans %}
+                            <option value="{{ plan.id }}"
+                                    data-price="{{ plan.price }}"
+                                    data-duration="{{ plan.duration }}">
+                                {{ plan.name }} - {{ plan.duration }} mesi - €{{ plan.price }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <p class="mt-1 text-sm text-gray-500">Seleziona il tipo di abbonamento da rinnovare</p>
+                </div>
+
+                {# Original Price (Read-only) #}
+                <div>
+                    <label for="original_price_display" class="block text-sm font-medium text-gray-700 mb-2">Prezzo Listino</label>
+                    <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100" id="original_price_display" readonly placeholder="€0.00">
+                    <p class="mt-1 text-sm text-gray-500">Prezzo originale del piano</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                {# Actual Price (Editable for discount) #}
+                <div>
+                    <label for="actual_price" class="block text-sm font-medium text-gray-700 mb-2">Prezzo Effettivo *</label>
+                    <input type="number" step="0.01" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" id="actual_price" name="actual_price" required onchange="calculateDiscount()">
+                    <p class="mt-1 text-sm text-gray-500">Prezzo da pagare</p>
+                </div>
+
+                {# Duration Display #}
+                <div>
+                    <label for="duration_display" class="block text-sm font-medium text-gray-700 mb-2">Durata Piano</label>
+                    <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100" id="duration_display" readonly placeholder="0 mesi">
+                    <p class="mt-1 text-sm text-gray-500">Durata base</p>
+                </div>
+
+                {# Bonus Months #}
+                <div>
+                    <label for="bonus_months" class="block text-sm font-medium text-gray-700 mb-2">Mesi Bonus</label>
+                    <input type="number" min="0" max="24" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" id="bonus_months" name="bonus_months" value="0" onchange="calculateTotalDuration()">
+                    <p class="mt-1 text-sm text-gray-500">Mesi extra</p>
+                </div>
+
+                {# Total Duration Display #}
+                <div>
+                    <label for="total_duration" class="block text-sm font-medium text-gray-700 mb-2">Durata Totale</label>
+                    <input type="text" class="w-full px-3 py-2 border border-green-300 rounded-lg bg-green-50 text-green-900 font-bold" id="total_duration" readonly placeholder="0 mesi">
+                    <p class="mt-1 text-sm text-gray-500">Durata + Bonus</p>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                {# Discount Display #}
+                <label for="discount_display" class="block text-sm font-medium text-gray-700 mb-2">Sconto Applicato</label>
+                <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100" id="discount_display" readonly placeholder="€0.00 (0%)">
+                <p class="mt-1 text-sm text-gray-500">Differenza dal listino</p>
+            </div>
+
+            <div class="mb-6">
+                {# Discount/Bonus Reason #}
+                <label for="discount_reason" class="block text-sm font-medium text-gray-700 mb-2">Motivo Sconto/Bonus</label>
+                <textarea class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" id="discount_reason" name="discount_reason" rows="2" placeholder="Es: Cliente fedele, Promozione Natale, Rinnovo anticipato..."></textarea>
+                <p class="mt-1 text-sm text-gray-500">Descrivi il motivo dello sconto o dei mesi bonus (consigliato per lo storico)</p>
+            </div>
+
+            <div class="mb-6">
+                {# Notes #}
+                <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Note Aggiuntive</label>
+                <textarea class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" id="notes" name="notes" rows="3" placeholder="Note interne sull'abbonamento..."></textarea>
+                <p class="mt-1 text-sm text-gray-500">Eventuali note aggiuntive sull'iscrizione</p>
+            </div>
+
+            <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
+                <div class="flex">
+                    <svg class="w-5 h-5 text-blue-600 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <div class="text-sm text-blue-800">
+                        <p class="font-medium">Nota:</p>
+                        <p>Il rinnovo scadrà l'abbonamento corrente e ne creerà uno nuovo con le date e i prezzi specificati. Lo storico completo sarà conservato.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-between">
+                <a href="{{ path('admin_membership_show', {id: membership.id}) }}" class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium">
+                    Annulla
+                </a>
+                <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
+                    <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    Rinnova Abbonamento
+                </button>
+            </div>
+        </form>
+    {% else %}
+        <div class="bg-orange-50 border-l-4 border-orange-400 p-4">
+            <div class="flex">
+                <svg class="w-5 h-5 text-orange-600 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+                <div class="text-sm text-orange-800">
+                    <p class="font-medium">Attenzione:</p>
+                    <p>Non ci sono piani abbonamento attivi per questa palestra. Crea prima un piano abbonamento nella sezione dedicata.</p>
+                </div>
+            </div>
+        </div>
+        <div class="mt-6">
+            <a href="{{ path('admin_membership_show', {id: membership.id}) }}" class="inline-flex items-center px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+                Torna ai Dettagli
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+function updatePriceAndDuration() {
+    const select = document.getElementById('subscription_plan_id');
+    const selectedOption = select.options[select.selectedIndex];
+
+    if (selectedOption.value) {
+        const price = selectedOption.dataset.price;
+        const duration = selectedOption.dataset.duration;
+
+        document.getElementById('original_price_display').value = '€' + parseFloat(price).toFixed(2);
+        document.getElementById('actual_price').value = parseFloat(price).toFixed(2);
+        document.getElementById('duration_display').value = duration + ' mesi';
+
+        calculateTotalDuration();
+        calculateDiscount();
+    } else {
+        document.getElementById('original_price_display').value = '';
+        document.getElementById('actual_price').value = '';
+        document.getElementById('duration_display').value = '';
+        document.getElementById('total_duration').value = '';
+        document.getElementById('discount_display').value = '';
+    }
+}
+
+function calculateTotalDuration() {
+    const select = document.getElementById('subscription_plan_id');
+    const selectedOption = select.options[select.selectedIndex];
+
+    if (selectedOption.value) {
+        const baseDuration = parseInt(selectedOption.dataset.duration) || 0;
+        const bonusMonths = parseInt(document.getElementById('bonus_months').value) || 0;
+        const total = baseDuration + bonusMonths;
+
+        document.getElementById('total_duration').value = total + ' mesi';
+    }
+}
+
+function calculateDiscount() {
+    const select = document.getElementById('subscription_plan_id');
+    const selectedOption = select.options[select.selectedIndex];
+
+    if (selectedOption.value) {
+        const originalPrice = parseFloat(selectedOption.dataset.price) || 0;
+        const actualPrice = parseFloat(document.getElementById('actual_price').value) || 0;
+
+        const discount = originalPrice - actualPrice;
+        const discountPercentage = originalPrice > 0 ? (discount / originalPrice * 100) : 0;
+
+        if (discount > 0) {
+            document.getElementById('discount_display').value = '€' + discount.toFixed(2) + ' (' + discountPercentage.toFixed(1) + '%)';
+        } else if (discount < 0) {
+            document.getElementById('discount_display').value = 'Sovrapprezzo: €' + Math.abs(discount).toFixed(2);
+        } else {
+            document.getElementById('discount_display').value = 'Nessuno sconto';
+        }
+    }
+}
+</script>
+{% endblock %}

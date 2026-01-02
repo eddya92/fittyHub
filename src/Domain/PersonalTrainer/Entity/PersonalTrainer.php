@@ -2,7 +2,6 @@
 
 namespace App\Domain\PersonalTrainer\Entity;
 
-use App\Domain\PersonalTrainer\Repository\PersonalTrainerRepository;
 use App\Domain\User\Entity\User;
 use App\Domain\Gym\Entity\Gym;
 use App\Domain\Workout\Entity\WorkoutPlan;
@@ -11,7 +10,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: PersonalTrainerRepository::class)]
+#[ORM\Entity]
 class PersonalTrainer
 {
     #[ORM\Id]

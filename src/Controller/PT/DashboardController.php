@@ -2,9 +2,9 @@
 
 namespace App\Controller\PT;
 
-use App\Domain\PersonalTrainer\Repository\PersonalTrainerRepository;
-use App\Domain\PersonalTrainer\Repository\PTClientRelationRepository;
-use App\Domain\Workout\Repository\WorkoutPlanRepository;
+use App\Domain\PersonalTrainer\Repository\TrainerRepositoryInterface;
+use App\Domain\PersonalTrainer\Repository\PTClientRelationRepositoryInterface;
+use App\Domain\Workout\Repository\WorkoutPlanRepositoryInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -16,9 +16,9 @@ class DashboardController extends AbstractController
 {
     #[Route('/', name: 'pt_dashboard')]
     public function index(
-        PersonalTrainerRepository $trainerRepo,
-        PTClientRelationRepository $relationRepo,
-        WorkoutPlanRepository $workoutRepo
+        TrainerRepositoryInterface $trainerRepo,
+        PTClientRelationRepositoryInterface $relationRepo,
+        WorkoutPlanRepositoryInterface $workoutRepo
     ): Response {
         // Recupera il PT loggato
         $user = $this->getUser();
@@ -50,11 +50,30 @@ class DashboardController extends AbstractController
             5
         );
 
+        // Clienti attivi senza schede di allenamento
+        $clientsWithoutPlans = $relationRepo->createQueryBuilder('r')
+            ->leftJoin('r.client', 'c')
+            ->where('r.personalTrainer = :trainer')
+            ->andWhere('r.status = :status')
+            ->andWhere('NOT EXISTS (
+                SELECT 1 FROM App\Domain\Workout\Entity\WorkoutPlan wp
+                WHERE wp.client = c
+                AND wp.personalTrainer = :trainer
+                AND wp.status IN (:planStatuses)
+            )')
+            ->setParameter('trainer', $trainer)
+            ->setParameter('status', 'active')
+            ->setParameter('planStatuses', ['draft', 'active'])
+            ->orderBy('r.startDate', 'DESC')
+            ->getQuery()
+            ->getResult();
+
         return $this->render('pt/dashboard/index.html.twig', [
             'trainer' => $trainer,
             'stats' => $stats,
             'active_clients' => $activeClients,
             'recent_workout_plans' => $recentWorkoutPlans,
+            'clients_without_plans' => $clientsWithoutPlans,
         ]);
     }
 }

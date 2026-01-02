@@ -2,13 +2,12 @@
 
 namespace App\Domain\Medical\Entity;
 
-use App\Domain\Medical\Repository\MedicalCertificateRepository;
 use App\Domain\User\Entity\User;
 use App\Domain\Membership\Entity\GymMembership;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: MedicalCertificateRepository::class)]
+#[ORM\Entity]
 class MedicalCertificate
 {
     #[ORM\Id]

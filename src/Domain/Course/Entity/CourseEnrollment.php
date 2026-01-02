@@ -2,13 +2,12 @@
 
 namespace App\Domain\Course\Entity;
 
-use App\Domain\Course\Repository\CourseEnrollmentRepository;
 use App\Domain\User\Entity\User;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\ApiResource;
 use Symfony\Component\Serializer\Annotation\Groups;
 
-#[ORM\Entity(repositoryClass: CourseEnrollmentRepository::class)]
+#[ORM\Entity]
 #[ORM\Table(name: 'course_enrollments')]
 #[ORM\HasLifecycleCallbacks]
 #[ApiResource(

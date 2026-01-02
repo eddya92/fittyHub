@@ -1,7 +1,7 @@
 {% extends 'admin/base.html.twig' %}
 
 {% block page_title %}Gestione Iscritti{% endblock %}
-{% block page_subtitle %}Visualizza e gestisci tutte le iscrizioni alle palestre{% endblock %}
+{% block page_subtitle %}Lista completa degli utenti iscritti con il loro abbonamento corrente{% endblock %}
 
 {% block content %}
 {# Stats Cards #}
@@ -9,7 +9,7 @@
     <div class="bg-white rounded-lg shadow-md p-6">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-sm text-gray-600 font-medium">Totali</p>
+                <p class="text-sm text-gray-600 font-medium">Utenti Totali</p>
                 <p class="text-3xl font-bold text-gray-900 mt-2">{{ stats.total }}</p>
             </div>
             <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
@@ -23,7 +23,7 @@
     <div class="bg-white rounded-lg shadow-md p-6">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-sm text-gray-600 font-medium">Attivi</p>
+                <p class="text-sm text-gray-600 font-medium">Abbonamenti Attivi</p>
                 <p class="text-3xl font-bold text-green-600 mt-2">{{ stats.active }}</p>
             </div>
             <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
@@ -37,7 +37,7 @@
     <div class="bg-white rounded-lg shadow-md p-6">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-sm text-gray-600 font-medium">Scaduti</p>
+                <p class="text-sm text-gray-600 font-medium">Abbonamenti Scaduti</p>
                 <p class="text-3xl font-bold text-orange-600 mt-2">{{ stats.expired }}</p>
             </div>
             <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
@@ -51,7 +51,7 @@
     <div class="bg-white rounded-lg shadow-md p-6">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-sm text-gray-600 font-medium">Cancellati</p>
+                <p class="text-sm text-gray-600 font-medium">Abbonamenti Cancellati</p>
                 <p class="text-3xl font-bold text-red-600 mt-2">{{ stats.cancelled }}</p>
             </div>
             <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
@@ -118,70 +118,65 @@
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Utente
                     </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Palestra
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Scadenza
                     </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Data Inizio
+                    <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Quota
                     </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Data Fine
-                    </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Stato
-                    </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Azioni
                     </th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
                 {% if memberships|length > 0 %}
-                    {% for membership in memberships %}
+                    {% for item in memberships %}
+                        {% set membership = item.membership %}
+                        {% set enrollment = item.enrollment %}
                         <tr class="hover:bg-gray-50 transition-colors">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center">
-                                    <div class="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
-                                        <span class="text-primary-600 font-bold text-sm">
-                                            {{ membership.user.firstName|slice(0, 1) ~ membership.user.lastName|slice(0, 1) }}
-                                        </span>
-                                    </div>
-                                    <div class="ml-3">
-                                        <p class="text-sm font-medium text-gray-900">
-                                            {{ membership.user.firstName }} {{ membership.user.lastName }}
-                                        </p>
-                                        <p class="text-xs text-gray-500">
-                                            {{ membership.user.email }}
-                                        </p>
-                                    </div>
+                            <td class="px-4 py-3">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">
+                                        {{ membership.user.firstName }} {{ membership.user.lastName }}
+                                    </p>
+                                    <p class="text-xs text-gray-500">{{ membership.user.email }}</p>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <p class="text-sm text-gray-900">{{ membership.gym.name }}</p>
-                                <p class="text-xs text-gray-500">{{ membership.gym.city }}</p>
+                            <td class="px-4 py-3">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">{{ membership.endDate|date('d/m/Y') }}</p>
+                                    <span class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded
+                                        {% if membership.status == 'active' %}bg-green-100 text-green-800
+                                        {% elseif membership.status == 'expired' %}bg-orange-100 text-orange-800
+                                        {% elseif membership.status == 'cancelled' %}bg-red-100 text-red-800
+                                        {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                        {{ membership.status|upper }}
+                                    </span>
+                                </div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ membership.startDate|date('d/m/Y') }}
+                            <td class="px-4 py-3 text-center">
+                                {% if membership.gym.enrollmentFeeAmount and membership.gym.enrollmentFeeAmount > 0 %}
+                                    {% if enrollment %}
+                                        <span class="inline-flex items-center px-2 py-1 text-xs font-medium rounded bg-green-100 text-green-800">
+                                            ✓
+                                        </span>
+                                    {% else %}
+                                        <span class="inline-flex items-center px-2 py-1 text-xs font-bold rounded bg-red-100 text-red-800">
+                                            ✗
+                                        </span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-xs text-gray-400">-</span>
+                                {% endif %}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ membership.endDate|date('d/m/Y') }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-3 py-1 text-xs font-medium rounded-full
-                                    {% if membership.status == 'active' %}bg-green-100 text-green-800
-                                    {% elseif membership.status == 'expired' %}bg-orange-100 text-orange-800
-                                    {% elseif membership.status == 'cancelled' %}bg-red-100 text-red-800
-                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
-                                    {{ membership.status|upper }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            <td class="px-4 py-3 text-right">
                                 <a
                                     href="{{ path('admin_membership_show', {'id': membership.id}) }}"
-                                    class="text-primary-600 hover:text-primary-900 font-medium"
+                                    class="text-primary-600 hover:text-primary-900 font-medium text-sm"
                                 >
                                     Dettagli →
                                 </a>
@@ -190,7 +185,7 @@
                     {% endfor %}
                 {% else %}
                     <tr>
-                        <td colspan="6" class="px-6 py-12 text-center text-gray-500">
+                        <td colspan="4" class="px-6 py-12 text-center text-gray-500">
                             <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
                             </svg>
@@ -202,5 +197,57 @@
             </tbody>
         </table>
     </div>
+
+    {# Pagination #}
+    {% if total_pages > 1 %}
+        <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
+            <div class="flex items-center justify-between">
+                <div class="text-sm text-gray-700">
+                    Pagina <span class="font-medium">{{ current_page }}</span> di <span class="font-medium">{{ total_pages }}</span>
+                    <span class="ml-2 text-gray-500">({{ total_users }} utenti totali)</span>
+                </div>
+                <div class="flex gap-2">
+                    {% if current_page > 1 %}
+                        <a href="{{ path('admin_memberships', {
+                            'page': current_page - 1,
+                            'status': current_status,
+                            'search': current_search,
+                            'gym': current_gym
+                        }) }}" class="px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
+                            ← Precedente
+                        </a>
+                    {% endif %}
+
+                    {# Mostra alcune pagine #}
+                    {% set start_page = max(1, current_page - 2) %}
+                    {% set end_page = min(total_pages, current_page + 2) %}
+
+                    {% for p in start_page..end_page %}
+                        <a href="{{ path('admin_memberships', {
+                            'page': p,
+                            'status': current_status,
+                            'search': current_search,
+                            'gym': current_gym
+                        }) }}" class="px-3 py-2 border rounded-lg text-sm font-medium
+                            {% if p == current_page %}bg-primary-600 text-white border-primary-600
+                            {% else %}bg-white border-gray-300 text-gray-700 hover:bg-gray-50{% endif %}">
+                            {{ p }}
+                        </a>
+                    {% endfor %}
+
+                    {% if current_page < total_pages %}
+                        <a href="{{ path('admin_memberships', {
+                            'page': current_page + 1,
+                            'status': current_status,
+                            'search': current_search,
+                            'gym': current_gym
+                        }) }}" class="px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
+                            Successiva →
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
 </div>
 {% endblock %}

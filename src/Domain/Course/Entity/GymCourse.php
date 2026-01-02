@@ -2,7 +2,6 @@
 
 namespace App\Domain\Course\Entity;
 
-use App\Domain\Course\Repository\GymCourseRepository;
 use App\Domain\Gym\Entity\Gym;
 use App\Domain\PersonalTrainer\Entity\PersonalTrainer;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -11,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\ApiResource;
 use Symfony\Component\Serializer\Annotation\Groups;
 
-#[ORM\Entity(repositoryClass: GymCourseRepository::class)]
+#[ORM\Entity]
 #[ORM\Table(name: 'gym_courses')]
 #[ApiResource(
     normalizationContext: ['groups' => ['course:read']],
