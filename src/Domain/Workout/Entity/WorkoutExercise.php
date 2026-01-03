@@ -2,11 +2,10 @@
 
 namespace App\Domain\Workout\Entity;
 
-use App\Domain\Workout\Repository\WorkoutExerciseRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: WorkoutExerciseRepository::class)]
+#[ORM\Entity]
 class WorkoutExercise
 {
     #[ORM\Id]

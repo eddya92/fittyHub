@@ -1,0 +1,116 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block page_title %}Richieste Iscrizione{% endblock %}
+{% block page_subtitle %}Nuove richieste di iscrizione da approvare{% endblock %}
+
+{% block content %}
+
+{# Badge con numero richieste pendenti #}
+<div class="mb-6">
+    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+        <div class="flex items-center">
+            <svg class="w-6 h-6 text-blue-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+            </svg>
+            <div>
+                <p class="font-medium text-blue-900">
+                    {% if requests|length > 0 %}
+                        {{ requests|length }} nuov{{ requests|length == 1 ? 'a' : 'e' }} richiest{{ requests|length == 1 ? 'a' : 'e' }} in attesa
+                    {% else %}
+                        Nessuna richiesta pendente
+                    {% endif %}
+                </p>
+                <p class="text-sm text-blue-700">Utenti che vogliono iscriversi alla tua palestra</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Lista Richieste #}
+<div class="bg-white rounded-lg shadow-md overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Utente</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contatti</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Messaggio</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data Richiesta</th>
+                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Azioni</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% if requests|length > 0 %}
+                    {% for request in requests %}
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-10 w-10 bg-primary-100 rounded-full flex items-center justify-center">
+                                        <span class="text-primary-700 font-semibold text-sm">
+                                            {{ request.user.firstName|slice(0,1) }}{{ request.user.lastName|slice(0,1) }}
+                                        </span>
+                                    </div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-gray-900">
+                                            {{ request.user.firstName }} {{ request.user.lastName }}
+                                        </div>
+                                        <div class="text-sm text-gray-500">
+                                            ID: #{{ request.user.id }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="text-sm text-gray-900">{{ request.user.email }}</div>
+                                {% if request.user.phoneNumber %}
+                                    <div class="text-sm text-gray-500">{{ request.user.phoneNumber }}</div>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4">
+                                {% if request.message %}
+                                    <div class="text-sm text-gray-900 max-w-xs truncate" title="{{ request.message }}">
+                                        {{ request.message }}
+                                    </div>
+                                {% else %}
+                                    <span class="text-sm text-gray-400 italic">Nessun messaggio</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">
+                                    {{ request.requestedAt|date('d/m/Y') }}
+                                </div>
+                                <div class="text-xs text-gray-500">
+                                    {{ request.requestedAt|date('H:i') }}
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                <a href="{{ path('admin_membership_request_show', {id: request.id}) }}"
+                                   class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                    </svg>
+                                    Gestisci
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="5" class="px-6 py-12 text-center">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+                            </svg>
+                            <h3 class="mt-2 text-sm font-medium text-gray-900">Nessuna richiesta pendente</h3>
+                            <p class="mt-1 text-sm text-gray-500">
+                                Al momento non ci sono nuove richieste di iscrizione da gestire.
+                            </p>
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

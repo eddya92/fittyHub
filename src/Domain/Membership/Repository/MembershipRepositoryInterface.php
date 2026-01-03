@@ -40,4 +40,13 @@ interface MembershipRepositoryInterface
      * Conta utenti unici (business logic custom)
      */
     public function countUniqueUsers(?string $status = null): int;
+
+    /**
+     * Trova un membership per criteri specifici
+     *
+     * @param array $criteria
+     * @param array|null $orderBy
+     * @return GymMembership|null
+     */
+    public function findOneBy(array $criteria, ?array $orderBy = null);
 }

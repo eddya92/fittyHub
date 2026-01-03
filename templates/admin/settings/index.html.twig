@@ -89,6 +89,27 @@
                 a tutti gli iscritti attuali e futuri.
             </p>
 
+            <div class="flex items-start mb-6">
+                <div class="flex items-center h-5">
+                    <input
+                        id="enable_enrollment_fee"
+                        name="enable_enrollment_fee"
+                        type="checkbox"
+                        value="1"
+                        {% if settings.isEnableEnrollmentFee %}checked{% endif %}
+                        class="w-5 h-5 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                    >
+                </div>
+                <div class="ml-4">
+                    <label for="enable_enrollment_fee" class="font-medium text-gray-900">
+                        Abilita Quota Iscrizione
+                    </label>
+                    <p class="text-sm text-gray-500 mt-1">
+                        Quando attiva, verrà richiesta la quota di iscrizione per tutti i nuovi iscritti.
+                    </p>
+                </div>
+            </div>
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label for="enrollment_fee_amount" class="block text-sm font-medium text-gray-700 mb-2">

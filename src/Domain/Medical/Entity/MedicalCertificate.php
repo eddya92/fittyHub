@@ -6,8 +6,11 @@ use App\Domain\User\Entity\User;
 use App\Domain\Membership\Entity\GymMembership;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\HttpFoundation\File\File;
+use Vich\UploaderBundle\Mapping\Annotation as Vich;
 
 #[ORM\Entity]
+#[Vich\Uploadable]
 class MedicalCertificate
 {
     #[ORM\Id]
@@ -37,7 +40,11 @@ class MedicalCertificate
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $doctorNumber = null;
 
-    #[ORM\Column(length: 255)]
+    // Campo per VichUploader (file PDF)
+    #[Vich\UploadableField(mapping: 'medical_certificates', fileNameProperty: 'filePath')]
+    private ?File $certificateFile = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $filePath = null;
 
     #[ORM\Column(length: 50)]
@@ -155,9 +162,26 @@ class MedicalCertificate
         return $this->filePath;
     }
 
-    public function setFilePath(string $filePath): static
+    public function setFilePath(?string $filePath): static
     {
         $this->filePath = $filePath;
+
+        return $this;
+    }
+
+    public function getCertificateFile(): ?File
+    {
+        return $this->certificateFile;
+    }
+
+    public function setCertificateFile(?File $certificateFile = null): static
+    {
+        $this->certificateFile = $certificateFile;
+
+        // Se viene uploadato un nuovo file, aggiorna uploadedAt
+        if (null !== $certificateFile) {
+            $this->uploadedAt = new \DateTimeImmutable();
+        }
 
         return $this;
     }

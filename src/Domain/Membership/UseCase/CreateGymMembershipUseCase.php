@@ -57,7 +57,7 @@ class CreateGymMembershipUseCase
         }
 
         // Business Rule 4: Verifica che il certificato copra l'intero periodo
-        if ($validCertificate->getExpirationDate() < $endDate) {
+        if ($validCertificate->getExpiryDate() < $endDate) {
             throw new \DomainException(
                 'Il tuo certificato medico scade prima della fine dell\'abbonamento. ' .
                 'Devi avere un certificato valido per tutta la durata dell\'iscrizione.'

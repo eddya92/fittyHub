@@ -2,6 +2,9 @@
 
 namespace App\Domain\Gym\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
@@ -18,9 +21,12 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Vich\UploaderBundle\Mapping\Annotation as Vich;
 
 #[ORM\Entity(repositoryClass: GymRepository::class)]
+#[Vich\Uploadable]
 #[ApiFilter(SearchFilter::class, properties: ['name' => 'partial', 'city' => 'exact', 'postalCode' => 'exact'])]
 #[ApiFilter(OrderFilter::class, properties: ['name', 'city', 'createdAt'])]
 #[ApiResource(
@@ -63,6 +69,10 @@ class Gym
     #[Groups(['gym:read'])]
     private ?int $id = null;
 
+    #[ORM\Column(length: 100, unique: true)]
+    #[Groups(['gym:read'])]
+    private ?string $slug = null; // Codice univoco per QR/ricerca (es: "fithub-milano-123")
+
     #[ORM\Column(length: 255)]
     #[Groups(['gym:read', 'gym:create', 'gym:update'])]
     private ?string $name = null;
@@ -101,6 +111,10 @@ class Gym
 
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $vatNumber = null;
+
+    // Campo per VichUploader (file logo)
+    #[Vich\UploadableField(mapping: 'gym_logos', fileNameProperty: 'logo')]
+    private ?File $logoFile = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $logo = null;
@@ -210,6 +224,24 @@ class Gym
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getSlug(): ?string
+    {
+        return $this->slug;
+    }
+
+    public function setSlug(string $slug): static
+    {
+        $this->slug = $slug;
+        return $this;
+    }
+
+    public function generateSlug(): void
+    {
+        // Genera slug da nome: "FitHub Milano" -> "fithub-milano-{random}"
+        $baseSlug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $this->name)));
+        $this->slug = $baseSlug . '-' . substr(md5(uniqid()), 0, 6);
     }
 
     public function getName(): ?string
@@ -340,6 +372,23 @@ class Gym
     public function setLogo(?string $logo): static
     {
         $this->logo = $logo;
+
+        return $this;
+    }
+
+    public function getLogoFile(): ?File
+    {
+        return $this->logoFile;
+    }
+
+    public function setLogoFile(?File $logoFile = null): static
+    {
+        $this->logoFile = $logoFile;
+
+        // Aggiorna updatedAt quando viene caricato nuovo logo
+        if (null !== $logoFile) {
+            $this->updatedAt = new \DateTimeImmutable();
+        }
 
         return $this;
     }

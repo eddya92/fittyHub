@@ -2,10 +2,7 @@
 
 namespace App\Controller\Admin;
 
-use App\Domain\Membership\UseCase\GetAllEnrollments;
-use App\Domain\Membership\UseCase\GetExpiringEnrollments;
-use App\Domain\Membership\UseCase\GetEnrollmentById;
-use App\Domain\Membership\UseCase\GetUserEnrollmentHistory;
+use App\Domain\Membership\Repository\EnrollmentRepositoryInterface;
 use App\Domain\Membership\UseCase\CreateEnrollment;
 use App\Domain\Membership\UseCase\ExpireEnrollment;
 use App\Domain\User\Repository\UserRepositoryInterface;
@@ -19,10 +16,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class EnrollmentController extends AbstractController
 {
     public function __construct(
-        private GetAllEnrollments $getAllEnrollments,
-        private GetExpiringEnrollments $getExpiringEnrollments,
-        private GetEnrollmentById $getEnrollmentById,
-        private GetUserEnrollmentHistory $getUserEnrollmentHistory,
+        private EnrollmentRepositoryInterface $enrollmentRepository,
         private CreateEnrollment $createEnrollment,
         private ExpireEnrollment $expireEnrollment,
         private UserRepositoryInterface $userRepository,
@@ -33,15 +27,24 @@ class EnrollmentController extends AbstractController
     public function index(): Response
     {
         return $this->render('admin/enrollments/index.html.twig', [
-            'enrollments' => $this->getAllEnrollments->execute(),
+            'enrollments' => $this->enrollmentRepository->findAll(),
         ]);
     }
 
     #[Route('/expiring', name: 'admin_enrollments_expiring')]
     public function expiring(): Response
     {
+        // Find enrollments expiring in 30 days
+        $expiryDate = new \DateTime('+30 days');
+        $enrollments = $this->enrollmentRepository->findBy(
+            ['status' => 'active'],
+            ['expiryDate' => 'ASC']
+        );
+
+        $expiring = array_filter($enrollments, fn($e) => $e->getExpiryDate() <= $expiryDate);
+
         return $this->render('admin/enrollments/expiring.html.twig', [
-            'enrollments' => $this->getExpiringEnrollments->execute(30),
+            'enrollments' => $expiring,
         ]);
     }
 
@@ -91,28 +94,30 @@ class EnrollmentController extends AbstractController
     #[Route('/user/{userId}', name: 'admin_enrollment_user_history')]
     public function userHistory(int $userId): Response
     {
-        try {
-            $user = $this->userRepository->find($userId);
+        $user = $this->userRepository->find($userId);
 
-            if (!$user) {
-                throw new \RuntimeException('Utente non trovato.');
-            }
-
-            return $this->render('admin/enrollments/user_history.html.twig', [
-                'user' => $user,
-                'enrollments' => $this->getUserEnrollmentHistory->execute($user),
-            ]);
-        } catch (\RuntimeException $e) {
-            $this->addFlash('error', $e->getMessage());
+        if (!$user) {
+            $this->addFlash('error', 'Utente non trovato.');
             return $this->redirectToRoute('admin_enrollments');
         }
+
+        return $this->render('admin/enrollments/user_history.html.twig', [
+            'user' => $user,
+            'enrollments' => $this->enrollmentRepository->findBy(['user' => $user], ['createdAt' => 'DESC']),
+        ]);
     }
 
     #[Route('/{id}/expire', name: 'admin_enrollment_expire', methods: ['POST'])]
     public function expire(int $id): Response
     {
+        $enrollment = $this->enrollmentRepository->find($id);
+
+        if (!$enrollment) {
+            $this->addFlash('error', 'Iscrizione non trovata.');
+            return $this->redirectToRoute('admin_enrollments');
+        }
+
         try {
-            $enrollment = $this->getEnrollmentById->execute($id);
             $this->expireEnrollment->execute($enrollment);
 
             $this->addFlash('success', 'Quota iscrizione scaduta.');

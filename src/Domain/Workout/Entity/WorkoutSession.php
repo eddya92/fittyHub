@@ -2,13 +2,12 @@
 
 namespace App\Domain\Workout\Entity;
 
-use App\Domain\Workout\Repository\WorkoutSessionRepository;
 use App\Domain\User\Entity\User;
 use App\Domain\PersonalTrainer\Entity\PersonalTrainer;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: WorkoutSessionRepository::class)]
+#[ORM\Entity]
 class WorkoutSession
 {
     #[ORM\Id]

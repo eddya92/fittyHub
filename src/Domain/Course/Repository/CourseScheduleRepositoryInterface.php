@@ -6,13 +6,12 @@ use App\Domain\Course\Entity\CourseSchedule;
 
 /**
  * Repository interface per CourseSchedule
- *
- * Nota: Attualmente usa solo metodi standard (find, save, remove)
- * che sono già forniti da ServiceEntityRepository.
- * Questa interfaccia mantiene il contratto Domain/Infrastructure.
  */
 interface CourseScheduleRepositoryInterface
 {
-    // Al momento non ci sono metodi business-specific custom
-    // I metodi standard sono ereditati da ServiceEntityRepository
+    public function save(CourseSchedule $schedule, bool $flush = false): void;
+
+    public function remove(CourseSchedule $schedule, bool $flush = false): void;
+
+    public function findAll(): array;
 }

@@ -33,4 +33,9 @@ interface GymAttendanceRepositoryInterface
      * Conta gli utenti unici per una palestra in un periodo
      */
     public function countUniqueUsersByGymAndDateRange(Gym $gym, ?\DateTime $from = null, ?\DateTime $to = null): int;
+
+    /**
+     * Salva una presenza
+     */
+    public function save(GymAttendance $attendance, bool $flush = false): void;
 }

@@ -272,4 +272,12 @@ class GymCourse
         }
         return false;
     }
+
+    /**
+     * Verifica se il corso è attivo
+     */
+    public function isActive(): bool
+    {
+        return $this->status === 'active';
+    }
 }

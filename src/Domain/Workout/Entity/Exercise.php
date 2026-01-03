@@ -2,11 +2,10 @@
 
 namespace App\Domain\Workout\Entity;
 
-use App\Domain\Workout\Repository\ExerciseRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: ExerciseRepository::class)]
+#[ORM\Entity]
 #[ORM\Table(name: 'exercise')]
 #[ORM\HasLifecycleCallbacks]
 class Exercise

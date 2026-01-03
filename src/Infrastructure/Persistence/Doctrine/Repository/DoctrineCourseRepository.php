@@ -17,6 +17,24 @@ class DoctrineCourseRepository extends ServiceEntityRepository implements Course
         parent::__construct($registry, GymCourse::class);
     }
 
+    public function save(GymCourse $course, bool $flush = false): void
+    {
+        $this->getEntityManager()->persist($course);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
+    public function remove(GymCourse $course, bool $flush = false): void
+    {
+        $this->getEntityManager()->remove($course);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
     public function findWithFilters(?string $search, ?string $category, ?string $status): array
     {
         $qb = $this->createQueryBuilder('c')

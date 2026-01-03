@@ -3,7 +3,7 @@
 namespace App\Controller\PT;
 
 use App\Domain\PersonalTrainer\Repository\TrainerRepositoryInterface;
-use App\Domain\Workout\Repository\WorkoutPlanRepository;
+use App\Domain\Workout\Repository\WorkoutPlanRepositoryInterface;
 use App\Domain\User\Repository\UserRepositoryInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,7 +19,7 @@ class WorkoutController extends AbstractController
     public function index(
         Request $request,
         TrainerRepositoryInterface $trainerRepo,
-        WorkoutPlanRepository $workoutRepo
+        WorkoutPlanRepositoryInterface $workoutRepo
     ): Response {
         // Recupera il PT loggato
         $user = $this->getUser();
@@ -110,7 +110,7 @@ class WorkoutController extends AbstractController
     public function show(
         int $id,
         TrainerRepositoryInterface $trainerRepo,
-        WorkoutPlanRepository $workoutRepo
+        WorkoutPlanRepositoryInterface $workoutRepo
     ): Response {
         // Recupera il PT loggato
         $user = $this->getUser();

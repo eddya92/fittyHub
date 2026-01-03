@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <h2 style="color: #f59e0b;">⏰ Abbonamento in Scadenza</h2>
+    <p>Ciao {{ user.firstName }},</p>
+    <p>Il tuo abbonamento a <strong>{{ gym.name }}</strong> scadrà tra <strong>{{ days_remaining }} giorn{{ days_remaining == 1 ? 'o' : 'i' }}</strong>.</p>
+    <div style="background: #fef3c7; padding: 15px; border-left: 4px solid #f59e0b; margin: 15px 0;">
+        <p><strong>Data scadenza:</strong> {{ membership.endDate|date('d/m/Y') }}</p>
+    </div>
+    <p>Non perdere l'accesso alla palestra! Contattaci per rinnovare il tuo abbonamento.</p>
+    <p>📧 {{ gym.email }}<br>📞 {{ gym.phoneNumber }}</p>
+</body>
+</html>

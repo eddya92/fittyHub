@@ -1,3 +1,7 @@
 framework:
     mailer:
         dsn: '%env(MAILER_DSN)%'
+        envelope:
+            sender: 'noreply@fittyhub.app'
+        headers:
+            From: 'FittyHub <noreply@fittyhub.app>'

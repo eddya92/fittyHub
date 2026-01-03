@@ -49,4 +49,36 @@ class DoctrineMedicalCertificateRepository extends ServiceEntityRepository imple
             ->getQuery()
             ->getOneOrNullResult();
     }
+
+    public function findValidCertificateForUserAndGym(User $user, $gym): ?MedicalCertificate
+    {
+        return $this->createQueryBuilder('c')
+            ->where('c.user = :user')
+            ->andWhere('c.gym = :gym')
+            ->andWhere('c.expiryDate >= :today')
+            ->setParameter('user', $user)
+            ->setParameter('gym', $gym)
+            ->setParameter('today', new \DateTime())
+            ->orderBy('c.expiryDate', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    public function findExpiringOn(\DateTimeInterface $date): array
+    {
+        // Normalizza la data a midnight per confronto
+        $startOfDay = (clone $date)->setTime(0, 0, 0);
+        $endOfDay = (clone $date)->setTime(23, 59, 59);
+
+        return $this->createQueryBuilder('c')
+            ->where('c.status = :status')
+            ->andWhere('c.expiryDate >= :startOfDay')
+            ->andWhere('c.expiryDate <= :endOfDay')
+            ->setParameter('status', 'approved')
+            ->setParameter('startOfDay', $startOfDay)
+            ->setParameter('endOfDay', $endOfDay)
+            ->getQuery()
+            ->getResult();
+    }
 }

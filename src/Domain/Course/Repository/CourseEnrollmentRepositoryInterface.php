@@ -3,17 +3,35 @@
 namespace App\Domain\Course\Repository;
 
 use App\Domain\Course\Entity\CourseEnrollment;
-use App\Domain\Course\Entity\GymCourse;
+use App\Domain\Course\Entity\CourseSchedule;
+use App\Domain\User\Entity\User;
 
 /**
  * Repository interface per CourseEnrollment (iscrizione a corsi)
- *
- * Nota: Attualmente usa solo metodi standard (find, findBy, save, remove)
- * che sono già forniti da ServiceEntityRepository.
- * Questa interfaccia mantiene il contratto Domain/Infrastructure.
  */
 interface CourseEnrollmentRepositoryInterface
 {
-    // Al momento non ci sono metodi business-specific custom
-    // I metodi standard sono ereditati da ServiceEntityRepository
+    public function save(CourseEnrollment $enrollment, bool $flush = false): void;
+
+    public function remove(CourseEnrollment $enrollment, bool $flush = false): void;
+
+    /**
+     * Trova prenotazione attiva di un utente per uno specifico schedule
+     */
+    public function findActiveEnrollmentForSchedule(User $user, CourseSchedule $schedule): ?CourseEnrollment;
+
+    /**
+     * Trova tutte le prenotazioni attive di un utente
+     */
+    public function findActiveEnrollmentsByUser(User $user): array;
+
+    /**
+     * Conta le prenotazioni attive per uno schedule
+     */
+    public function countActiveEnrollmentsBySchedule(CourseSchedule $schedule): int;
+
+    /**
+     * Trova un enrollment con criteri specifici
+     */
+    public function findOneBy(array $criteria, ?array $orderBy = null): ?CourseEnrollment;
 }

@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <h2 style="color: #ef4444;">Richiesta Iscrizione</h2>
+    <p>Ciao {{ user.firstName }},</p>
+    <p>Purtroppo la tua richiesta di iscrizione a <strong>{{ gym.name }}</strong> non è stata approvata.</p>
+    {% if request.adminNotes %}
+    <div style="background: #fee2e2; padding: 15px; border-left: 4px solid #ef4444; margin: 15px 0;">
+        <p><strong>Motivo:</strong> {{ request.adminNotes }}</p>
+    </div>
+    {% endif %}
+    <p>Per ulteriori informazioni, contatta direttamente la palestra:</p>
+    <p>📧 {{ gym.email }}<br>📞 {{ gym.phoneNumber }}</p>
+</body>
+</html>

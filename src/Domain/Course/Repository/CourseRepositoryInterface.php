@@ -7,12 +7,13 @@ use App\Domain\Gym\Entity\Gym;
 
 /**
  * Repository interface per GymCourse
- *
- * Nota: Metodi standard (find, findBy, save, remove, count, etc.)
- * sono già forniti da ServiceEntityRepository
  */
 interface CourseRepositoryInterface
 {
+    public function save(GymCourse $course, bool $flush = false): void;
+
+    public function remove(GymCourse $course, bool $flush = false): void;
+
     /**
      * Trova corsi con filtri custom
      */

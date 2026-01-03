@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #4CAF50; color: white; padding: 20px; text-align: center; border-radius: 5px; }
+        .content { background: #f9f9f9; padding: 20px; margin-top: 20px; border-radius: 5px; }
+        .details { background: white; padding: 15px; margin: 15px 0; border-left: 4px solid #4CAF50; }
+        .footer { text-align: center; margin-top: 20px; font-size: 12px; color: #666; }
+        .btn { display: inline-block; padding: 10px 20px; background: #4CAF50; color: white; text-decoration: none; border-radius: 5px; margin-top: 15px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✅ Prenotazione Confermata!</h1>
+        </div>
+
+        <div class="content">
+            <p>Ciao {{ user.firstName }},</p>
+
+            <p>La tua prenotazione per <strong>{{ course.name }}</strong> è stata confermata!</p>
+
+            <div class="details">
+                <h3>📅 Dettagli Sessione</h3>
+                <p><strong>Corso:</strong> {{ course.name }}</p>
+                <p><strong>Data e Ora:</strong> {{ session.sessionDate|date('d/m/Y') }} alle {{ session.schedule.startTime|date('H:i') }}</p>
+                <p><strong>Durata:</strong> {{ session.schedule.duration }} minuti</p>
+                <p><strong>Istruttore:</strong> {{ course.instructor.firstName }} {{ course.instructor.lastName }}</p>
+                {% if course.location %}
+                <p><strong>Luogo:</strong> {{ course.location }}</p>
+                {% endif %}
+            </div>
+
+            <p>Ti invieremo un promemoria 1 ora prima dell'inizio della lezione.</p>
+
+            <p><strong>Importante:</strong> Se non puoi più partecipare, ti preghiamo di cancellare la prenotazione per liberare il posto per altri.</p>
+        </div>
+
+        <div class="footer">
+            <p>FittyHub - Il tuo partner per il fitness</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -70,7 +70,7 @@ class CreateWorkoutPlanUseCase
 
         // Crea il piano
         $workoutPlan = new WorkoutPlan();
-        $workoutPlan->setUser($targetUser);
+        $workoutPlan->setClient($targetUser);
         $workoutPlan->setName($name);
         $workoutPlan->setDescription($description);
         $workoutPlan->setPlanType($planType);

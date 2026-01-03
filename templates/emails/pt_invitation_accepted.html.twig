@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #4CAF50; color: white; padding: 20px; text-align: center; border-radius: 5px; }
+        .content { background: #f9f9f9; padding: 20px; margin-top: 20px; border-radius: 5px; }
+        .success { background: #C8E6C9; padding: 20px; margin: 15px 0; border-radius: 5px; text-align: center; }
+        .details { background: white; padding: 15px; margin: 15px 0; border-left: 4px solid #4CAF50; }
+        .footer { text-align: center; margin-top: 20px; font-size: 12px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✅ Invito Accettato!</h1>
+        </div>
+
+        <div class="content">
+            <p>Ciao {{ trainer.user.firstName }},</p>
+
+            <div class="success">
+                <h2 style="margin: 0; color: #4CAF50;">{{ client.firstName }} {{ client.lastName }} ha accettato il tuo invito!</h2>
+            </div>
+
+            <div class="details">
+                <h3>👤 Nuovo Cliente</h3>
+                <p><strong>Nome:</strong> {{ client.firstName }} {{ client.lastName }}</p>
+                <p><strong>Email:</strong> {{ client.email }}</p>
+                <p><strong>Data Accettazione:</strong> {{ invitation.respondedAt|date('d/m/Y H:i') }}</p>
+            </div>
+
+            <p>Ora puoi:</p>
+            <ul>
+                <li>Creare piani allenamento personalizzati</li>
+                <li>Monitorare i progressi del cliente</li>
+                <li>Comunicare direttamente tramite l'app</li>
+            </ul>
+
+            <p style="background: #E3F2FD; padding: 15px; border-radius: 5px;">
+                💡 <strong>Suggerimento:</strong> Contatta il cliente per fissare la prima sessione e valutare gli obiettivi!
+            </p>
+        </div>
+
+        <div class="footer">
+            <p>FittyHub - Il tuo partner per il fitness</p>
+        </div>
+    </div>
+</body>
+</html>

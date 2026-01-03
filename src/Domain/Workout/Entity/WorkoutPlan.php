@@ -9,7 +9,6 @@ use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Delete;
-use App\Domain\Workout\Repository\WorkoutPlanRepository;
 use App\Domain\PersonalTrainer\Entity\PersonalTrainer;
 use App\Domain\User\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -18,7 +17,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
-#[ORM\Entity(repositoryClass: WorkoutPlanRepository::class)]
+#[ORM\Entity]
 #[ApiResource(
     operations: [
         new Get(

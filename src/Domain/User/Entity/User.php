@@ -19,14 +19,17 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Vich\UploaderBundle\Mapping\Annotation as Vich;
 
 #[ORM\Entity]
 #[ORM\Table(name: '`user`')]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
 #[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
+#[Vich\Uploadable]
 #[ApiResource(
     operations: [
         new Get(
@@ -113,6 +116,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 10, nullable: true)]
     #[Groups(['user:read', 'user:create', 'user:update'])]
     private ?string $postalCode = null;
+
+    // Campo per VichUploader (file avatar)
+    #[Vich\UploadableField(mapping: 'user_avatars', fileNameProperty: 'profileImage')]
+    private ?File $avatarFile = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['user:read', 'user:update'])]
@@ -341,6 +348,23 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setProfileImage(?string $profileImage): static
     {
         $this->profileImage = $profileImage;
+
+        return $this;
+    }
+
+    public function getAvatarFile(): ?File
+    {
+        return $this->avatarFile;
+    }
+
+    public function setAvatarFile(?File $avatarFile = null): static
+    {
+        $this->avatarFile = $avatarFile;
+
+        // Aggiorna updatedAt quando viene caricato nuovo avatar
+        if (null !== $avatarFile) {
+            $this->updatedAt = new \DateTimeImmutable();
+        }
 
         return $this;
     }

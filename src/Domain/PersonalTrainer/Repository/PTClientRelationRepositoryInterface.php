@@ -7,12 +7,18 @@ use App\Domain\PersonalTrainer\Entity\PTClientRelation;
 /**
  * Repository interface per PTClientRelation
  *
- * Nota: Attualmente usa solo metodi standard (find, findBy)
- * che sono già forniti da ServiceEntityRepository.
+ * Nota: Metodi standard (find, findBy, findOneBy, etc.)
+ * sono già forniti da ServiceEntityRepository.
  * Questa interfaccia mantiene il contratto Domain/Infrastructure.
  */
 interface PTClientRelationRepositoryInterface
 {
-    // Al momento non ci sono metodi business-specific custom
-    // I metodi standard sono ereditati da ServiceEntityRepository
+    /**
+     * Trova una relazione PT-Cliente per criteri specifici
+     *
+     * @param array $criteria
+     * @param array|null $orderBy
+     * @return PTClientRelation|null
+     */
+    public function findOneBy(array $criteria, ?array $orderBy = null);
 }

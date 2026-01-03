@@ -1,7 +1,7 @@
 {% extends 'admin/base.html.twig' %}
 
 {% block page_title %}Calendario Corsi{% endblock %}
-{% block page_subtitle %}Visualizza tutti i corsi della settimana{% endblock %}
+{% block page_subtitle %}{{ weekInfo.label }}{% endblock %}
 
 {% block content %}
 <div class="-mx-8">
@@ -12,6 +12,30 @@
         </svg>
         Torna alla lista
     </a>
+
+    {# Navigazione settimane #}
+    <div class="flex items-center gap-4">
+        <a href="{{ path('admin_courses_calendar', {'week': previousWeek|date('Y-m-d')}) }}"
+           class="inline-flex items-center px-3 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+        </a>
+
+        <span class="font-semibold text-gray-900">{{ weekInfo.label }}</span>
+
+        <a href="{{ path('admin_courses_calendar', {'week': nextWeek|date('Y-m-d')}) }}"
+           class="inline-flex items-center px-3 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+        </a>
+
+        <a href="{{ path('admin_courses_calendar') }}"
+           class="inline-flex items-center px-3 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm">
+            Oggi
+        </a>
+    </div>
 
     <div class="flex gap-3">
         <a
@@ -69,23 +93,28 @@
                         </td>
                         {% for day in ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] %}
                             <td class="border-r border-b border-gray-200 p-2 align-top last:border-r-0 min-h-[80px]">
-                                {# Trova corsi che iniziano in questo slot #}
+                                {# Trova sessioni che iniziano in questo slot #}
                                 {% if calendar[day]|length > 0 %}
-                                    {% for item in calendar[day] %}
-                                        {% set course = item.course %}
-                                        {% set schedule = item.schedule %}
+                                    {% for session in calendar[day] %}
+                                        {% set course = session.course %}
+                                        {% set schedule = session.schedule %}
                                         {% set scheduleStart = schedule.startTime|date('H:i') %}
 
                                         {% if scheduleStart == timeSlot %}
                                             {% set categoryColor = course.category ? course.category.color : '#3B82F6' %}
+                                            {% set isPast = session.isInPast %}
+                                            {% set isToday = session.isToday %}
 
                                             <div
-                                                class="p-2 rounded-lg border-l-4 hover:shadow-md transition-shadow cursor-pointer mb-2"
+                                                class="p-2 rounded-lg border-l-4 hover:shadow-md transition-shadow cursor-pointer mb-2 {{ isPast ? 'opacity-60' : '' }}"
                                                 style="background-color: {{ categoryColor }}20; border-left-color: {{ categoryColor }}"
-                                                onclick="window.location='{{ path('admin_course_show', {'id': course.id}) }}'"
+                                                onclick="window.location='{{ path('admin_course_session_show', {'sessionId': session.id}) }}'"
                                             >
                                                 <div class="text-xs font-bold mb-1" style="color: {{ categoryColor }}">
                                                     {{ schedule.startTime|date('H:i') }} - {{ schedule.endTime|date('H:i') }}
+                                                    {% if isToday %}
+                                                        <span class="ml-1 px-1 py-0.5 bg-blue-500 text-white rounded text-[10px]">OGGI</span>
+                                                    {% endif %}
                                                 </div>
 
                                                 <h4 class="font-semibold text-xs text-gray-900 mb-1">{{ course.name }}</h4>
@@ -98,16 +127,20 @@
 
                                                 <div class="flex items-center justify-between mt-1">
                                                     <span class="text-xs text-gray-600">
-                                                        {{ schedule.activeEnrollmentsCount }}/{{ course.maxParticipants }}
+                                                        {{ session.activeEnrollmentsCount }}/{{ session.maxParticipants }}
                                                     </span>
 
-                                                    {% if schedule.activeEnrollmentsCount >= course.maxParticipants %}
+                                                    {% if session.isFull %}
                                                         <span class="text-xs font-medium px-1.5 py-0.5 bg-red-100 text-red-800 rounded">
                                                             PIENO
                                                         </span>
-                                                    {% elseif schedule.activeEnrollmentsCount >= (course.maxParticipants * 0.8) %}
+                                                    {% elseif session.activeEnrollmentsCount >= (session.maxParticipants * 0.8) %}
                                                         <span class="text-xs font-medium px-1.5 py-0.5 bg-yellow-100 text-yellow-800 rounded">
-                                                            {{ course.maxParticipants - schedule.activeEnrollmentsCount }}
+                                                            {{ session.availableSpots }}
+                                                        </span>
+                                                    {% elseif isPast %}
+                                                        <span class="text-xs font-medium px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded">
+                                                            PASSATA
                                                         </span>
                                                     {% endif %}
                                                 </div>

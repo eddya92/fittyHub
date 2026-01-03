@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <h2 style="color: #6366f1;">Nuova Richiesta Iscrizione</h2>
+    <p>Ciao {{ admin.firstName }},</p>
+    <p>È arrivata una nuova richiesta di iscrizione da gestire:</p>
+    <div style="background: #f9fafb; padding: 15px; border-left: 4px solid #f59e0b; margin: 15px 0;">
+        <p><strong>Utente:</strong> {{ user.firstName }} {{ user.lastName }}</p>
+        <p><strong>Email:</strong> {{ user.email }}</p>
+        <p><strong>Telefono:</strong> {{ user.phoneNumber ?? 'Non fornito' }}</p>
+        {% if request.message %}<p><strong>Messaggio:</strong> {{ request.message }}</p>{% endif %}
+    </div>
+    <p><a href="{{ url('admin_membership_request_show', {id: request.id}) }}" style="background: #6366f1; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">Gestisci Richiesta</a></p>
+</body>
+</html>

@@ -1,0 +1,177 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block page_title %}Report Finanziari{% endblock %}
+{% block page_subtitle %}Analisi e statistiche sui pagamenti{% endblock %}
+
+{% block content %}
+{# Filters #}
+<div class="bg-white rounded-lg shadow-md p-6 mb-6">
+    <form method="get" action="{{ path('admin_payment_reports') }}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div>
+            <label for="gym" class="block text-sm font-medium text-gray-700 mb-2">Palestra</label>
+            <select id="gym" name="gym" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                {% for gym in gyms %}
+                <option value="{{ gym.id }}" {% if current_gym and current_gym.id == gym.id %}selected{% endif %}>
+                    {{ gym.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div>
+            <label for="start_date" class="block text-sm font-medium text-gray-700 mb-2">Data Inizio</label>
+            <input type="date" id="start_date" name="start_date" value="{{ start_date|date('Y-m-d') }}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+        </div>
+
+        <div>
+            <label for="end_date" class="block text-sm font-medium text-gray-700 mb-2">Data Fine</label>
+            <input type="date" id="end_date" name="end_date" value="{{ end_date|date('Y-m-d') }}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+        </div>
+
+        <div class="flex items-end">
+            <button type="submit" class="w-full px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium">
+                Aggiorna Report
+            </button>
+        </div>
+    </form>
+</div>
+
+{# Summary Cards #}
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-600 font-medium">Periodo Selezionato</p>
+                <p class="text-lg font-bold text-gray-900 mt-2">
+                    {{ start_date|date('d/m/Y') }} - {{ end_date|date('d/m/Y') }}
+                </p>
+            </div>
+            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-600 font-medium">Palestra</p>
+                <p class="text-lg font-bold text-gray-900 mt-2">{{ current_gym.name }}</p>
+            </div>
+            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-lg shadow-md p-6 text-white">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-green-100 font-medium">Totale Incassato</p>
+                <p class="text-3xl font-bold mt-2">€ {{ total_revenue|number_format(2, ',', '.') }}</p>
+            </div>
+            <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Revenue by Type #}
+<div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+    <div class="bg-gradient-to-r from-primary-600 to-primary-700 px-6 py-4">
+        <h3 class="text-xl font-bold text-white">Incassi per Tipo di Pagamento</h3>
+    </div>
+    <div class="p-6">
+        {% if revenue_by_type|length > 0 %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo Pagamento</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">N. Pagamenti</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Totale Incassato</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">% sul Totale</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for row in revenue_by_type %}
+                    {% set percentage = total_revenue > 0 ? (row.total / total_revenue * 100) : 0 %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full
+                                {% if row.paymentType == 'membership' %}bg-blue-100 text-blue-800
+                                {% elseif row.paymentType == 'course_enrollment' %}bg-purple-100 text-purple-800
+                                {% elseif row.paymentType == 'pt_session' %}bg-green-100 text-green-800
+                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {% if row.paymentType == 'membership' %}Abbonamento
+                                {% elseif row.paymentType == 'course_enrollment' %}Iscrizione Corso
+                                {% elseif row.paymentType == 'pt_session' %}Sessione PT
+                                {% else %}Altro{% endif %}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
+                            {{ row.count }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-600">
+                            € {{ row.total|number_format(2, ',', '.') }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="w-32 bg-gray-200 rounded-full h-2 mr-3">
+                                    <div class="bg-primary-600 h-2 rounded-full" style="width: {{ percentage }}%"></div>
+                                </div>
+                                <span class="text-sm text-gray-900 font-medium">{{ percentage|number_format(1) }}%</span>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    <tr class="bg-gray-100 font-bold">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">TOTALE</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {{ revenue_by_type|reduce((carry, row) => carry + row.count, 0) }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600">
+                            € {{ total_revenue|number_format(2, ',', '.') }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">100%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-12 text-gray-500">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <p class="mt-4 text-sm">Nessun pagamento registrato nel periodo selezionato.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{# Quick Actions #}
+<div class="bg-white rounded-lg shadow-md p-6">
+    <h3 class="text-lg font-bold text-gray-900 mb-4">Azioni Rapide</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <a href="{{ path('admin_payments') }}" class="inline-flex items-center px-4 py-2 border border-primary-600 text-primary-600 rounded-lg hover:bg-primary-50 transition-colors text-sm font-medium justify-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+            </svg>
+            Vedi Tutti i Pagamenti
+        </a>
+        <a href="{{ path('admin_payment_new') }}" class="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm font-medium justify-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+            Registra Nuovo Pagamento
+        </a>
+    </div>
+</div>
+{% endblock %}

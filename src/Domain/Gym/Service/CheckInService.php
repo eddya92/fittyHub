@@ -4,17 +4,17 @@ namespace App\Domain\Gym\Service;
 
 use App\Domain\Gym\Entity\Gym;
 use App\Domain\Gym\Entity\GymAttendance;
-use App\Domain\Gym\Repository\GymAttendanceRepository;
-use App\Domain\Membership\Repository\GymMembershipRepository;
-use App\Domain\Medical\Repository\MedicalCertificateRepository;
+use App\Domain\Gym\Repository\GymAttendanceRepositoryInterface;
+use App\Domain\Membership\Repository\MembershipRepositoryInterface;
+use App\Domain\Medical\Repository\MedicalCertificateRepositoryInterface;
 use App\Domain\User\Entity\User;
 
 class CheckInService
 {
     public function __construct(
-        private GymAttendanceRepository $attendanceRepository,
-        private GymMembershipRepository $membershipRepository,
-        private MedicalCertificateRepository $certificateRepository
+        private GymAttendanceRepositoryInterface $attendanceRepository,
+        private MembershipRepositoryInterface $membershipRepository,
+        private MedicalCertificateRepositoryInterface $certificateRepository
     ) {}
 
     /**
@@ -25,11 +25,7 @@ class CheckInService
     public function canCheckIn(User $user, Gym $gym): array
     {
         // 1. Verifica abbonamento attivo
-        $membership = $this->membershipRepository->findOneBy([
-            'user' => $user,
-            'gym' => $gym,
-            'status' => 'active'
-        ]);
+        $membership = $this->membershipRepository->findActiveByGym($gym, $user);
 
         if (!$membership) {
             return [
@@ -48,17 +44,7 @@ class CheckInService
         }
 
         // 3. Verifica certificato medico
-        $certificate = $this->certificateRepository->createQueryBuilder('c')
-            ->where('c.user = :user')
-            ->andWhere('c.gym = :gym')
-            ->andWhere('c.expiryDate >= :today')
-            ->setParameter('user', $user)
-            ->setParameter('gym', $gym)
-            ->setParameter('today', $now)
-            ->orderBy('c.expiryDate', 'DESC')
-            ->setMaxResults(1)
-            ->getQuery()
-            ->getOneOrNullResult();
+        $certificate = $this->certificateRepository->findValidCertificateForUserAndGym($user, $gym);
 
         if (!$certificate) {
             return [
@@ -102,15 +88,7 @@ class CheckInService
      */
     public function getUserAttendanceHistory(User $user, Gym $gym, int $limit = 10): array
     {
-        return $this->attendanceRepository->createQueryBuilder('a')
-            ->where('a.user = :user')
-            ->andWhere('a.gym = :gym')
-            ->setParameter('user', $user)
-            ->setParameter('gym', $gym)
-            ->orderBy('a.checkInTime', 'DESC')
-            ->setMaxResults($limit)
-            ->getQuery()
-            ->getResult();
+        return $this->attendanceRepository->findByUserAndGym($user, $gym, $limit);
     }
 
     /**
@@ -118,30 +96,12 @@ class CheckInService
      */
     public function getAttendanceStats(Gym $gym, ?\DateTime $from = null, ?\DateTime $to = null): array
     {
-        $qb = $this->attendanceRepository->createQueryBuilder('a')
-            ->where('a.gym = :gym')
-            ->setParameter('gym', $gym);
-
-        if ($from) {
-            $qb->andWhere('a.checkInTime >= :from')
-               ->setParameter('from', $from);
-        }
-
-        if ($to) {
-            $qb->andWhere('a.checkInTime <= :to')
-               ->setParameter('to', $to);
-        }
-
-        $totalCheckIns = (clone $qb)->select('COUNT(a.id)')->getQuery()->getSingleScalarResult();
-
-        $uniqueUsers = (clone $qb)
-            ->select('COUNT(DISTINCT a.user)')
-            ->getQuery()
-            ->getSingleScalarResult();
+        $totalCheckIns = $this->attendanceRepository->countByGymAndDateRange($gym, $from, $to);
+        $uniqueUsers = $this->attendanceRepository->countUniqueUsersByGymAndDateRange($gym, $from, $to);
 
         return [
-            'total_check_ins' => (int)$totalCheckIns,
-            'unique_users' => (int)$uniqueUsers
+            'total_check_ins' => $totalCheckIns,
+            'unique_users' => $uniqueUsers
         ];
     }
 }

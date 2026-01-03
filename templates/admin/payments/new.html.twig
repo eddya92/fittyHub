@@ -1,0 +1,145 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block page_title %}Registra Pagamento{% endblock %}
+{% block page_subtitle %}Inserisci un nuovo pagamento ricevuto{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white rounded-lg shadow-md p-8">
+        <form method="post" action="{{ path('admin_payment_new') }}" id="payment-form">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {# User Selection #}
+                <div class="md:col-span-2">
+                    <label for="user_id" class="block text-sm font-medium text-gray-700 mb-2">Utente *</label>
+                    <select id="user_id" name="user_id" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                        <option value="">Seleziona utente...</option>
+                        {% for user in users %}
+                        <option value="{{ user.id }}" {% if preselected_user and preselected_user.id == user.id %}selected{% endif %}>
+                            {{ user.firstName }} {{ user.lastName }} - {{ user.email }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                {# Gym Selection #}
+                <div class="md:col-span-2">
+                    <label for="gym_id" class="block text-sm font-medium text-gray-700 mb-2">Palestra *</label>
+                    <select id="gym_id" name="gym_id" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                        <option value="">Seleziona palestra...</option>
+                        {% for gym in gyms %}
+                        <option value="{{ gym.id }}">{{ gym.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                {# Payment Type #}
+                <div>
+                    <label for="payment_type" class="block text-sm font-medium text-gray-700 mb-2">Tipo Pagamento *</label>
+                    <select id="payment_type" name="payment_type" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                        <option value="">Seleziona tipo...</option>
+                        <option value="membership">Abbonamento</option>
+                        <option value="course_enrollment">Iscrizione Corso</option>
+                        <option value="pt_session">Sessione PT</option>
+                        <option value="other">Altro</option>
+                    </select>
+                </div>
+
+                {# Payment Method #}
+                <div>
+                    <label for="payment_method" class="block text-sm font-medium text-gray-700 mb-2">Metodo Pagamento *</label>
+                    <select id="payment_method" name="payment_method" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                        <option value="">Seleziona metodo...</option>
+                        <option value="cash">Contanti</option>
+                        <option value="card">Carta</option>
+                        <option value="bank_transfer">Bonifico</option>
+                        <option value="other">Altro</option>
+                    </select>
+                </div>
+
+                {# Membership ID (conditional) #}
+                <div id="membership-field" class="hidden md:col-span-2">
+                    <label for="membership_id" class="block text-sm font-medium text-gray-700 mb-2">Abbonamento</label>
+                    <select id="membership_id" name="membership_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                        <option value="">Seleziona abbonamento...</option>
+                        {% if preselected_membership %}
+                        <option value="{{ preselected_membership.id }}" selected>
+                            Piano: {{ preselected_membership.subscriptionPlan.name }} - Dal {{ preselected_membership.startDate|date('d/m/Y') }} al {{ preselected_membership.endDate|date('d/m/Y') }}
+                        </option>
+                        {% endif %}
+                    </select>
+                    <p class="mt-1 text-sm text-gray-500">Verrà caricato automaticamente alla selezione dell'utente</p>
+                </div>
+
+                {# Course Enrollment ID (conditional) #}
+                <div id="enrollment-field" class="hidden md:col-span-2">
+                    <label for="enrollment_id" class="block text-sm font-medium text-gray-700 mb-2">Iscrizione Corso</label>
+                    <select id="enrollment_id" name="enrollment_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                        <option value="">Seleziona iscrizione...</option>
+                        {% if preselected_enrollment %}
+                        <option value="{{ preselected_enrollment.id }}" selected>
+                            Corso: {{ preselected_enrollment.courseSession.schedule.course.name }}
+                        </option>
+                        {% endif %}
+                    </select>
+                    <p class="mt-1 text-sm text-gray-500">Verrà caricato automaticamente alla selezione dell'utente</p>
+                </div>
+
+                {# Amount #}
+                <div>
+                    <label for="amount" class="block text-sm font-medium text-gray-700 mb-2">Importo (€) *</label>
+                    <input type="number" id="amount" name="amount" step="0.01" min="0" required placeholder="0.00" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                </div>
+
+                {# Payment Date #}
+                <div>
+                    <label for="payment_date" class="block text-sm font-medium text-gray-700 mb-2">Data Pagamento *</label>
+                    <input type="date" id="payment_date" name="payment_date" required value="{{ 'now'|date('Y-m-d') }}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                </div>
+
+                {# Transaction Reference #}
+                <div class="md:col-span-2">
+                    <label for="transaction_reference" class="block text-sm font-medium text-gray-700 mb-2">Riferimento Transazione</label>
+                    <input type="text" id="transaction_reference" name="transaction_reference" placeholder="Es. Ricevuta n. 123, CRO bonifico..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                    <p class="mt-1 text-sm text-gray-500">Numero ricevuta, CRO bonifico o altro riferimento</p>
+                </div>
+
+                {# Notes #}
+                <div class="md:col-span-2">
+                    <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Note</label>
+                    <textarea id="notes" name="notes" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500" placeholder="Eventuali note aggiuntive..."></textarea>
+                </div>
+            </div>
+
+            {# Actions #}
+            <div class="mt-8 flex justify-end space-x-4">
+                <a href="{{ path('admin_payments') }}" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
+                    Annulla
+                </a>
+                <button type="submit" class="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium">
+                    Registra Pagamento
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Show/hide related entity fields based on payment type
+document.getElementById('payment_type').addEventListener('change', function() {
+    const membershipField = document.getElementById('membership-field');
+    const enrollmentField = document.getElementById('enrollment-field');
+
+    membershipField.classList.add('hidden');
+    enrollmentField.classList.add('hidden');
+
+    if (this.value === 'membership') {
+        membershipField.classList.remove('hidden');
+    } else if (this.value === 'course_enrollment') {
+        enrollmentField.classList.remove('hidden');
+    }
+});
+
+// Trigger on page load in case of preselection
+document.getElementById('payment_type').dispatchEvent(new Event('change'));
+</script>
+{% endblock %}

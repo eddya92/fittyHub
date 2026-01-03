@@ -2,15 +2,12 @@
 
 namespace App\Controller\Admin;
 
-use App\Domain\Membership\UseCase\GetMembershipById;
-use App\Domain\Membership\UseCase\SearchMemberships;
 use App\Domain\Membership\UseCase\CancelMembership;
 use App\Domain\Membership\UseCase\RenewMembership;
-use App\Domain\Membership\UseCase\GetMembershipStats;
-use App\Domain\Membership\UseCase\GetExpiringMemberships;
 use App\Domain\Membership\UseCase\ReactivateMembership;
 use App\Domain\Membership\UseCase\UpdateMembershipAndUser;
 use App\Domain\PersonalTrainer\UseCase\AssignTrainerToClient;
+use App\Domain\Membership\Repository\MembershipRepositoryInterface;
 use App\Domain\Membership\Repository\EnrollmentRepositoryInterface;
 use App\Domain\Membership\Repository\SubscriptionPlanRepositoryInterface;
 use App\Domain\Medical\Repository\MedicalCertificateRepositoryInterface;
@@ -29,12 +26,9 @@ use Symfony\Component\Routing\Annotation\Route;
 class MembershipController extends AbstractController
 {
     public function __construct(
-        private GetMembershipById $getMembershipById,
-        private SearchMemberships $searchMemberships,
+        private MembershipRepositoryInterface $membershipRepository,
         private CancelMembership $cancelMembership,
         private RenewMembership $renewMembership,
-        private GetMembershipStats $getMembershipStats,
-        private GetExpiringMemberships $getExpiringMemberships,
         private ReactivateMembership $reactivateMembership,
         private UpdateMembershipAndUser $updateMembershipAndUser,
         private AssignTrainerToClient $assignTrainerToClient,
@@ -51,14 +45,14 @@ class MembershipController extends AbstractController
         $status = $request->query->get('status');
         $search = $request->query->get('search');
         $gymId = $request->query->getInt('gym');
-        $page = max(1, $request->query->getInt('page', 1));
 
-        // Use Case: cerca abbonamenti
-        $result = $this->searchMemberships->execute($status, $search, $gymId, $page);
+        $memberships = $status
+            ? $this->membershipRepository->findBy(['status' => $status])
+            : $this->membershipRepository->findAll();
 
         // Aggiungi informazioni sulla quota iscrizione
         $membershipsWithEnrollment = [];
-        foreach ($result['memberships'] as $membership) {
+        foreach ($memberships as $membership) {
             $enrollment = $this->enrollmentRepository->findActiveEnrollment(
                 $membership->getUser(),
                 $membership->getGym()
@@ -70,74 +64,95 @@ class MembershipController extends AbstractController
             ];
         }
 
+        $allMemberships = $this->membershipRepository->findAll();
+        $stats = [
+            'total' => count($allMemberships),
+            'active' => count(array_filter($allMemberships, fn($m) => $m->getStatus() === 'active')),
+            'expired' => count(array_filter($allMemberships, fn($m) => $m->getStatus() === 'expired')),
+            'cancelled' => count(array_filter($allMemberships, fn($m) => $m->getStatus() === 'cancelled')),
+        ];
+
         return $this->render('admin/memberships/index.html.twig', [
             'memberships' => $membershipsWithEnrollment,
-            'stats' => $this->getMembershipStats->execute(),
+            'stats' => $stats,
             'current_status' => $status,
             'current_search' => $search,
             'current_gym' => $gymId,
-            'current_page' => $result['current_page'],
-            'total_pages' => $result['total_pages'],
-            'total_users' => $result['total_users'],
+            'current_page' => 1,
+            'total_pages' => 1,
+            'total_users' => count($membershipsWithEnrollment),
         ]);
     }
 
     #[Route('/expiring', name: 'admin_memberships_expiring')]
     public function expiring(): Response
     {
+        $expiryDate = new \DateTime('+30 days');
+        $activeMemberships = $this->membershipRepository->findBy(['status' => 'active']);
+        $expiring = array_filter($activeMemberships, fn($m) => $m->getEndDate() <= $expiryDate);
+
         return $this->render('admin/memberships/expiring.html.twig', [
-            'memberships' => $this->getExpiringMemberships->execute(30),
+            'memberships' => $expiring,
         ]);
     }
 
     #[Route('/{id}', name: 'admin_membership_show', requirements: ['id' => '\d+'])]
     public function show(int $id): Response
     {
-        try {
-            // Use Case: ottiene abbonamento
-            $membership = $this->getMembershipById->execute($id);
+        $membership = $this->membershipRepository->find($id);
 
-            $certificate = $this->certificateRepository->findOneBy(
-                ['user' => $membership->getUser()],
-                ['uploadedAt' => 'DESC']
-            );
-
-            $trainers = $this->trainerRepository->findBy([
-                'gym' => $membership->getGym(),
-                'isActive' => true
-            ]);
-
-            $activeRelations = $this->relationRepository->findBy([
-                'client' => $membership->getUser(),
-                'status' => 'active'
-            ]);
-
-            $activeEnrollment = $this->enrollmentRepository->findActiveEnrollment(
-                $membership->getUser(),
-                $membership->getGym()
-            );
-
-            return $this->render('admin/memberships/show.html.twig', [
-                'membership' => $membership,
-                'certificate' => $certificate,
-                'trainers' => $trainers,
-                'active_relations' => $activeRelations,
-                'active_enrollment' => $activeEnrollment,
-            ]);
-        } catch (\RuntimeException $e) {
-            $this->addFlash('error', $e->getMessage());
+        if (!$membership) {
+            $this->addFlash('error', 'Abbonamento non trovato.');
             return $this->redirectToRoute('admin_memberships');
         }
+
+        $certificate = $this->certificateRepository->findOneBy(
+            ['user' => $membership->getUser()],
+            ['uploadedAt' => 'DESC']
+        );
+
+        $trainers = $this->trainerRepository->findBy([
+            'gym' => $membership->getGym(),
+            'isActive' => true
+        ]);
+
+        $activeRelations = $this->relationRepository->findBy([
+            'client' => $membership->getUser(),
+            'status' => 'active'
+        ]);
+
+        $activeEnrollment = $this->enrollmentRepository->findActiveEnrollment(
+            $membership->getUser(),
+            $membership->getGym()
+        );
+
+        $membershipHistory = $this->membershipRepository->findBy(
+            ['user' => $membership->getUser(), 'gym' => $membership->getGym()],
+            ['startDate' => 'DESC']
+        );
+
+        return $this->render('admin/memberships/show.html.twig', [
+            'membership' => $membership,
+            'certificate' => $certificate,
+            'trainers' => $trainers,
+            'active_relations' => $activeRelations,
+            'active_enrollment' => $activeEnrollment,
+            'membership_history' => $membershipHistory,
+        ]);
     }
 
     #[Route('/{id}/cancel', name: 'admin_membership_cancel', methods: ['POST'])]
     public function cancel(int $id): Response
     {
-        try {
-            // Use Case: ottiene e cancella abbonamento
-            $membership = $this->getMembershipById->execute($id);
-            $this->cancelMembership->execute($membership);
+        $membership = $this->membershipRepository->find($id);
 
+        if (!$membership) {
+            $this->addFlash('error', 'Abbonamento non trovato.');
+            return $this->redirectToRoute('admin_memberships');
+        }
+
+        try {
+            $this->cancelMembership->execute($membership);
             $this->addFlash('success', 'Iscrizione cancellata con successo.');
         } catch (\RuntimeException $e) {
             $this->addFlash('error', $e->getMessage());
@@ -149,10 +164,15 @@ class MembershipController extends AbstractController
     #[Route('/{id}/reactivate', name: 'admin_membership_reactivate', methods: ['POST'])]
     public function reactivate(int $id): Response
     {
-        try {
-            $membership = $this->getMembershipById->execute($id);
-            $this->reactivateMembership->execute($membership);
+        $membership = $this->membershipRepository->find($id);
 
+        if (!$membership) {
+            $this->addFlash('error', 'Abbonamento non trovato.');
+            return $this->redirectToRoute('admin_memberships');
+        }
+
+        try {
+            $this->reactivateMembership->execute($membership);
             $this->addFlash('success', 'Iscrizione riattivata con successo.');
         } catch (\RuntimeException $e) {
             $this->addFlash('error', $e->getMessage());
@@ -164,9 +184,14 @@ class MembershipController extends AbstractController
     #[Route('/{id}/edit', name: 'admin_membership_edit')]
     public function edit(int $id, Request $request): Response
     {
-        try {
-            $membership = $this->getMembershipById->execute($id);
+        $membership = $this->membershipRepository->find($id);
 
+        if (!$membership) {
+            $this->addFlash('error', 'Abbonamento non trovato.');
+            return $this->redirectToRoute('admin_memberships');
+        }
+
+        try {
             if ($request->isMethod('POST')) {
                 $this->updateMembershipAndUser->execute($membership, $request->request->all());
                 $this->addFlash('success', 'Dati aggiornati con successo.');
@@ -185,8 +210,14 @@ class MembershipController extends AbstractController
     #[Route('/{id}/assign-pt', name: 'admin_membership_assign_pt', methods: ['POST'])]
     public function assignPT(int $id, Request $request): Response
     {
+        $membership = $this->membershipRepository->find($id);
+
+        if (!$membership) {
+            $this->addFlash('error', 'Abbonamento non trovato.');
+            return $this->redirectToRoute('admin_memberships');
+        }
+
         try {
-            $membership = $this->getMembershipById->execute($id);
             $trainerId = $request->request->getInt('trainer_id');
 
             if (!$trainerId) {
@@ -226,10 +257,14 @@ class MembershipController extends AbstractController
     #[Route('/{id}/renew', name: 'admin_membership_renew', methods: ['GET', 'POST'])]
     public function renew(int $id, Request $request): Response
     {
-        try {
-            // Use Case: ottiene abbonamento corrente
-            $currentMembership = $this->getMembershipById->execute($id);
+        $currentMembership = $this->membershipRepository->find($id);
 
+        if (!$currentMembership) {
+            $this->addFlash('error', 'Abbonamento non trovato.');
+            return $this->redirectToRoute('admin_memberships');
+        }
+
+        try {
             $subscriptionPlans = $this->planRepository->findBy([
                 'gym' => $currentMembership->getGym(),
                 'isActive' => true
@@ -247,7 +282,6 @@ class MembershipController extends AbstractController
                     throw new \RuntimeException('Piano abbonamento non trovato.');
                 }
 
-                // Use Case: rinnova abbonamento
                 $newMembership = $this->renewMembership->execute(
                     currentMembership: $currentMembership,
                     plan: $plan,

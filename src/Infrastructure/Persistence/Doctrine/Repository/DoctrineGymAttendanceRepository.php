@@ -81,4 +81,13 @@ class DoctrineGymAttendanceRepository extends ServiceEntityRepository implements
 
         return (int) $qb->getQuery()->getSingleScalarResult();
     }
+
+    public function save(GymAttendance $attendance, bool $flush = false): void
+    {
+        $this->getEntityManager()->persist($attendance);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
 }

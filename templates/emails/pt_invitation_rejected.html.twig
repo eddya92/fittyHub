@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #F44336; color: white; padding: 20px; text-align: center; border-radius: 5px; }
+        .content { background: #f9f9f9; padding: 20px; margin-top: 20px; border-radius: 5px; }
+        .info { background: #FFCDD2; padding: 20px; margin: 15px 0; border-radius: 5px; text-align: center; }
+        .details { background: white; padding: 15px; margin: 15px 0; border-left: 4px solid #F44336; }
+        .footer { text-align: center; margin-top: 20px; font-size: 12px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Invito Rifiutato</h1>
+        </div>
+
+        <div class="content">
+            <p>Ciao {{ trainer.user.firstName }},</p>
+
+            <div class="info">
+                <p style="margin: 0;"><strong>{{ client.firstName }} {{ client.lastName }}</strong> ha rifiutato il tuo invito.</p>
+            </div>
+
+            <div class="details">
+                <h3>📋 Dettagli</h3>
+                <p><strong>Cliente:</strong> {{ client.firstName }} {{ client.lastName }}</p>
+                <p><strong>Data Risposta:</strong> {{ invitation.respondedAt|date('d/m/Y H:i') }}</p>
+                {% if invitation.rejectionReason %}
+                <p><strong>Motivo:</strong> {{ invitation.rejectionReason }}</p>
+                {% endif %}
+            </div>
+
+            <p>Non preoccuparti, puoi continuare a cercare nuovi clienti attraverso la piattaforma.</p>
+        </div>
+
+        <div class="footer">
+            <p>FittyHub - Il tuo partner per il fitness</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -2,9 +2,7 @@
 
 namespace App\Controller\Admin;
 
-use App\Domain\Medical\UseCase\GetCertificateById;
-use App\Domain\Medical\UseCase\SearchCertificates;
-use App\Domain\Medical\UseCase\GetCertificateStats;
+use App\Domain\Medical\Repository\MedicalCertificateRepositoryInterface;
 use App\Domain\Medical\UseCase\ApproveCertificate;
 use App\Domain\Medical\UseCase\RejectCertificate;
 use App\Domain\Medical\UseCase\UploadCertificate;
@@ -18,9 +16,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class CertificateController extends AbstractController
 {
     public function __construct(
-        private GetCertificateById $getCertificateById,
-        private SearchCertificates $searchCertificates,
-        private GetCertificateStats $getCertificateStats,
+        private MedicalCertificateRepositoryInterface $certificateRepository,
         private ApproveCertificate $approveCertificate,
         private RejectCertificate $rejectCertificate,
         private UploadCertificate $uploadCertificate,
@@ -33,9 +29,19 @@ class CertificateController extends AbstractController
         $status = $request->query->get('status', 'pending_review');
         $search = $request->query->get('search');
 
+        $certificates = $this->certificateRepository->findBy(['status' => $status]);
+
+        $allCertificates = $this->certificateRepository->findAll();
+        $stats = [
+            'total' => count($allCertificates),
+            'pending' => count(array_filter($allCertificates, fn($c) => $c->getStatus() === 'pending_review')),
+            'approved' => count(array_filter($allCertificates, fn($c) => $c->getStatus() === 'approved')),
+            'rejected' => count(array_filter($allCertificates, fn($c) => $c->getStatus() === 'rejected')),
+        ];
+
         return $this->render('admin/certificates/index.html.twig', [
-            'certificates' => $this->searchCertificates->execute($status, $search),
-            'stats' => $this->getCertificateStats->execute(),
+            'certificates' => $certificates,
+            'stats' => $stats,
             'current_status' => $status,
             'current_search' => $search,
         ]);
@@ -44,23 +50,29 @@ class CertificateController extends AbstractController
     #[Route('/{id}', name: 'admin_certificate_show', requirements: ['id' => '\d+'])]
     public function show(int $id): Response
     {
-        try {
-            $certificate = $this->getCertificateById->execute($id);
+        $certificate = $this->certificateRepository->find($id);
 
-            return $this->render('admin/certificates/show.html.twig', [
-                'certificate' => $certificate,
-            ]);
-        } catch (\RuntimeException $e) {
-            $this->addFlash('error', $e->getMessage());
+        if (!$certificate) {
+            $this->addFlash('error', 'Certificato non trovato.');
             return $this->redirectToRoute('admin_certificates');
         }
+
+        return $this->render('admin/certificates/show.html.twig', [
+            'certificate' => $certificate,
+        ]);
     }
 
     #[Route('/{id}/approve', name: 'admin_certificate_approve', methods: ['POST'])]
     public function approve(int $id): Response
     {
+        $certificate = $this->certificateRepository->find($id);
+
+        if (!$certificate) {
+            $this->addFlash('error', 'Certificato non trovato.');
+            return $this->redirectToRoute('admin_certificates');
+        }
+
         try {
-            $certificate = $this->getCertificateById->execute($id);
             $this->approveCertificate->execute($certificate);
             $this->addFlash('success', 'Certificato approvato con successo.');
         } catch (\RuntimeException|\Exception $e) {
@@ -73,8 +85,14 @@ class CertificateController extends AbstractController
     #[Route('/{id}/reject', name: 'admin_certificate_reject', methods: ['POST'])]
     public function reject(int $id): Response
     {
+        $certificate = $this->certificateRepository->find($id);
+
+        if (!$certificate) {
+            $this->addFlash('error', 'Certificato non trovato.');
+            return $this->redirectToRoute('admin_certificates');
+        }
+
         try {
-            $certificate = $this->getCertificateById->execute($id);
             $this->rejectCertificate->execute($certificate);
             $this->addFlash('success', 'Certificato rifiutato.');
         } catch (\RuntimeException|\Exception $e) {

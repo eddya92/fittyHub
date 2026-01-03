@@ -1,0 +1,201 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block page_title %}{{ course.name }} - {{ session.sessionDate|date('d/m/Y') }}{% endblock %}
+{% block page_subtitle %}{{ session.schedule.dayOfWeek|title }} {{ session.schedule.startTime|date('H:i') }}-{{ session.schedule.endTime|date('H:i') }}{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <a href="{{ path('admin_courses_calendar') }}" class="inline-flex items-center text-primary-600 hover:text-primary-700 font-medium">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+        Torna al calendario
+    </a>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    {# Main Content #}
+    <div class="lg:col-span-2 space-y-6">
+        {# Session Info #}
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-semibold text-gray-900">Dettagli Sessione</h3>
+                <div class="flex gap-2">
+                    {% if session.isToday %}
+                        <span class="px-3 py-1 text-sm font-medium rounded-full bg-blue-100 text-blue-800">
+                            OGGI
+                        </span>
+                    {% elseif session.isInPast %}
+                        <span class="px-3 py-1 text-sm font-medium rounded-full bg-gray-100 text-gray-800">
+                            PASSATA
+                        </span>
+                    {% else %}
+                        <span class="px-3 py-1 text-sm font-medium rounded-full bg-green-100 text-green-800">
+                            PROGRAMMATA
+                        </span>
+                    {% endif %}
+
+                    {% if session.isFull %}
+                        <span class="px-3 py-1 text-sm font-medium rounded-full bg-red-100 text-red-800">
+                            AL COMPLETO
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-6">
+                <div>
+                    <p class="text-sm text-gray-600 mb-1">Data</p>
+                    <p class="text-base font-medium text-gray-900">
+                        {{ session.sessionDate|date('l d F Y')|trans }}
+                    </p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600 mb-1">Orario</p>
+                    <p class="text-base font-medium text-gray-900">
+                        {{ session.schedule.startTime|date('H:i') }} - {{ session.schedule.endTime|date('H:i') }}
+                    </p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600 mb-1">Corso</p>
+                    <p class="text-base font-medium text-gray-900">{{ course.name }}</p>
+                </div>
+                {% if course.category %}
+                <div>
+                    <p class="text-sm text-gray-600 mb-1">Categoria</p>
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 rounded" style="background-color: {{ course.category.color }}"></div>
+                        <p class="text-base font-medium text-gray-900">{{ course.category.name }}</p>
+                    </div>
+                </div>
+                {% endif %}
+                {% if course.instructor %}
+                <div class="col-span-2">
+                    <p class="text-sm text-gray-600 mb-1">Istruttore</p>
+                    <p class="text-base font-medium text-gray-900">
+                        {{ course.instructor.user.firstName }} {{ course.instructor.user.lastName }}
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if course.description %}
+            <div class="mt-6 pt-6 border-t border-gray-200">
+                <p class="text-sm text-gray-600 mb-2">Descrizione</p>
+                <p class="text-base text-gray-900">{{ course.description }}</p>
+            </div>
+            {% endif %}
+        </div>
+
+        {# Enrollments for THIS session #}
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-6">
+                Iscritti a questa sessione ({{ session.activeEnrollmentsCount }})
+            </h3>
+
+            {% set activeEnrollments = session.enrollments|filter(e => e.status == 'active') %}
+            {% if activeEnrollments|length > 0 %}
+                <div class="space-y-3 mb-6">
+                    {% for enrollment in activeEnrollments %}
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                            <div class="flex items-center flex-1">
+                                <div class="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
+                                    <span class="text-primary-600 font-bold text-sm">
+                                        {{ enrollment.user.firstName|slice(0, 1) ~ enrollment.user.lastName|slice(0, 1) }}
+                                    </span>
+                                </div>
+                                <div class="ml-3 flex-1">
+                                    <p class="text-sm font-medium text-gray-900">
+                                        {{ enrollment.user.firstName }} {{ enrollment.user.lastName }}
+                                    </p>
+                                    <p class="text-xs text-gray-500">
+                                        Iscritto il {{ enrollment.enrolledAt|date('d/m/Y H:i') }}
+                                    </p>
+                                </div>
+                            </div>
+                            <form method="post" action="{{ path('admin_course_enrollment_cancel', {'enrollmentId': enrollment.id}) }}" class="inline" onsubmit="return confirm('Cancellare iscrizione?')">
+                                <button type="submit" class="text-red-600 hover:text-red-800 text-sm font-medium">
+                                    Cancella
+                                </button>
+                            </form>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-gray-500 text-center py-4 mb-6">Nessun iscritto a questa sessione</p>
+            {% endif %}
+
+            {# Add Enrollment Form - only for future sessions #}
+            {% if not session.isInPast and not session.isFull %}
+                <form method="post" action="{{ path('admin_course_session_enroll', {'sessionId': session.id}) }}" class="border-t border-gray-200 pt-6">
+                    <h4 class="font-medium text-gray-900 mb-4">Iscrivi Utente a questa Sessione</h4>
+                    <div class="flex gap-4">
+                        <select name="user_id" required class="flex-1 px-4 py-2 border border-gray-300 rounded-lg">
+                            <option value="">Seleziona utente...</option>
+                            {% for user in users %}
+                                <option value="{{ user.id }}">{{ user.firstName }} {{ user.lastName }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">
+                            Iscrivi
+                        </button>
+                    </div>
+                </form>
+            {% elseif session.isInPast %}
+                <div class="border-t border-gray-200 pt-6">
+                    <p class="text-sm text-gray-500 text-center">Sessione già conclusa. Non è possibile aggiungere iscritti.</p>
+                </div>
+            {% elseif session.isFull %}
+                <div class="border-t border-gray-200 pt-6">
+                    <p class="text-sm text-orange-600 text-center font-medium">Sessione al completo. Non è possibile aggiungere iscritti.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {# Sidebar #}
+    <div class="space-y-6">
+        {# Quick Stats #}
+        <div class="bg-gradient-to-br from-primary-600 to-primary-700 rounded-lg shadow-md p-6 text-white">
+            <h3 class="text-lg font-semibold mb-4">Statistiche Sessione</h3>
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm">Posti Totali</span>
+                    <span class="text-2xl font-bold">{{ session.maxParticipants }}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-sm">Iscritti</span>
+                    <span class="text-2xl font-bold">{{ session.activeEnrollmentsCount }}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-sm">Disponibili</span>
+                    <span class="text-2xl font-bold">{{ session.availableSpots }}</span>
+                </div>
+                <div class="pt-4 border-t border-white/20">
+                    <div class="flex items-center justify-between text-sm">
+                        <span>Percentuale Riempimento</span>
+                        <span class="font-bold">{{ ((session.activeEnrollmentsCount / session.maxParticipants) * 100)|round }}%</span>
+                    </div>
+                    <div class="mt-2 bg-white/20 rounded-full h-2">
+                        <div class="bg-white rounded-full h-2" style="width: {{ ((session.activeEnrollmentsCount / session.maxParticipants) * 100)|round }}%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Actions #}
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Azioni</h3>
+            <div class="space-y-3">
+                <a href="{{ path('admin_course_show', {'id': course.id}) }}" class="block w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium text-center">
+                    <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                    </svg>
+                    Vedi Tutte le Sessioni Corso
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -4,9 +4,7 @@ namespace App\Controller\Admin;
 
 use App\Domain\Gym\UseCase\ValidateCheckIn;
 use App\Domain\Gym\UseCase\ProcessCheckIn;
-use App\Domain\Gym\UseCase\GetUserAttendanceHistory;
-use App\Domain\Gym\UseCase\GetAttendanceStats;
-use App\Domain\Gym\UseCase\GetRecentAttendances;
+use App\Domain\Gym\Repository\GymAttendanceRepositoryInterface;
 use App\Domain\User\Service\GymUserService;
 use App\Domain\User\Repository\UserRepositoryInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -20,9 +18,7 @@ class CheckInController extends AbstractController
     public function __construct(
         private ValidateCheckIn $validateCheckIn,
         private ProcessCheckIn $processCheckIn,
-        private GetUserAttendanceHistory $getUserAttendanceHistory,
-        private GetAttendanceStats $getAttendanceStats,
-        private GetRecentAttendances $getRecentAttendances,
+        private GymAttendanceRepositoryInterface $attendanceRepository,
         private GymUserService $gymUserService,
         private UserRepositoryInterface $userRepository
     ) {}
@@ -40,10 +36,26 @@ class CheckInController extends AbstractController
         $today = new \DateTime('today');
         $tomorrow = new \DateTime('tomorrow');
 
+        $recentAttendances = $this->attendanceRepository->findBy(
+            ['gym' => $gym],
+            ['checkInTime' => 'DESC'],
+            20
+        );
+
+        $todayAttendances = $this->attendanceRepository->findBy(['gym' => $gym]);
+        $todayAttendances = array_filter($todayAttendances, function($a) use ($today, $tomorrow) {
+            return $a->getCheckInTime() >= $today && $a->getCheckInTime() < $tomorrow;
+        });
+
+        $todayStats = [
+            'total_check_ins' => count($todayAttendances),
+            'unique_users' => count(array_unique(array_map(fn($a) => $a->getUser()->getId(), $todayAttendances))),
+        ];
+
         return $this->render('admin/check_in/index.html.twig', [
             'gym' => $gym,
-            'recentAttendances' => $this->getRecentAttendances->execute($gym, 20),
-            'todayStats' => $this->getAttendanceStats->execute($gym, $today, $tomorrow),
+            'recentAttendances' => $recentAttendances,
+            'todayStats' => $todayStats,
         ]);
     }
 
@@ -137,7 +149,11 @@ class CheckInController extends AbstractController
             return $this->redirectToRoute('admin_check_in');
         }
 
-        $history = $this->getUserAttendanceHistory->execute($user, $gym, 50);
+        $history = $this->attendanceRepository->findBy(
+            ['user' => $user, 'gym' => $gym],
+            ['checkInTime' => 'DESC'],
+            50
+        );
 
         return $this->render('admin/check_in/history.html.twig', [
             'gym' => $gym,

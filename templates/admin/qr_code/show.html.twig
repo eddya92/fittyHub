@@ -1,0 +1,151 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block page_title %}QR Code Palestra{% endblock %}
+{% block page_subtitle %}Codice e QR code per iscrizioni utenti{% endblock %}
+
+{% block content %}
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    {# QR Code e Codice #}
+    <div class="bg-white rounded-lg shadow-md p-8">
+        <h3 class="text-xl font-semibold text-gray-900 mb-6 text-center">QR Code Palestra</h3>
+
+        {# QR Code Display #}
+        <div class="flex justify-center mb-6">
+            {{ qr_html|raw }}
+        </div>
+
+        {# Codice Semplice #}
+        <div class="bg-primary-50 border-2 border-primary-200 rounded-lg p-6 mb-6">
+            <p class="text-sm text-gray-600 text-center mb-2">Codice Palestra</p>
+            <p class="text-4xl font-bold text-primary-700 text-center tracking-wider">{{ simple_code }}</p>
+            <p class="text-xs text-gray-500 text-center mt-2">Gli utenti possono digitare questo codice nell'app</p>
+        </div>
+
+        {# Deep Link #}
+        <div class="bg-gray-50 rounded-lg p-4">
+            <p class="text-xs text-gray-500 mb-2">Deep Link</p>
+            <p class="text-sm text-gray-700 font-mono break-all">{{ deep_link }}</p>
+        </div>
+
+        {# Pulsanti Azione #}
+        <div class="mt-6 space-y-3">
+            <button onclick="window.print()" class="w-full bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                </svg>
+                Stampa QR Code
+            </button>
+            <button onclick="copyToClipboard('{{ simple_code }}')" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                </svg>
+                Copia Codice
+            </button>
+        </div>
+    </div>
+
+    {# Istruzioni #}
+    <div class="space-y-6">
+        {# Info Palestra #}
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <svg class="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                </svg>
+                {{ gym.name }}
+            </h3>
+            <div class="space-y-3">
+                {% if gym.address %}
+                <div>
+                    <label class="block text-sm font-medium text-gray-500">Indirizzo</label>
+                    <p class="mt-1 text-gray-900">{{ gym.address }}</p>
+                </div>
+                {% endif %}
+                {% if gym.phoneNumber %}
+                <div>
+                    <label class="block text-sm font-medium text-gray-500">Telefono</label>
+                    <p class="mt-1 text-gray-900">{{ gym.phoneNumber }}</p>
+                </div>
+                {% endif %}
+                <div>
+                    <label class="block text-sm font-medium text-gray-500">Slug</label>
+                    <p class="mt-1 text-gray-900 font-mono text-sm">{{ slug }}</p>
+                </div>
+            </div>
+        </div>
+
+        {# Come Funziona #}
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-6 rounded">
+            <h4 class="text-lg font-semibold text-blue-900 mb-3 flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                </svg>
+                Come Funziona
+            </h4>
+            <ol class="space-y-3 text-sm text-blue-900">
+                <li class="flex">
+                    <span class="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3">1</span>
+                    <span>L'utente apre l'app FittyHub sul proprio smartphone</span>
+                </li>
+                <li class="flex">
+                    <span class="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3">2</span>
+                    <span>Scansiona il QR code o inserisce manualmente il codice <strong>{{ simple_code }}</strong></span>
+                </li>
+                <li class="flex">
+                    <span class="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3">3</span>
+                    <span>Invia una richiesta di iscrizione alla palestra</span>
+                </li>
+                <li class="flex">
+                    <span class="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3">4</span>
+                    <span>Tu approvi/rifiuti la richiesta dalla sezione "Richieste Iscrizione"</span>
+                </li>
+                <li class="flex">
+                    <span class="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3">5</span>
+                    <span>Se approvata, l'utente viene aggiunto come iscritto alla palestra</span>
+                </li>
+            </ol>
+        </div>
+
+        {# Suggerimenti #}
+        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-6 rounded">
+            <h4 class="text-sm font-semibold text-yellow-800 mb-2 flex items-center">
+                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                </svg>
+                Suggerimenti
+            </h4>
+            <ul class="text-xs text-yellow-800 space-y-1 list-disc list-inside">
+                <li>Stampa il QR code e appendilo all'ingresso della palestra</li>
+                <li>Condividi il codice <strong>{{ simple_code }}</strong> sui social della palestra</li>
+                <li>Ricorda agli utenti di caricare il certificato medico prima dell'approvazione</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+        alert('Codice copiato negli appunti: ' + text);
+    }, function(err) {
+        console.error('Errore nella copia: ', err);
+    });
+}
+</script>
+
+<style>
+@media print {
+    aside, header, .no-print {
+        display: none !important;
+    }
+    main {
+        margin-left: 0 !important;
+    }
+    .bg-white {
+        page-break-inside: avoid;
+    }
+}
+</style>
+
+{% endblock %}

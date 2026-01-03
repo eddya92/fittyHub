@@ -1,0 +1,27 @@
+vich_uploader:
+    db_driver: orm
+
+    mappings:
+        medical_certificates:
+            uri_prefix: /uploads/medical-certificates
+            upload_destination: '%kernel.project_dir%/public/uploads/medical-certificates'
+            namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
+            inject_on_load: false
+            delete_on_update: true
+            delete_on_remove: true
+
+        user_avatars:
+            uri_prefix: /uploads/avatars
+            upload_destination: '%kernel.project_dir%/public/uploads/avatars'
+            namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
+            inject_on_load: false
+            delete_on_update: true
+            delete_on_remove: true
+
+        gym_logos:
+            uri_prefix: /uploads/gym-logos
+            upload_destination: '%kernel.project_dir%/public/uploads/gym-logos'
+            namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
+            inject_on_load: false
+            delete_on_update: true
+            delete_on_remove: true

@@ -4,12 +4,12 @@ namespace App\Domain\Gym\Service;
 
 use App\Domain\Gym\Entity\Gym;
 use App\Domain\Gym\Entity\GymSettings;
-use App\Domain\Gym\Repository\GymSettingsRepository;
+use App\Domain\Gym\Repository\GymSettingsRepositoryInterface;
 
 class SettingsService
 {
     public function __construct(
-        private GymSettingsRepository $settingsRepository
+        private GymSettingsRepositoryInterface $settingsRepository
     ) {}
 
     /**
@@ -47,6 +47,9 @@ class SettingsService
 
         // Check-in tornello: se il checkbox non è presente, il valore è false
         $settings->setEnableGymCheckIn(isset($data['enable_gym_check_in']) && $data['enable_gym_check_in'] === '1');
+
+        // Quota iscrizione: se il checkbox non è presente, il valore è false
+        $settings->setEnableEnrollmentFee(isset($data['enable_enrollment_fee']) && $data['enable_enrollment_fee'] === '1');
 
         $this->settingsRepository->save($settings, true);
     }

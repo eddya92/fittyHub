@@ -27,10 +27,21 @@ class CourseEnrollment
     #[Groups(['enrollment:read', 'enrollment:write'])]
     private ?GymCourse $course = null;
 
+    /**
+     * @deprecated Mantenuto per compatibilità. Usare $session invece.
+     */
     #[ORM\ManyToOne(targetEntity: CourseSchedule::class, inversedBy: 'enrollments')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     #[Groups(['enrollment:read', 'enrollment:write'])]
     private ?CourseSchedule $schedule = null;
+
+    /**
+     * Sessione specifica a cui l'utente è iscritto
+     */
+    #[ORM\ManyToOne(targetEntity: CourseSession::class, inversedBy: 'enrollments')]
+    #[ORM\JoinColumn(nullable: true)]
+    #[Groups(['enrollment:read', 'enrollment:write'])]
+    private ?CourseSession $session = null;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: false)]
@@ -136,14 +147,47 @@ class CourseEnrollment
         return $this;
     }
 
+    /**
+     * @deprecated Usare getSession() invece
+     */
     public function getSchedule(): ?CourseSchedule
     {
         return $this->schedule;
     }
 
+    /**
+     * @deprecated Usare setSession() invece
+     */
     public function setSchedule(?CourseSchedule $schedule): static
     {
         $this->schedule = $schedule;
         return $this;
+    }
+
+    public function getSession(): ?CourseSession
+    {
+        return $this->session;
+    }
+
+    public function setSession(?CourseSession $session): static
+    {
+        $this->session = $session;
+        return $this;
+    }
+
+    /**
+     * Ottiene la data della sessione (se iscritto a sessione specifica)
+     */
+    public function getSessionDate(): ?\DateTimeInterface
+    {
+        return $this->session?->getSessionDate();
+    }
+
+    /**
+     * Verifica se questa iscrizione è per una sessione specifica
+     */
+    public function hasSession(): bool
+    {
+        return $this->session !== null;
     }
 }

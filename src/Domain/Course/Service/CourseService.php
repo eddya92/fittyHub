@@ -7,6 +7,7 @@ use App\Domain\Course\Entity\CourseSchedule;
 use App\Domain\Course\Repository\CourseRepositoryInterface;
 use App\Domain\Course\Repository\CourseScheduleRepositoryInterface;
 use App\Domain\Course\Repository\CourseCategoryRepositoryInterface;
+use App\Domain\Course\UseCase\GenerateCourseSessionsUseCase;
 use App\Domain\PersonalTrainer\Repository\TrainerRepositoryInterface;
 use App\Domain\Gym\Entity\Gym;
 
@@ -16,7 +17,8 @@ class CourseService
         private CourseRepositoryInterface $courseRepository,
         private CourseScheduleRepositoryInterface $scheduleRepository,
         private CourseCategoryRepositoryInterface $categoryRepository,
-        private TrainerRepositoryInterface $trainerRepository
+        private TrainerRepositoryInterface $trainerRepository,
+        private GenerateCourseSessionsUseCase $generateSessions
     ) {}
 
     /**
@@ -95,6 +97,9 @@ class CourseService
         $schedule->setEndTime(new \DateTime($data['end_time']));
 
         $this->scheduleRepository->save($schedule, true);
+
+        // Genera sessioni per le prossime 8 settimane per questo orario
+        $this->generateSessions->execute(8);
 
         return $schedule;
     }

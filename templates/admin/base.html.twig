@@ -35,7 +35,13 @@
                     </svg>
                 </button>
                 <div id="users-menu" class="hidden bg-gray-800">
-                    <a href="{{ path('admin_memberships') }}" class="flex items-center pl-14 pr-6 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-700 transition-colors {% if app.request.get('_route') starts with 'admin_membership' and app.request.get('_route') != 'admin_memberships_expiring' %}text-white bg-gray-700{% endif %}">
+                    <a href="{{ path('admin_membership_requests') }}" class="flex items-center pl-14 pr-6 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-700 transition-colors {% if app.request.get('_route') starts with 'admin_membership_request' %}text-white bg-gray-700{% endif %}">
+                        <span class="flex items-center">
+                            Richieste Iscrizione
+                            {# TODO: Badge con numero richieste pendenti #}
+                        </span>
+                    </a>
+                    <a href="{{ path('admin_memberships') }}" class="flex items-center pl-14 pr-6 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-700 transition-colors {% if app.request.get('_route') starts with 'admin_membership' and app.request.get('_route') != 'admin_memberships_expiring' and not (app.request.get('_route') starts with 'admin_membership_request') %}text-white bg-gray-700{% endif %}">
                         Iscritti
                     </a>
                     <a href="{{ path('admin_trainers') }}" class="flex items-center pl-14 pr-6 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-700 transition-colors {% if app.request.get('_route') starts with 'admin_trainers' %}text-white bg-gray-700{% endif %}">
@@ -110,6 +116,40 @@
                 </svg>
                 Check-in Tornello
             </a>
+
+            {# QR Code #}
+            <a href="{{ path('admin_qr_code') }}" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-colors {% if app.request.get('_route') starts with 'admin_qr_code' %}bg-gray-800 text-white{% endif %}">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
+                </svg>
+                QR Code Palestra
+            </a>
+
+            {# Pagamenti #}
+            <div class="mt-2">
+                <button onclick="toggleAccordion('payments')" class="w-full flex items-center justify-between px-6 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-colors">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span>Pagamenti</span>
+                    </div>
+                    <svg id="payments-icon" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                <div id="payments-menu" class="hidden bg-gray-800">
+                    <a href="{{ path('admin_payments') }}" class="flex items-center pl-14 pr-6 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-700 transition-colors {% if app.request.get('_route') starts with 'admin_payment' and app.request.get('_route') != 'admin_payment_reports' %}text-white bg-gray-700{% endif %}">
+                        Registro Pagamenti
+                    </a>
+                    <a href="{{ path('admin_payment_new') }}" class="flex items-center pl-14 pr-6 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-700 transition-colors {% if app.request.get('_route') == 'admin_payment_new' %}text-white bg-gray-700{% endif %}">
+                        Registra Pagamento
+                    </a>
+                    <a href="{{ path('admin_payment_reports') }}" class="flex items-center pl-14 pr-6 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-700 transition-colors {% if app.request.get('_route') == 'admin_payment_reports' %}text-white bg-gray-700{% endif %}">
+                        Report Finanziari
+                    </a>
+                </div>
+            </div>
 
             {# Impostazioni #}
             <a href="{{ path('admin_settings') }}" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-colors {% if app.request.get('_route') starts with 'admin_settings' %}bg-gray-800 text-white{% endif %}">

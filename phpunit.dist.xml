@@ -27,6 +27,10 @@
         <env name="JWT_PUBLIC_KEY" value="%kernel.project_dir%/config/jwt/public.pem"/>
         <env name="JWT_PASSPHRASE" value="40f1d7c9791df6ba54d47cc5a5d3f87d781d13c017ca87941dbbb525586d9163"/>
         <!-- ###- lexik/jwt-authentication-bundle ### -->
+
+        <!-- ###+ symfony/sendgrid-mailer ### -->
+        <!-- MAILER_DSN=sendgrid://KEY@default -->
+        <!-- ###- symfony/sendgrid-mailer ### -->
     </php>
 
     <testsuites>

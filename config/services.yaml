@@ -25,6 +25,9 @@ services:
     App\Domain\Membership\Repository\MembershipRepositoryInterface:
         alias: App\Infrastructure\Persistence\Doctrine\Repository\DoctrineMembershipRepository
 
+    App\Domain\Membership\Repository\MembershipRequestRepositoryInterface:
+        alias: App\Infrastructure\Persistence\Doctrine\Repository\DoctrineMembershipRequestRepository
+
     App\Domain\Membership\Repository\SubscriptionPlanRepositoryInterface:
         alias: App\Infrastructure\Persistence\Doctrine\Repository\DoctrineSubscriptionPlanRepository
 
@@ -43,6 +46,12 @@ services:
 
     App\Domain\Course\Repository\CourseCategoryRepositoryInterface:
         alias: App\Infrastructure\Persistence\Doctrine\Repository\DoctrineCourseCategoryRepository
+
+    App\Domain\Course\Repository\CourseWaitingListRepositoryInterface:
+        alias: App\Infrastructure\Persistence\Doctrine\Repository\DoctrineCourseWaitingListRepository
+
+    App\Domain\Course\Repository\CourseSessionRepositoryInterface:
+        alias: App\Infrastructure\Persistence\Doctrine\Repository\DoctrineCourseSessionRepository
 
     # Trainer Repositories
     App\Domain\PersonalTrainer\Repository\TrainerRepositoryInterface:
@@ -72,6 +81,29 @@ services:
 
     App\Domain\Gym\Repository\GymAttendanceRepositoryInterface:
         alias: App\Infrastructure\Persistence\Doctrine\Repository\DoctrineGymAttendanceRepository
+
+    App\Domain\Gym\Repository\GymSettingsRepositoryInterface:
+        alias: App\Infrastructure\Persistence\Doctrine\Repository\DoctrineGymSettingsRepository
+
+    # Workout Repositories
+    App\Domain\Workout\Repository\WorkoutPlanRepositoryInterface:
+        alias: App\Infrastructure\Persistence\Doctrine\Repository\DoctrineWorkoutPlanRepository
+
+    App\Domain\Workout\Repository\ClientAssessmentRepositoryInterface:
+        alias: App\Infrastructure\Persistence\Doctrine\Repository\DoctrineClientAssessmentRepository
+
+    App\Domain\Workout\Repository\ExerciseRepositoryInterface:
+        alias: App\Infrastructure\Persistence\Doctrine\Repository\DoctrineExerciseRepository
+
+    App\Domain\Workout\Repository\WorkoutExerciseRepositoryInterface:
+        alias: App\Infrastructure\Persistence\Doctrine\Repository\DoctrineWorkoutExerciseRepository
+
+    App\Domain\Workout\Repository\WorkoutSessionRepositoryInterface:
+        alias: App\Infrastructure\Persistence\Doctrine\Repository\DoctrineWorkoutSessionRepository
+
+    # Payment Repositories
+    App\Domain\Payment\Repository\PaymentRepositoryInterface:
+        alias: App\Infrastructure\Persistence\Doctrine\Repository\DoctrinePaymentRepository
 
     # API Platform State Processors
     App\Domain\User\State\UserPasswordHasher:

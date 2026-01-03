@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <h2 style="color: #10b981;">🎉 Richiesta Approvata!</h2>
+    <p>Ciao {{ user.firstName }},</p>
+    <p>Ottime notizie! La tua richiesta di iscrizione a <strong>{{ gym.name }}</strong> è stata approvata.</p>
+    <div style="background: #d1fae5; padding: 15px; border-left: 4px solid #10b981; margin: 15px 0;">
+        <p><strong>Abbonamento attivo dal:</strong> {{ membership.startDate|date('d/m/Y') }}</p>
+        <p><strong>Valido fino al:</strong> {{ membership.endDate|date('d/m/Y') }}</p>
+        {% if request.adminNotes %}<p><strong>Note:</strong> {{ request.adminNotes }}</p>{% endif %}
+    </div>
+    <p>Puoi iniziare ad allenarti! Ti aspettiamo in palestra.</p>
+    <p style="font-size: 12px; color: #666; margin-top: 30px;">Il team di {{ gym.name }}</p>
+</body>
+</html>

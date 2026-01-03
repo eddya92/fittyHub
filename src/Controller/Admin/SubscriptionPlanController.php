@@ -2,8 +2,9 @@
 
 namespace App\Controller\Admin;
 
-use App\Domain\Membership\UseCase\GetAllSubscriptionPlans;
-use App\Domain\Membership\UseCase\GetSubscriptionPlanById;
+
+
+use App\Domain\Membership\Repository\SubscriptionPlanRepositoryInterface;
 use App\Domain\Membership\UseCase\CreateSubscriptionPlan;
 use App\Domain\Membership\UseCase\UpdateSubscriptionPlan;
 use App\Domain\Membership\UseCase\ToggleSubscriptionPlan;
@@ -18,8 +19,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class SubscriptionPlanController extends AbstractController
 {
     public function __construct(
-        private GetAllSubscriptionPlans $getAllSubscriptionPlans,
-        private GetSubscriptionPlanById $getSubscriptionPlanById,
+        private SubscriptionPlanRepositoryInterface $planRepository,
         private CreateSubscriptionPlan $createSubscriptionPlan,
         private UpdateSubscriptionPlan $updateSubscriptionPlan,
         private ToggleSubscriptionPlan $toggleSubscriptionPlan,
@@ -31,7 +31,7 @@ class SubscriptionPlanController extends AbstractController
     public function index(): Response
     {
         return $this->render('admin/subscription_plans/index.html.twig', [
-            'plans' => $this->getAllSubscriptionPlans->execute(),
+            'plans' => $this->planRepository->findAll(),
         ]);
     }
 
@@ -77,7 +77,7 @@ class SubscriptionPlanController extends AbstractController
     public function edit(int $id, Request $request): Response
     {
         try {
-            $plan = $this->getSubscriptionPlanById->execute($id);
+            $plan = $this->planRepository->find($id);
             $gyms = $this->gymRepository->findAll();
 
             if ($request->isMethod('POST')) {
@@ -117,7 +117,7 @@ class SubscriptionPlanController extends AbstractController
     public function toggle(int $id): Response
     {
         try {
-            $plan = $this->getSubscriptionPlanById->execute($id);
+            $plan = $this->planRepository->find($id);
             $this->toggleSubscriptionPlan->execute($plan);
 
             $status = $plan->isActive() ? 'attivato' : 'disattivato';
@@ -133,7 +133,7 @@ class SubscriptionPlanController extends AbstractController
     public function delete(int $id): Response
     {
         try {
-            $plan = $this->getSubscriptionPlanById->execute($id);
+            $plan = $this->planRepository->find($id);
             $this->deleteSubscriptionPlan->execute($plan);
 
             $this->addFlash('success', 'Piano abbonamento eliminato con successo!');

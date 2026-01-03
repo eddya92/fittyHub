@@ -27,4 +27,13 @@ interface GymRepositoryInterface
      * Trova palestre per città
      */
     public function findByCity(string $city): array;
+
+    /**
+     * Trova una palestra per criteri specifici
+     *
+     * @param array $criteria
+     * @param array|null $orderBy
+     * @return Gym|null
+     */
+    public function findOneBy(array $criteria, ?array $orderBy = null);
 }

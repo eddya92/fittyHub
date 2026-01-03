@@ -2,10 +2,9 @@
 
 namespace App\Domain\Gym\Entity;
 
-use App\Domain\Gym\Repository\GymSettingsRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: GymSettingsRepository::class)]
+#[ORM\Entity]
 #[ORM\Table(name: 'gym_settings')]
 class GymSettings
 {
@@ -29,6 +28,9 @@ class GymSettings
 
     #[ORM\Column(type: 'boolean', options: ['default' => false])]
     private bool $enableGymCheckIn = false; // Abilita check-in tornello ingresso
+
+    #[ORM\Column(type: 'boolean', options: ['default' => true])]
+    private bool $enableEnrollmentFee = true; // Abilita quota di iscrizione
 
     #[ORM\Column(type: 'datetime_immutable')]
     private ?\DateTimeImmutable $createdAt = null;
@@ -109,6 +111,17 @@ class GymSettings
     public function setEnableGymCheckIn(bool $enableGymCheckIn): self
     {
         $this->enableGymCheckIn = $enableGymCheckIn;
+        return $this;
+    }
+
+    public function isEnableEnrollmentFee(): bool
+    {
+        return $this->enableEnrollmentFee;
+    }
+
+    public function setEnableEnrollmentFee(bool $enableEnrollmentFee): self
+    {
+        $this->enableEnrollmentFee = $enableEnrollmentFee;
         return $this;
     }
 

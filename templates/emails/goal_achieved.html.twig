@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #FFD700, #FFA500); color: white; padding: 30px; text-align: center; border-radius: 5px; }
+        .content { background: #f9f9f9; padding: 20px; margin-top: 20px; border-radius: 5px; }
+        .celebration { background: #FFF3E0; padding: 30px; margin: 20px 0; border-radius: 5px; text-align: center; border: 3px solid #FFD700; }
+        .trophy { font-size: 80px; margin: 20px 0; }
+        .details { background: white; padding: 20px; margin: 15px 0; border-left: 4px solid #FFD700; }
+        .footer { text-align: center; margin-top: 20px; font-size: 12px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎉 OBIETTIVO RAGGIUNTO!</h1>
+        </div>
+
+        <div class="content">
+            <p>Ciao {{ user.firstName }},</p>
+
+            <div class="celebration">
+                <div class="trophy">🏆</div>
+                <h2 style="margin: 10px 0; color: #FF6F00;">COMPLIMENTI!</h2>
+                <p style="font-size: 18px; margin: 10px 0;">Hai raggiunto un importante traguardo!</p>
+            </div>
+
+            <div class="details">
+                <h3>🎯 Obiettivo Completato</h3>
+                <p><strong>Tipo:</strong> {{ goal_type }}</p>
+                <p><strong>Descrizione:</strong> {{ goal_description }}</p>
+            </div>
+
+            <p>Questo è solo l'inizio! Continua così e raggiungerai traguardi ancora più grandi.</p>
+
+            <div style="background: linear-gradient(135deg, #E8F5E9, #C8E6C9); padding: 20px; border-radius: 5px; margin: 20px 0;">
+                <p style="margin: 0; font-size: 16px;"><strong>💪 Il tuo impegno sta dando risultati!</strong></p>
+                <p style="margin: 10px 0 0 0;">Continua ad allenarti con costanza e determinazione.</p>
+            </div>
+
+            <p style="text-align: center; font-size: 20px; margin: 30px 0;">
+                Condividi il tuo successo! 🎊
+            </p>
+        </div>
+
+        <div class="footer">
+            <p>FittyHub - Il tuo partner per il fitness</p>
+            <p>Insieme verso il successo! 💪</p>
+        </div>
+    </div>
+</body>
+</html>

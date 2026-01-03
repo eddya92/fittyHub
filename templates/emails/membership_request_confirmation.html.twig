@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Richiesta Iscrizione Ricevuta</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div style="background: #6366f1; color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0;">
+        <h1 style="margin: 0;">🏋️ FittyHub</h1>
+    </div>
+
+    <div style="background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px;">
+        <h2 style="color: #6366f1;">Ciao {{ user.firstName }}!</h2>
+
+        <p>Abbiamo ricevuto la tua richiesta di iscrizione a <strong>{{ gym.name }}</strong>.</p>
+
+        <div style="background: white; padding: 20px; border-left: 4px solid #6366f1; margin: 20px 0;">
+            <h3 style="margin-top: 0;">Dettagli richiesta:</h3>
+            <p><strong>Palestra:</strong> {{ gym.name }}</p>
+            <p><strong>Indirizzo:</strong> {{ gym.address }}, {{ gym.city }}</p>
+            <p><strong>Data richiesta:</strong> {{ request.requestedAt|date('d/m/Y H:i') }}</p>
+            {% if request.message %}
+            <p><strong>Messaggio:</strong> {{ request.message }}</p>
+            {% endif %}
+        </div>
+
+        <p>La tua richiesta è in attesa di approvazione da parte dello staff.</p>
+        <p>Riceverai un'email non appena la richiesta verrà gestita.</p>
+
+        <p style="margin-top: 30px; font-size: 12px; color: #666;">
+            Grazie per aver scelto FittyHub!<br>
+            Il team di {{ gym.name }}
+        </p>
+    </div>
+</body>
+</html>

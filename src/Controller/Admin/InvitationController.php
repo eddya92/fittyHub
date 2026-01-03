@@ -2,9 +2,7 @@
 
 namespace App\Controller\Admin;
 
-use App\Domain\Invitation\UseCase\GetInvitationById;
-use App\Domain\Invitation\UseCase\SearchInvitations;
-use App\Domain\Invitation\UseCase\GetInvitationStats;
+use App\Domain\Invitation\Repository\InvitationRepositoryInterface;
 use App\Domain\Invitation\UseCase\CreateInvitation;
 use App\Domain\Invitation\UseCase\ResendInvitation;
 use App\Domain\Invitation\UseCase\CancelInvitation;
@@ -18,9 +16,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class InvitationController extends AbstractController
 {
     public function __construct(
-        private GetInvitationById $getInvitationById,
-        private SearchInvitations $searchInvitations,
-        private GetInvitationStats $getInvitationStats,
+        private InvitationRepositoryInterface $invitationRepository,
         private CreateInvitation $createInvitation,
         private ResendInvitation $resendInvitation,
         private CancelInvitation $cancelInvitation,
@@ -33,9 +29,20 @@ class InvitationController extends AbstractController
         $status = $request->query->get('status', 'pending');
         $search = $request->query->get('search');
 
+        $invitations = $this->invitationRepository->findBy(['status' => $status]);
+
+        $allInvitations = $this->invitationRepository->findAll();
+        $stats = [
+            'total' => count($allInvitations),
+            'pending' => count(array_filter($allInvitations, fn($i) => $i->getStatus() === 'pending')),
+            'accepted' => count(array_filter($allInvitations, fn($i) => $i->getStatus() === 'accepted')),
+            'declined' => count(array_filter($allInvitations, fn($i) => $i->getStatus() === 'declined')),
+            'expired' => count(array_filter($allInvitations, fn($i) => $i->getStatus() === 'expired')),
+        ];
+
         return $this->render('admin/invitations/index.html.twig', [
-            'invitations' => $this->searchInvitations->execute($status, $search),
-            'stats' => $this->getInvitationStats->execute(),
+            'invitations' => $invitations,
+            'stats' => $stats,
             'current_status' => $status,
             'current_search' => $search,
         ]);
@@ -77,8 +84,14 @@ class InvitationController extends AbstractController
     #[Route('/{id}/resend', name: 'admin_invitation_resend', methods: ['POST'])]
     public function resend(int $id): Response
     {
+        $invitation = $this->invitationRepository->find($id);
+
+        if (!$invitation) {
+            $this->addFlash('error', 'Invito non trovato.');
+            return $this->redirectToRoute('admin_invitations');
+        }
+
         try {
-            $invitation = $this->getInvitationById->execute($id);
             $this->resendInvitation->execute($invitation);
             $this->addFlash('success', 'Invito reinviato con successo.');
         } catch (\RuntimeException|\Exception $e) {
@@ -91,8 +104,14 @@ class InvitationController extends AbstractController
     #[Route('/{id}/cancel', name: 'admin_invitation_cancel', methods: ['POST'])]
     public function cancel(int $id): Response
     {
+        $invitation = $this->invitationRepository->find($id);
+
+        if (!$invitation) {
+            $this->addFlash('error', 'Invito non trovato.');
+            return $this->redirectToRoute('admin_invitations');
+        }
+
         try {
-            $invitation = $this->getInvitationById->execute($id);
             $this->cancelInvitation->execute($invitation);
             $this->addFlash('success', 'Invito cancellato.');
         } catch (\RuntimeException|\Exception $e) {

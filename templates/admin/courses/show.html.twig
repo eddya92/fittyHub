@@ -47,13 +47,13 @@
                     <p class="text-base font-medium text-gray-900">{{ course.maxParticipants }}</p>
                 </div>
                 <div>
-                    <p class="text-sm text-gray-600 mb-1">Iscritti Attivi</p>
-                    <p class="text-base font-medium text-gray-900">{{ course.activeEnrollmentsCount }}</p>
+                    <p class="text-sm text-gray-600 mb-1">Orari Settimanali</p>
+                    <p class="text-base font-medium text-gray-900">{{ course.schedules|length }}</p>
                 </div>
                 <div>
-                    <p class="text-sm text-gray-600 mb-1">Posti Disponibili</p>
-                    <p class="text-base font-medium {% if course.hasAvailableSpots %}text-green-600{% else %}text-red-600{% endif %}">
-                        {{ course.maxParticipants - course.activeEnrollmentsCount }}
+                    <p class="text-sm text-gray-600 mb-1">Stato</p>
+                    <p class="text-base font-medium {% if course.isActive %}text-green-600{% else %}text-red-600{% endif %}">
+                        {{ course.status|upper }}
                     </p>
                 </div>
                 {% if course.instructor %}
@@ -125,77 +125,29 @@
             </form>
         </div>
 
-        {# Enrollments #}
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-6">Iscritti ({{ course.activeEnrollmentsCount }})</h3>
-
-            {% set activeEnrollments = course.enrollments|filter(e => e.status == 'active') %}
-            {% if activeEnrollments|length > 0 %}
-                <div class="space-y-3 mb-6">
-                    {% for enrollment in activeEnrollments %}
-                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                            <div class="flex items-center flex-1">
-                                <div class="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
-                                    <span class="text-primary-600 font-bold text-sm">
-                                        {{ enrollment.user.firstName|slice(0, 1) ~ enrollment.user.lastName|slice(0, 1) }}
-                                    </span>
-                                </div>
-                                <div class="ml-3 flex-1">
-                                    <p class="text-sm font-medium text-gray-900">
-                                        {{ enrollment.user.firstName }} {{ enrollment.user.lastName }}
-                                    </p>
-                                    <p class="text-xs text-gray-500">
-                                        {% if enrollment.schedule %}
-                                            {{ enrollment.schedule.dayOfWeek|title }} {{ enrollment.schedule.startTime|date('H:i') }}-{{ enrollment.schedule.endTime|date('H:i') }}
-                                            • Iscritto il {{ enrollment.enrolledAt|date('d/m/Y') }}
-                                        {% else %}
-                                            Iscritto il {{ enrollment.enrolledAt|date('d/m/Y') }}
-                                        {% endif %}
-                                    </p>
-                                </div>
-                            </div>
-                            <form method="post" action="{{ path('admin_course_enrollment_cancel', {'enrollmentId': enrollment.id}) }}" class="inline" onsubmit="return confirm('Cancellare iscrizione?')">
-                                <button type="submit" class="text-red-600 hover:text-red-800 text-sm font-medium">
-                                    Cancella
-                                </button>
-                            </form>
-                        </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <p class="text-gray-500 text-center py-4 mb-6">Nessun iscritto</p>
-            {% endif %}
-
-            {# Add Enrollment Form #}
-            {% if course.schedules|length > 0 %}
-                <form method="post" action="{{ path('admin_course_enroll', {'id': course.id}) }}" class="border-t border-gray-200 pt-6">
-                    <h4 class="font-medium text-gray-900 mb-4">Iscrivi Utente</h4>
-                    <div class="grid grid-cols-2 gap-4">
-                        <select name="user_id" required class="px-4 py-2 border border-gray-300 rounded-lg">
-                            <option value="">Seleziona utente...</option>
-                            {% for user in users %}
-                                <option value="{{ user.id }}">{{ user.firstName }} {{ user.lastName }}</option>
-                            {% endfor %}
-                        </select>
-                        <select name="schedule_id" required class="px-4 py-2 border border-gray-300 rounded-lg">
-                            <option value="">Seleziona orario...</option>
-                            {% for schedule in course.schedules %}
-                                <option value="{{ schedule.id }}">
-                                    {{ schedule.dayOfWeek|title }} {{ schedule.startTime|date('H:i') }}-{{ schedule.endTime|date('H:i') }}
-                                    ({{ schedule.activeEnrollmentsCount }}/{{ course.maxParticipants }})
-                                </option>
-                            {% endfor %}
-                        </select>
+        {# Info gestione iscrizioni #}
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+            <div class="flex items-start">
+                <svg class="w-6 h-6 text-blue-600 mt-1 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <div>
+                    <h4 class="text-lg font-semibold text-blue-900 mb-2">Gestione Iscrizioni</h4>
+                    <p class="text-sm text-blue-800 mb-3">
+                        Gli utenti si iscrivono a <strong>sessioni specifiche</strong> (es. "Lunedì 6 Gennaio 2026 ore 18:00"),
+                        non al corso in generale.
+                    </p>
+                    <div class="bg-white rounded-lg p-4 border border-blue-200">
+                        <p class="text-sm font-medium text-gray-900 mb-2">Per gestire gli iscritti:</p>
+                        <ol class="text-sm text-gray-700 space-y-1 ml-4 list-decimal">
+                            <li>Vai al <a href="{{ path('admin_courses_calendar') }}" class="text-primary-600 hover:text-primary-700 font-medium underline">Calendario Corsi</a></li>
+                            <li>Clicca sulla sessione specifica del corso</li>
+                            <li>Vedrai la lista degli iscritti solo a quella data/orario</li>
+                            <li>Potrai iscrivere o disiscrivere utenti dalla singola sessione</li>
+                        </ol>
                     </div>
-                    <button type="submit" class="mt-4 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">
-                        Iscrivi
-                    </button>
-                </form>
-            {% else %}
-                <div class="border-t border-gray-200 pt-6">
-                    <p class="text-sm text-gray-500">Aggiungi almeno un orario prima di iscrivere utenti</p>
                 </div>
-            {% endif %}
+            </div>
         </div>
     </div>
 
@@ -203,19 +155,19 @@
     <div class="space-y-6">
         {# Quick Stats #}
         <div class="bg-gradient-to-br from-primary-600 to-primary-700 rounded-lg shadow-md p-6 text-white">
-            <h3 class="text-lg font-semibold mb-4">Statistiche</h3>
+            <h3 class="text-lg font-semibold mb-4">Configurazione</h3>
             <div class="space-y-4">
                 <div class="flex items-center justify-between">
-                    <span class="text-sm">Posti Totali</span>
+                    <span class="text-sm">Max Partecipanti</span>
                     <span class="text-2xl font-bold">{{ course.maxParticipants }}</span>
                 </div>
                 <div class="flex items-center justify-between">
-                    <span class="text-sm">Iscritti</span>
-                    <span class="text-2xl font-bold">{{ course.activeEnrollmentsCount }}</span>
+                    <span class="text-sm">Orari Settimanali</span>
+                    <span class="text-2xl font-bold">{{ course.schedules|length }}</span>
                 </div>
                 <div class="flex items-center justify-between">
-                    <span class="text-sm">Disponibili</span>
-                    <span class="text-2xl font-bold">{{ course.maxParticipants - course.activeEnrollmentsCount }}</span>
+                    <span class="text-sm">Stato</span>
+                    <span class="text-lg font-bold">{{ course.status|upper }}</span>
                 </div>
             </div>
         </div>
@@ -229,6 +181,12 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                     </svg>
                     Modifica Corso
+                </a>
+                <a href="{{ path('admin_courses_calendar') }}" class="block w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-center">
+                    <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    Vai al Calendario
                 </a>
             </div>
         </div>

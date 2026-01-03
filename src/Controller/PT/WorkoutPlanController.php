@@ -6,9 +6,9 @@ use App\Domain\Workout\Entity\ClientAssessment;
 use App\Domain\Workout\Entity\WorkoutPlan;
 use App\Domain\Workout\Entity\WorkoutExercise;
 use App\Domain\Workout\Entity\Exercise;
-use App\Domain\Workout\Repository\ClientAssessmentRepository;
-use App\Domain\Workout\Repository\WorkoutPlanRepository;
-use App\Domain\Workout\Repository\ExerciseRepository;
+use App\Domain\Workout\Repository\ClientAssessmentRepositoryInterface;
+use App\Domain\Workout\Repository\WorkoutPlanRepositoryInterface;
+use App\Domain\Workout\Repository\ExerciseRepositoryInterface;
 use App\Domain\PersonalTrainer\Repository\TrainerRepositoryInterface;
 use App\Domain\PersonalTrainer\Repository\PTClientRelationRepositoryInterface;
 use App\Domain\User\Repository\UserRepositoryInterface;
@@ -27,10 +27,10 @@ class WorkoutPlanController extends AbstractController
         private EntityManagerInterface $entityManager,
         private TrainerRepositoryInterface $ptRepository,
         private PTClientRelationRepositoryInterface $relationRepository,
-        private ClientAssessmentRepository $assessmentRepository,
-        private WorkoutPlanRepository $workoutPlanRepository,
+        private ClientAssessmentRepositoryInterface $assessmentRepository,
+        private WorkoutPlanRepositoryInterface $workoutPlanRepository,
         private UserRepositoryInterface $userRepository,
-        private ExerciseRepository $exerciseRepository,
+        private ExerciseRepositoryInterface $exerciseRepository,
     ) {}
 
     #[Route('', name: 'pt_workout_plans', methods: ['GET'])]

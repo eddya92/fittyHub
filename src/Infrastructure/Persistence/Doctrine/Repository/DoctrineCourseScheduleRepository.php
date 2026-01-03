@@ -16,4 +16,27 @@ class DoctrineCourseScheduleRepository extends ServiceEntityRepository implement
     {
         parent::__construct($registry, CourseSchedule::class);
     }
+
+    public function save(CourseSchedule $schedule, bool $flush = false): void
+    {
+        $this->getEntityManager()->persist($schedule);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
+    public function remove(CourseSchedule $schedule, bool $flush = false): void
+    {
+        $this->getEntityManager()->remove($schedule);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
+    public function findAll(): array
+    {
+        return parent::findAll();
+    }
 }
