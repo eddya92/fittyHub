@@ -55,8 +55,8 @@
   - [x] Controllo posti disponibili automatico
   - [x] Categorie corso personalizzabili con colore
   - [x] CRUD categorie personalizzate (nome + colore hex)
-  - [ ] Gestione presenze/check-in corsi
-  - [ ] Report partecipazione corsi
+  - [x] Gestione presenze/check-in corsi
+  - [x] Report partecipazione corsi
 - [x] **Sistema Check-in Tornello**
   - [x] Impostazione per abilitare/disabilitare check-in tornello
   - [x] Validazione automatica (abbonamento + certificato medico)

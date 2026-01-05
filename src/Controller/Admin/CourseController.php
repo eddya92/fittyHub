@@ -9,6 +9,7 @@ use App\Domain\Course\Repository\CourseSessionRepositoryInterface;
 use App\Domain\Course\Service\CourseService;
 use App\Domain\Course\Service\CourseCalendarService;
 use App\Domain\Course\UseCase\GenerateCourseSessionsUseCase;
+use App\Domain\Course\UseCase\CourseCheckInUseCase;
 use App\Domain\Membership\Service\EnrollmentService;
 use App\Domain\User\Service\GymUserService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -27,7 +28,8 @@ class CourseController extends AbstractController{
 		private readonly EnrollmentService                   $enrollmentService,
 		private readonly CourseCalendarService               $calendarService,
 		private readonly GymUserService                      $gymUserService,
-		private readonly GenerateCourseSessionsUseCase       $generateSessions
+		private readonly GenerateCourseSessionsUseCase       $generateSessions,
+		private readonly CourseCheckInUseCase                $courseCheckIn
 	){
 	}
 
@@ -323,5 +325,110 @@ class CourseController extends AbstractController{
 			$this->addFlash('error', $e->getMessage());
 			return $this->redirectToRoute('admin_courses');
 		}
+	}
+
+	#[Route('/session/{sessionId}/attendance', name: 'admin_course_session_attendance')]
+	public function sessionAttendance(int $sessionId) : Response{
+		$session = $this->sessionRepository->find($sessionId);
+
+		if (!$session) {
+			$this->addFlash('error', 'Sessione non trovata.');
+			return $this->redirectToRoute('admin_courses_calendar');
+		}
+
+		$course = $session->getCourse();
+		$attendances = $this->courseCheckIn->getSessionAttendances($session);
+		$enrollments = $session->getEnrollments();
+
+		return $this->render('admin/courses/session_attendance.html.twig', [
+			'session' => $session,
+			'course'  => $course,
+			'attendances' => $attendances,
+			'enrollments' => $enrollments,
+		]);
+	}
+
+	#[Route('/session/{sessionId}/checkin', name: 'admin_course_session_checkin', methods: ['POST'])]
+	public function checkInToSession(int $sessionId, Request $request) : Response{
+		$session = $this->sessionRepository->find($sessionId);
+
+		if (!$session) {
+			$this->addFlash('error', 'Sessione non trovata.');
+			return $this->redirectToRoute('admin_courses_calendar');
+		}
+
+		try{
+			$userId = $request->request->getInt('user_id');
+
+			if(!$userId){
+				throw new \RuntimeException('Seleziona un utente.');
+			}
+
+			$course = $session->getCourse();
+			$users = $this->gymUserService->getActiveMembers($course->getGym());
+			$user = array_filter($users, fn($u) => $u->getId() == $userId)[0] ?? null;
+
+			if(!$user){
+				throw new \RuntimeException('Utente non valido.');
+			}
+
+			$this->courseCheckIn->checkInToCourse($user, $session);
+			$this->addFlash('success', 'Check-in effettuato con successo per ' . $user->getFullName() . '.');
+		}catch(\RuntimeException $e){
+			$this->addFlash('error', $e->getMessage());
+		}
+
+		return $this->redirectToRoute('admin_course_session_attendance', ['sessionId' => $sessionId]);
+	}
+
+	#[Route('/{id}/report', name: 'admin_course_report')]
+	public function courseReport(int $id, Request $request) : Response{
+		$course = $this->courseRepository->find($id);
+
+		if (!$course) {
+			$this->addFlash('error', 'Corso non trovato.');
+			return $this->redirectToRoute('admin_courses');
+		}
+
+		// Ottieni parametri filtro data
+		$from = $request->query->get('from') ? new \DateTime($request->query->get('from')) : null;
+		$to = $request->query->get('to') ? new \DateTime($request->query->get('to')) : null;
+
+		// Ottieni statistiche
+		$stats = $this->courseCheckIn->getCourseAttendanceStats($course->getId(), $from, $to);
+
+		return $this->render('admin/courses/report.html.twig', [
+			'course' => $course,
+			'stats' => $stats,
+			'from' => $from,
+			'to' => $to,
+		]);
+	}
+
+	#[Route('/reports', name: 'admin_courses_reports')]
+	public function allCoursesReport(Request $request) : Response{
+		$gym = $this->gymUserService->getPrimaryGym($this->getUser());
+		$courses = $this->courseRepository->findAll();
+
+		// Ottieni parametri filtro data
+		$from = $request->query->get('from') ? new \DateTime($request->query->get('from')) : new \DateTime('first day of this month');
+		$to = $request->query->get('to') ? new \DateTime($request->query->get('to')) : new \DateTime('last day of this month');
+
+		// Ottieni statistiche per ogni corso
+		$reportsData = [];
+		foreach ($courses as $course) {
+			$stats = $this->courseCheckIn->getCourseAttendanceStats($course->getId(), $from, $to);
+			$reportsData[] = [
+				'course' => $course,
+				'stats' => $stats
+			];
+		}
+
+		return $this->render('admin/courses/reports.html.twig', [
+			'courses' => $courses,
+			'reportsData' => $reportsData,
+			'from' => $from,
+			'to' => $to,
+		]);
 	}
 }

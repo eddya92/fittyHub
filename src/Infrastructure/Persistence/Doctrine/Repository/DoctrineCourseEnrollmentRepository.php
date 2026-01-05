@@ -4,6 +4,7 @@ namespace App\Infrastructure\Persistence\Doctrine\Repository;
 
 use App\Domain\Course\Entity\CourseEnrollment;
 use App\Domain\Course\Entity\CourseSchedule;
+use App\Domain\Course\Entity\CourseSession;
 use App\Domain\Course\Repository\CourseEnrollmentRepositoryInterface;
 use App\Domain\User\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -77,5 +78,18 @@ class DoctrineCourseEnrollmentRepository extends ServiceEntityRepository impleme
     public function findOneBy(array $criteria, ?array $orderBy = null): ?CourseEnrollment
     {
         return parent::findOneBy($criteria, $orderBy);
+    }
+
+    public function findActiveEnrollmentForUserAndSession(User $user, CourseSession $session): ?CourseEnrollment
+    {
+        return $this->createQueryBuilder('e')
+            ->where('e.user = :user')
+            ->andWhere('e.session = :session')
+            ->andWhere('e.status = :status')
+            ->setParameter('user', $user)
+            ->setParameter('session', $session)
+            ->setParameter('status', 'active')
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 }

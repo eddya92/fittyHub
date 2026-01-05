@@ -4,6 +4,7 @@ namespace App\Domain\Gym\Entity;
 
 use App\Domain\User\Entity\User;
 use App\Domain\Membership\Entity\GymMembership;
+use App\Domain\Course\Entity\CourseSession;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -41,6 +42,10 @@ class GymAttendance
 
     #[ORM\Column(length: 20, options: ['default' => 'gym_entrance'])]
     private string $type = 'gym_entrance'; // gym_entrance | course
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?CourseSession $courseSession = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
@@ -166,6 +171,18 @@ class GymAttendance
     public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getCourseSession(): ?CourseSession
+    {
+        return $this->courseSession;
+    }
+
+    public function setCourseSession(?CourseSession $courseSession): static
+    {
+        $this->courseSession = $courseSession;
 
         return $this;
     }

@@ -5,6 +5,7 @@ namespace App\Domain\Gym\Repository;
 use App\Domain\Gym\Entity\Gym;
 use App\Domain\Gym\Entity\GymAttendance;
 use App\Domain\User\Entity\User;
+use App\Domain\Course\Entity\CourseSession;
 
 /**
  * Repository interface per GymAttendance
@@ -38,4 +39,19 @@ interface GymAttendanceRepositoryInterface
      * Salva una presenza
      */
     public function save(GymAttendance $attendance, bool $flush = false): void;
+
+    /**
+     * Trova presenza per utente e sessione corso
+     */
+    public function findByUserAndSession(User $user, CourseSession $session): ?GymAttendance;
+
+    /**
+     * Trova tutte le presenze per una sessione corso
+     */
+    public function findBySession(CourseSession $session): array;
+
+    /**
+     * Ottiene statistiche presenze per un corso
+     */
+    public function getAttendanceStatsByCourse(int $courseId, ?\DateTime $from = null, ?\DateTime $to = null): array;
 }

@@ -4,6 +4,7 @@ namespace App\Domain\Course\Repository;
 
 use App\Domain\Course\Entity\CourseEnrollment;
 use App\Domain\Course\Entity\CourseSchedule;
+use App\Domain\Course\Entity\CourseSession;
 use App\Domain\User\Entity\User;
 
 /**
@@ -34,4 +35,9 @@ interface CourseEnrollmentRepositoryInterface
      * Trova un enrollment con criteri specifici
      */
     public function findOneBy(array $criteria, ?array $orderBy = null): ?CourseEnrollment;
+
+    /**
+     * Trova iscrizione attiva di un utente per una sessione specifica
+     */
+    public function findActiveEnrollmentForUserAndSession(User $user, CourseSession $session): ?CourseEnrollment;
 }
